@@ -152,7 +152,8 @@ def get_cls(
             return lookup_dict[key]
         if lookup_dict_synonyms is not None and key in lookup_dict_synonyms:
             return lookup_dict_synonyms[key]
-        raise ValueError(f'Invalid {base.__name__} name: {query}')
+        valid_choices = sorted(set(lookup_dict.keys()).union(lookup_dict_synonyms or []))
+        raise ValueError(f'Invalid {base.__name__} name: {query}. Valid choices are: {valid_choices}')
     elif issubclass(query, base):
         return query
     raise TypeError(f'Not subclass of {base.__name__}: {query}')
