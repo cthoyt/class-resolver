@@ -50,7 +50,7 @@ class Resolver(Generic[X]):
         }
 
     @classmethod
-    def from_subclasses(cls, base: Type[X], skip: Collection[Type[X]] = tuple(), **kwargs) -> 'Resolver':
+    def from_subclasses(cls, base: Type[X], *, skip: Optional[Collection[Type[X]]] = None, **kwargs) -> 'Resolver':
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
@@ -58,7 +58,7 @@ class Resolver(Generic[X]):
         :param kwargs: remaining keyword arguments to pass to :func:`Resolver.__init__`
         :return: A resolver instance
         """
-        skip = set(skip)
+        skip = set(skip) if skip else set()
         return Resolver(
             {
                 subcls
