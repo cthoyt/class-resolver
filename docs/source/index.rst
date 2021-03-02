@@ -7,6 +7,7 @@ Class Resolver |release| Documentation
    :name: start
 
    installation
+   usage
 
 Indices and Tables
 ------------------
