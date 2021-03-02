@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 """Tests for the class resolver."""
 
 import unittest
