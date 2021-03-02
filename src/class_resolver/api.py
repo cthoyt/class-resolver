@@ -6,7 +6,6 @@ from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Type, 
 
 __all__ = [
     'Hint',
-    'HintType',
     'Resolver',
     'get_subclasses',
     'get_cls',
@@ -15,7 +14,6 @@ __all__ = [
 
 X = TypeVar('X')
 Hint = Union[None, str, X]
-HintType = Hint[Type[X]]
 
 
 class Resolver(Generic[X]):
@@ -79,7 +77,7 @@ class Resolver(Generic[X]):
         """Normalize the string with this resolve's suffix."""
         return normalize_string(s, suffix=self.suffix)
 
-    def lookup(self, query: HintType[X]) -> Type[X]:
+    def lookup(self, query: Hint[Type[X]]) -> Type[X]:
         """Lookup a class."""
         return get_cls(
             query,
@@ -90,10 +88,14 @@ class Resolver(Generic[X]):
             suffix=self.suffix,
         )
 
-    def make(self, query: HintType[X], pos_kwargs: Optional[Mapping[str, Any]] = None, **kwargs) -> X:
+    def make(self, query: Hint[Union[X, Type[X]]], pos_kwargs: Optional[Mapping[str, Any]] = None, **kwargs) -> X:
         """Instantiate a class with optional kwargs."""
-        cls: Type[X] = self.lookup(query)
-        return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
+        if query is None or isinstance(query, (str, type)):
+            cls: Type[X] = self.lookup(query)
+            return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
+
+        # An instance was passed, and it will go through without modification.
+        return query
 
     def get_option(self, *flags: str, default: Optional[str] = None, **kwargs):
         """Get a click option for this resolver."""
@@ -112,6 +114,10 @@ class Resolver(Generic[X]):
             callback=_make_callback(self.lookup),
             **kwargs,
         )
+
+
+def _not_hint(x: Any) -> bool:
+    return x is not None and not isinstance(x, (str, type))
 
 
 def get_subclasses(cls: Type[X]) -> Iterable[Type[X]]:

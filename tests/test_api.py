@@ -16,18 +16,21 @@ class Base:
 @dataclass
 class A(Base):
     """A base class."""
+
     name: str
 
 
 @dataclass
 class B(Base):
     """B base class."""
+
     name: str
 
 
 @dataclass
 class C(Base):
     """C base class."""
+
     name: str
 
 
@@ -50,3 +53,8 @@ class TestResolver(unittest.TestCase):
         self.assertEqual(A(name=name), self.resolver.make('a', {'name': name}))
         # Test instantiating with kwargs
         self.assertEqual(A(name=name), self.resolver.make('a', name=name))
+
+    def test_passthrough(self):
+        """Test instances are passed through unmodified."""
+        a = A(name='charlie')
+        self.assertEqual(a, self.resolver.make(a))

@@ -61,6 +61,9 @@ assert A(name='hi') == resolver.make('A', {'name': 'hi'})
 
 # Instantiate with kwargs
 assert A(name='hi') == resolver.make('A', name='hi')
+
+# A pre-instantiated class will simply be passed through
+assert A(name='hi') == resolver.make(A(name='hi'))
 ```
 
 ## ⬇️ Installation
