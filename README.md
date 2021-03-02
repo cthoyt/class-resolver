@@ -38,18 +38,29 @@ Lookup and instantiate classes with style.
 
 ```python
 from class_resolver import Resolver
+from dataclasses import dataclass
 
-class A: pass
-class B: pass
+class Base: pass
+
+@dataclass
+class A(Base):
+   name: str
+
+@dataclass
+class B(Base):
+   name: str
 
 # Index
-resolver = Resolver([A, B])
+resolver = Resolver([A, B], base=Base)
 
 # Lookup
-assert A == resolver.lookup('a')
+assert A == resolver.lookup('A')
 
-# Instantiate
-assert isinstance(resolver.make('a'), A)
+# Instantiate with a dictionary
+assert A(name='hi') == resolver.make('A', {'name': 'hi'})
+
+# Instantiate with kwargs
+assert A(name='hi') == resolver.make('A', name='hi')
 ```
 
 ## ⬇️ Installation
