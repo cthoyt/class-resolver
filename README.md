@@ -27,6 +27,9 @@
     <a href='https://class_resolver.readthedocs.io/en/latest/?badge=latest'>
         <img src='https://readthedocs.org/projects/class_resolver/badge/?version=latest' alt='Documentation Status' />
     </a>
+    <a href="https://zenodo.org/badge/latestdoi/343741010">
+        <img src="https://zenodo.org/badge/343741010.svg" alt="DOI">
+    </a>
 </p>
 
 Lookup and instantiate classes with style.
