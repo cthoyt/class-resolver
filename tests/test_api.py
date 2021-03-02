@@ -4,34 +4,28 @@
 """Tests for the class resolver."""
 
 import unittest
-from dataclasses import dataclass
 
 from class_resolver import Resolver
 
 
 class Base:
-    """A letter class."""
+    """A base class."""
+
+    def __init__(self, name):
+        """Initialize the class."""
+        self.name = name
 
 
-@dataclass
 class A(Base):
     """A base class."""
 
-    name: str
 
-
-@dataclass
 class B(Base):
     """B base class."""
 
-    name: str
 
-
-@dataclass
 class C(Base):
     """C base class."""
-
-    name: str
 
 
 class TestResolver(unittest.TestCase):
