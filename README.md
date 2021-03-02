@@ -22,7 +22,7 @@
         <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/class_resolver" />
     </a>
     <a href="https://github.com/cthoyt/class-resolver/blob/main/LICENSE">
-        <img alt="PyPI - License" src="https://img.shields.io/pypi/l/class_resolver" />
+        <img alt="PyPI - License" src="https://img.shields.io/pypi/l/class-resolver" />
     </a>
     <a href='https://class_resolver.readthedocs.io/en/latest/?badge=latest'>
         <img src='https://readthedocs.org/projects/class_resolver/badge/?version=latest' alt='Documentation Status' />
