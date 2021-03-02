@@ -4,8 +4,6 @@
 
 from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Type, TypeVar, Union
 
-import click
-
 __all__ = [
     'Hint',
     'HintType',
@@ -103,6 +101,8 @@ class Resolver(Generic[X]):
             if self.default is None:
                 raise ValueError
             default = self.normalize_cls(self.default)
+
+        import click
 
         return click.option(
             *flags,
