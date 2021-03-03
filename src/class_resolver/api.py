@@ -33,11 +33,14 @@ class Resolver(Generic[X]):
         :param classes: A list of classes
         :param base: The base class
         :param default: The default class
-        :param suffix: The optional shared suffix of all classes
+        :param suffix: The optional shared suffix of all classes. If None, use the base class' name for it. To disable
+            this behaviour, explicitly provide `suffix=""`.
         :param synonyms: The optional synonym dictionary
         """
         self.base = base
         self.default = default
+        if suffix is None:
+            suffix = normalize_string(base.__name__)
         self.suffix = suffix
         self.synonyms = synonyms
         self.lookup_dict = {
