@@ -39,7 +39,7 @@ class Resolver(Generic[X]):
         self.base = base
         self.default = default
         if suffix is None:
-            suffix = self.normalize_cls(cls=base)
+            suffix = normalize_string(base.__name__, suffix=None)
         self.suffix = suffix
         self.synonyms = synonyms
         self.lookup_dict = {
