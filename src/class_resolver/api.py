@@ -33,7 +33,8 @@ class Resolver(Generic[X]):
         :param classes: A list of classes
         :param base: The base class
         :param default: The default class
-        :param suffix: The optional shared suffix of all classes. If None, use the base class' name for it.
+        :param suffix: The optional shared suffix of all classes. If None, use the base class' name for it. To disable
+            this behaviour, explicitly provide `suffix=""`.
         :param synonyms: The optional synonym dictionary
         """
         self.base = base
