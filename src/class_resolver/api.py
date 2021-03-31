@@ -154,10 +154,10 @@ class Resolver(Generic[X]):
                 """,
             )) from None
         if kwargs_search_space is None:
-            return ray.tune.choice(sorted(self.lookup_dict.keys()))
+            return ray.tune.choice(self.options)
 
         return dict(
-            query=ray.tune.choice(sorted(self.lookup_dict.keys())),
+            query=ray.tune.choice(self.options),
             **kwargs_search_space,
         )
 
