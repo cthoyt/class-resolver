@@ -125,6 +125,16 @@ class Resolver(Generic[X]):
             **kwargs,
         )
 
+    @property
+    def options(self) -> Set[str]:
+        """Return the normalized option names."""
+        return set(self.lookup_dict.keys())
+
+    @property
+    def classes(self) -> Set[Type[X]]:
+        """Return the available classes."""
+        return set(self.lookup_dict.values())
+
 
 def _not_hint(x: Any) -> bool:
     return x is not None and not isinstance(x, (str, type))
