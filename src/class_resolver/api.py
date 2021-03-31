@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Resolve classes."""
-
+from textwrap import dedent
 from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Type, TypeVar, Union
 
 __all__ = [
@@ -116,6 +116,32 @@ class Resolver(Generic[X]):
             show_default=True,
             callback=_make_callback(self.lookup),
             **kwargs,
+        )
+
+    def ray_tune_search_space(self, kwargs_search_space: Optional[Mapping[str, Any]] = None):
+        """Return a search space for ray.tune."""
+        try:
+            import ray.tune
+        except ImportError:
+            raise ImportError(dedent(
+                """
+                To use ray_tune_search_space please install ray tune first.
+                
+                You can do so by selecting the appropriate install option for the package
+                
+                    pip install class-resolver[ray]
+                
+                or by manually installing ray tune
+                
+                    pip install ray[tune]
+                """
+            ))
+        if kwargs_search_space is None:
+            return ray.tune.choice(sorted(self.lookup_dict.keys()))
+
+        return dict(
+            query=ray.tune.choice(sorted(self.lookup_dict.keys())),
+            **kwargs_search_space,
         )
 
 
