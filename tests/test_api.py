@@ -76,4 +76,4 @@ class TestResolver(unittest.TestCase):
             }
             query = config.pop("query")
             instance = self.resolver.make(query=query, pos_kwargs=config)
-            assert isinstance(instance, Base)
+            self.assertIsInstance(instance, Base)
