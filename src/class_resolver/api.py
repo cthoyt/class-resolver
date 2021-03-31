@@ -146,10 +146,14 @@ class Resolver(Generic[X]):
         This method can be used to create a tune.choice sampler for the choices available to the resolver. By default,
         this is equivalent to
 
+        .. code-block:: python
+
             ray.tune.choice(self.options)
 
         If additional `kwargs_search_space` are passed, they are assumed to be a sub-search space for the constructor
         parameters passed via `pos_kwargs`.  The resulting sub-search thus looks as follows:
+
+        .. code-block:: python
 
             ray.tune.choice(
                 query=self.options,
