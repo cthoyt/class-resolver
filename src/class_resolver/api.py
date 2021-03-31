@@ -19,6 +19,13 @@ Hint = Union[None, str, X]
 class Resolver(Generic[X]):
     """Resolve from a list of classes."""
 
+    #: The base class
+    base: Type[X]
+    #: The shared suffix fo all classes derived from the base class
+    suffix: str
+    #: The mapping from normalized class names to the classes indexed by this resolver
+    lookup_dict: Mapping[str, Type[X]]
+
     def __init__(
         self,
         classes: Collection[Type[X]],
@@ -117,6 +124,16 @@ class Resolver(Generic[X]):
             callback=_make_callback(self.lookup),
             **kwargs,
         )
+
+    @property
+    def options(self) -> Set[str]:
+        """Return the normalized option names."""
+        return set(self.lookup_dict.keys())
+
+    @property
+    def classes(self) -> Set[Type[X]]:
+        """Return the available classes."""
+        return set(self.lookup_dict.values())
 
     def ray_tune_search_space(self, kwargs_search_space: Optional[Mapping[str, Any]] = None):
         """Return a search space for ray.tune."""
