@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Tests for the class resolver."""
-
+import itertools
 import unittest
 
 from class_resolver import Resolver
@@ -67,7 +67,7 @@ class TestResolver(unittest.TestCase):
     def test_variant_generation(self):
         """Test whether ray tune can generate variants from the search space."""
         search_space = self.resolver.ray_tune_search_space(kwargs_search_space=dict(name=tune.choice(["charlie", "max"]), ), )
-        for spec in ray.tune.suggest.variant_generator.generate_variants(search_space):
+        for spec in itertools.islice(ray.tune.suggest.variant_generator.generate_variants(search_space), 2):
             config = {
                 k[0]: v
                 for k, v in spec[0].items()
