@@ -19,6 +19,13 @@ Hint = Union[None, str, X]
 class Resolver(Generic[X]):
     """Resolve from a list of classes."""
 
+    #: The base class
+    base: Type[X]
+    #: The shared suffix fo all classes derived from the base class
+    suffix: str
+    #: The mapping from normalized class names to the classes indexed by this resolver
+    lookup_dict: Mapping[str, Type[X]]
+
     def __init__(
         self,
         classes: Collection[Type[X]],
