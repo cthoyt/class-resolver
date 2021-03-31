@@ -156,6 +156,15 @@ class Resolver(Generic[X]):
                 **kwargs_search_space,
             )
 
+        :param kwargs_search_space:
+            Additional sub search space for the constructor's parameters.
+
+        :return:
+            A ray.tune compatible search space.
+
+        :raise ImportError:
+            If ray.tune is not installed.
+
         .. seealso ::
             https://docs.ray.io/en/master/tune/index.html
         """
