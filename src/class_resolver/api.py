@@ -121,12 +121,12 @@ class Resolver(Generic[X]):
     @property
     def options(self) -> Collection[str]:
         """Return the normalized option names."""
-        return self.lookup_dict.keys()
+        return set(self.lookup_dict.keys())
 
     @property
-    def classes(self) -> Collection[str]:
+    def classes(self) -> Collection[Type[X]]:
         """Return the available classes."""
-        return self.lookup_dict.values()
+        return set(self.lookup_dict.values())
 
 
 def _not_hint(x: Any) -> bool:
