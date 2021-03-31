@@ -135,7 +135,7 @@ class Resolver(Generic[X]):
 
                     pip install ray[tune]
                 """,
-            ))
+            )) from None
         if kwargs_search_space is None:
             return ray.tune.choice(sorted(self.lookup_dict.keys()))
 
