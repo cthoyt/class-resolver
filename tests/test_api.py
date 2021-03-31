@@ -3,6 +3,7 @@
 """Tests for the class resolver."""
 
 import unittest
+from unittest import SkipTest
 
 from class_resolver import Resolver
 
@@ -55,3 +56,49 @@ class TestResolver(unittest.TestCase):
         """Test instances are passed through unmodified."""
         a = A(name='charlie')
         self.assertEqual(a, self.resolver.make(a))
+
+
+def _dummy_training_function(config):
+    """A dummy training function without actual training."""
+    # instantiate from configuration
+    to_resolve = config["choice"]
+    if isinstance(to_resolve, dict):
+        query = to_resolve.pop("query")
+        kwargs = to_resolve
+    else:
+        query = to_resolve
+        kwargs = None
+    resolver = Resolver([A, B, C], base=Base)
+    instance = resolver.make(query, pos_kwargs=kwargs)
+    if instance.name == "charlie":
+        mean_loss = 1.0
+    else:
+        mean_loss = 2.0
+
+    import ray.tune
+    ray.tune.report(mean_loss=mean_loss)
+
+
+def test_ray():
+    """Test case for the ray.tune search space."""
+    try:
+        import ray
+        import ray.tune
+    except ImportError:
+        raise SkipTest("Cannot test ray.tune methods without ray installed.") from None
+
+    resolver = Resolver([A, B, C], base=Base)
+    ray.init(local_mode=True)
+    analysis = ray.tune.run(
+        _dummy_training_function,
+        config=dict(
+            choice=resolver.ray_tune_search_space(
+                kwargs_search_space=dict(
+                    name=ray.tune.choice(["charlie", "max"]),
+                ),
+            ),
+        ),
+        ray_auto_init=False,
+    )
+
+    analysis.get_best_config(metric="mean_loss", mode="min")
