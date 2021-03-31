@@ -7,10 +7,8 @@ import unittest
 from class_resolver import Resolver
 
 try:
-    import ray
     import ray.tune as tune
 except ImportError:
-    ray = None
     tune = None
 
 
@@ -63,11 +61,11 @@ class TestResolver(unittest.TestCase):
         a = A(name='charlie')
         self.assertEqual(a, self.resolver.make(a))
 
-    @unittest.skipIf(ray is None or tune is None, 'ray[tune] was not installed properly')
+    @unittest.skipIf(tune is None, 'ray[tune] was not installed properly')
     def test_variant_generation(self):
         """Test whether ray tune can generate variants from the search space."""
         search_space = self.resolver.ray_tune_search_space(kwargs_search_space=dict(name=tune.choice(["charlie", "max"]), ), )
-        for spec in itertools.islice(ray.tune.suggest.variant_generator.generate_variants(search_space), 2):
+        for spec in itertools.islice(tune.suggest.variant_generator.generate_variants(search_space), 2):
             config = {
                 k[0]: v
                 for k, v in spec[0].items()
