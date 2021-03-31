@@ -126,15 +126,15 @@ class Resolver(Generic[X]):
             raise ImportError(dedent(
                 """
                 To use ray_tune_search_space please install ray tune first.
-                
+
                 You can do so by selecting the appropriate install option for the package
-                
+
                     pip install class-resolver[ray]
-                
+
                 or by manually installing ray tune
-                
+
                     pip install ray[tune]
-                """
+                """,
             ))
         if kwargs_search_space is None:
             return ray.tune.choice(sorted(self.lookup_dict.keys()))
