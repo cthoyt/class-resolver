@@ -6,6 +6,7 @@ import unittest
 
 import ray
 import ray.tune
+
 from class_resolver import Resolver
 
 
