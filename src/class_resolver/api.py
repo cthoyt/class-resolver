@@ -154,11 +154,14 @@ class Resolver(Generic[X]):
                     pip install ray[tune]
                 """,
             )) from None
+
+        query = ray.tune.choice(self.options)
+
         if kwargs_search_space is None:
-            return ray.tune.choice(self.options)
+            return query
 
         return dict(
-            query=ray.tune.choice(self.options),
+            query=query,
             **kwargs_search_space,
         )
 
