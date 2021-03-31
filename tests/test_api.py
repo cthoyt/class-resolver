@@ -63,46 +63,15 @@ class TestResolver(unittest.TestCase):
         a = A(name='charlie')
         self.assertEqual(a, self.resolver.make(a))
 
-
-@unittest.skipIf(ray is None or tune is None, 'ray[tune] was not installed properly')
-class TestRay(unittest.TestCase):
-    """Tests for ray.tune."""
-
-    def setUp(self) -> None:
-        """Set up the resolver class."""
-        self.resolver = Resolver([A, B, C], base=Base)
-
-    def test_ray(self):
-        """Test case for the ray.tune search space."""
-        ray.init(local_mode=True)
-        analysis = tune.run(
-            tune.with_parameters(self._dummy_training_function, resolver=self.resolver),
-            config=dict(
-                choice=self.resolver.ray_tune_search_space(
-                    kwargs_search_space=dict(
-                        name=tune.choice(["charlie", "max"]),
-                    ),
-                ),
-            ),
-            ray_auto_init=False,
-        )
-
-        analysis.get_best_config(metric="mean_loss", mode="min")
-
-    @staticmethod
-    def _dummy_training_function(config, resolver):
-        """Perform a dummy training without actual training."""
-        # instantiate from configuration
-        to_resolve = config["choice"]
-        if isinstance(to_resolve, dict):
-            query = to_resolve.pop("query")
-            kwargs = to_resolve
-        else:
-            query = to_resolve
-            kwargs = None
-        instance = resolver.make(query, pos_kwargs=kwargs)
-        if instance.name == "charlie":
-            mean_loss = 1.0
-        else:
-            mean_loss = 2.0
-        tune.report(mean_loss=mean_loss)
+    @unittest.skipIf(ray is None or tune is None, 'ray[tune] was not installed properly')
+    def test_variant_generation(self):
+        """Test whether ray tune can generate variants from the search space."""
+        search_space = self.resolver.ray_tune_search_space(kwargs_search_space=dict(name=tune.choice(["charlie", "max"]), ), )
+        for spec in ray.tune.suggest.variant_generator.generate_variants(search_space):
+            config = {
+                k[0]: v
+                for k, v in spec[0].items()
+            }
+            query = config.pop("query")
+            instance = self.resolver.make(query=query, pos_kwargs=config)
+            assert isinstance(instance, Base)
