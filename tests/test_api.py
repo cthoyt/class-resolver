@@ -3,8 +3,9 @@
 """Tests for the class resolver."""
 
 import unittest
-from unittest import SkipTest
 
+import ray
+import ray.tune
 from class_resolver import Resolver
 
 
@@ -74,19 +75,11 @@ def _dummy_training_function(config):
         mean_loss = 1.0
     else:
         mean_loss = 2.0
-
-    import ray.tune
     ray.tune.report(mean_loss=mean_loss)
 
 
 def test_ray():
     """Test case for the ray.tune search space."""
-    try:
-        import ray
-        import ray.tune
-    except ImportError:
-        raise SkipTest("Cannot test ray.tune methods without ray installed.") from None
-
     resolver = Resolver([A, B, C], base=Base)
     ray.init(local_mode=True)
     analysis = ray.tune.run(
