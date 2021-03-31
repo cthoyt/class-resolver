@@ -4,10 +4,14 @@
 
 import unittest
 
-import ray
-import ray.tune
-
 from class_resolver import Resolver
+
+try:
+    import ray
+    import ray.tune as tune
+except ImportError:
+    ray = None
+    tune = None
 
 
 class Base:
@@ -59,15 +63,24 @@ class TestResolver(unittest.TestCase):
         a = A(name='charlie')
         self.assertEqual(a, self.resolver.make(a))
 
+
+@unittest.skipIf(ray is None or tune is None, 'ray[tune] was not installed properly')
+class TestRay(unittest.TestCase):
+    """Tests for ray.tune."""
+
+    def setUp(self) -> None:
+        """Set up the resolver class."""
+        self.resolver = Resolver([A, B, C], base=Base)
+
     def test_ray(self):
         """Test case for the ray.tune search space."""
         ray.init(local_mode=True)
-        analysis = ray.tune.run(
-            ray.tune.with_parameters(self._dummy_training_function, resolver=self.resolver),
+        analysis = tune.run(
+            tune.with_parameters(self._dummy_training_function, resolver=self.resolver),
             config=dict(
                 choice=self.resolver.ray_tune_search_space(
                     kwargs_search_space=dict(
-                        name=ray.tune.choice(["charlie", "max"]),
+                        name=tune.choice(["charlie", "max"]),
                     ),
                 ),
             ),
@@ -92,4 +105,4 @@ class TestResolver(unittest.TestCase):
             mean_loss = 1.0
         else:
             mean_loss = 2.0
-        ray.tune.report(mean_loss=mean_loss)
+        tune.report(mean_loss=mean_loss)
