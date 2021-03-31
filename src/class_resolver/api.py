@@ -124,7 +124,7 @@ class Resolver(Generic[X]):
         return set(self.lookup_dict.keys())
 
     @property
-    def classes(self) -> Collection[Type[X]]:
+    def classes(self) -> Set[Type[X]]:
         """Return the available classes."""
         return set(self.lookup_dict.values())
 
