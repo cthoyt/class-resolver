@@ -137,7 +137,25 @@ class Resolver(Generic[X]):
         return set(self.lookup_dict.values())
 
     def ray_tune_search_space(self, kwargs_search_space: Optional[Mapping[str, Any]] = None):
-        """Return a search space for ray.tune."""
+        """Return a search space for ray.tune.
+
+        ray.tune is a package for distributed hyperparameter optimization. The search space for this search is defined
+        as a (nested) dictionary, which can contain special values `tune.{choice,uniform,...}`. For these values, the
+        search algorithm will sample a specific configuration.
+
+        This method can be used to create a tune.choice sampler for the choices available to the resolver. By default,
+        this is equivalent to
+
+            ray.tune.choice(self.options)
+
+        If additional `kwargs_search_space` are passed, they are assumed to be a sub-search space for the constructor
+        parameters passed via `pos_kwargs`.  The resulting sub-search thus looks as follows:
+
+            ray.tune.choice(
+                query=self.options,
+                **kwargs_search_space,
+            )
+        """
         try:
             import ray.tune
         except ImportError:
