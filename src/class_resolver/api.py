@@ -2,6 +2,7 @@
 
 """Resolve classes."""
 
+from textwrap import dedent
 from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Set, Type, TypeVar, Union
 
 __all__ = [
@@ -134,6 +135,69 @@ class Resolver(Generic[X]):
     def classes(self) -> Set[Type[X]]:
         """Return the available classes."""
         return set(self.lookup_dict.values())
+
+    def ray_tune_search_space(self, kwargs_search_space: Optional[Mapping[str, Any]] = None):
+        """Return a search space for ray.tune.
+
+        ray.tune is a package for distributed hyperparameter optimization. The search space for this search is defined
+        as a (nested) dictionary, which can contain special values `tune.{choice,uniform,...}`. For these values, the
+        search algorithm will sample a specific configuration.
+
+        This method can be used to create a tune.choice sampler for the choices available to the resolver. By default,
+        this is equivalent to
+
+        .. code-block:: python
+
+            ray.tune.choice(self.options)
+
+        If additional `kwargs_search_space` are passed, they are assumed to be a sub-search space for the constructor
+        parameters passed via `pos_kwargs`.  The resulting sub-search thus looks as follows:
+
+        .. code-block:: python
+
+            ray.tune.choice(
+                query=self.options,
+                **kwargs_search_space,
+            )
+
+        :param kwargs_search_space:
+            Additional sub search space for the constructor's parameters.
+
+        :return:
+            A ray.tune compatible search space.
+
+        :raises ImportError:
+            If ray.tune is not installed.
+
+        .. seealso ::
+            https://docs.ray.io/en/master/tune/index.html
+        """
+        try:
+            import ray.tune
+        except ImportError:
+            raise ImportError(dedent(
+                """
+                To use ray_tune_search_space please install ray tune first.
+
+                You can do so by selecting the appropriate install option for the package
+
+                    pip install class-resolver[ray]
+
+                or by manually installing ray tune
+
+                    pip install ray[tune]
+                """,
+            )) from None
+
+        query = ray.tune.choice(self.options)
+
+        if kwargs_search_space is None:
+            return query
+
+        return dict(
+            query=query,
+            **kwargs_search_space,
+        )
 
 
 def _not_hint(x: Any) -> bool:
