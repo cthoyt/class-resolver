@@ -3,7 +3,7 @@
 """Resolve classes."""
 
 from textwrap import dedent
-from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Type, TypeVar, Union
+from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Set, Type, TypeVar, Union
 
 __all__ = [
     'Hint',
