@@ -155,6 +155,9 @@ class Resolver(Generic[X]):
                 query=self.options,
                 **kwargs_search_space,
             )
+
+        .. seealso ::
+            https://docs.ray.io/en/master/tune/index.html
         """
         try:
             import ray.tune
