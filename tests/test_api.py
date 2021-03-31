@@ -6,7 +6,6 @@ import unittest
 
 import ray
 import ray.tune
-
 from class_resolver import Resolver
 
 
@@ -78,7 +77,7 @@ class TestResolver(unittest.TestCase):
 
     @staticmethod
     def _dummy_training_function(config, resolver):
-        """A dummy training function without actual training."""
+        """Perform a dummy training without actual training."""
         # instantiate from configuration
         to_resolve = config["choice"]
         if isinstance(to_resolve, dict):

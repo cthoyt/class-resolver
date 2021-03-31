@@ -162,7 +162,7 @@ class Resolver(Generic[X]):
         :return:
             A ray.tune compatible search space.
 
-        :raise ImportError:
+        :raises ImportError:
             If ray.tune is not installed.
 
         .. seealso ::
