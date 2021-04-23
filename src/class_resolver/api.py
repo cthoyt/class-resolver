@@ -7,6 +7,8 @@ from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Set, T
 
 __all__ = [
     'Hint',
+    'HintType',
+    'HintOrType',
     'Resolver',
     'get_subclasses',
     'get_cls',
@@ -15,6 +17,8 @@ __all__ = [
 
 X = TypeVar('X')
 Hint = Union[None, str, X]
+HintType = Hint[Type[X]]
+HintOrType = Hint[Union[X, Type[X]]]
 
 
 class Resolver(Generic[X]):
