@@ -103,7 +103,7 @@ class Resolver(Generic[X]):
             suffix=self.suffix,
         )
 
-    def make(self, query: Hint[Union[X, Type[X]]], pos_kwargs: Optional[Mapping[str, Any]] = None, **kwargs) -> X:
+    def make(self, query: HintOrType[X], pos_kwargs: Optional[Mapping[str, Any]] = None, **kwargs) -> X:
         """Instantiate a class with optional kwargs."""
         if query is None or isinstance(query, (str, type)):
             cls: Type[X] = self.lookup(query)
