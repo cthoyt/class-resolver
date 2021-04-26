@@ -112,6 +112,12 @@ class Resolver(Generic[X]):
         # An instance was passed, and it will go through without modification.
         return query
 
+    def make_from_kwargs(self, kwargs: Mapping[str, Any], key: str, kwargs_suffix: str = "kwargs", **o_kwargs) -> X:
+        """Instantiate a class, by looking up query/pos_kwargs from a dictionary."""
+        query = kwargs.get(key, None)
+        pos_kwargs = kwargs.get(f"{key}_{kwargs_suffix}", {})
+        return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
+
     def get_option(self, *flags: str, default: Optional[str] = None, **kwargs):
         """Get a click option for this resolver."""
         if default is None:
