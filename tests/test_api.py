@@ -61,7 +61,7 @@ class TestResolver(unittest.TestCase):
         name = "charlie"
         self.assertEqual(A(name=name), self.resolver.make_from_kwargs(
             key="magic",
-            kwargs=dict(
+            data=dict(
                 ignored_entry=...,
                 magic="a",
                 magic_kwargs=dict(
