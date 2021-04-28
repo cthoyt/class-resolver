@@ -112,7 +112,14 @@ class Resolver(Generic[X]):
         # An instance was passed, and it will go through without modification.
         return query
 
-    def make_from_kwargs(self, kwargs: Mapping[str, Any], key: str, kwargs_suffix: str = "kwargs", **o_kwargs) -> X:
+    def make_from_kwargs(
+        self,
+        key: str,
+        kwargs: Mapping[str, Any],
+        *,
+        kwargs_suffix: str = "kwargs",
+        **o_kwargs,
+    ) -> X:
         """Instantiate a class, by looking up query/pos_kwargs from a dictionary."""
         query = kwargs.get(key, None)
         pos_kwargs = kwargs.get(f"{key}_{kwargs_suffix}", {})
