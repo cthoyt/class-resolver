@@ -128,6 +128,7 @@ class Resolver(Generic[X]):
             and ``kwargs_suffix='kwargs'`` (the default value), then the kwargs from :func:`make` are looked up
             via ``data['model_kwargs']``.
         :param o_kwargs: Additional kwargs to be passed to :func:`make`
+        :returns: An instance of the X datatype parametrized by this resolver
         """
         query = data.get(key, None)
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
