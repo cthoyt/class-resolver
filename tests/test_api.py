@@ -56,6 +56,20 @@ class TestResolver(unittest.TestCase):
         # Test instantiating with kwargs
         self.assertEqual(A(name=name), self.resolver.make('a', name=name))
 
+    def test_make_from_kwargs(self):
+        """Test making classes from kwargs."""
+        name = "charlie"
+        self.assertEqual(A(name=name), self.resolver.make_from_kwargs(
+            key="magic",
+            data=dict(
+                ignored_entry=...,
+                magic="a",
+                magic_kwargs=dict(
+                    name=name,
+                ),
+            ),
+        ))
+
     def test_passthrough(self):
         """Test instances are passed through unmodified."""
         a = A(name='charlie')

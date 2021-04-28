@@ -112,6 +112,28 @@ class Resolver(Generic[X]):
         # An instance was passed, and it will go through without modification.
         return query
 
+    def make_from_kwargs(
+        self,
+        data: Mapping[str, Any],
+        key: str,
+        *,
+        kwargs_suffix: str = "kwargs",
+        **o_kwargs,
+    ) -> X:
+        """Instantiate a class, by looking up query/pos_kwargs from a dictionary.
+
+        :param data: A dictionary that contains entry ``key`` and entry ``{key}_{kwargs_suffix}``.
+        :param key: The key in the dictionary whose value will be put in the ``query`` argument of :func:`make`.
+        :param kwargs_suffix: The suffix after ``key`` to look up the data. For example, if ``key='model'``
+            and ``kwargs_suffix='kwargs'`` (the default value), then the kwargs from :func:`make` are looked up
+            via ``data['model_kwargs']``.
+        :param o_kwargs: Additional kwargs to be passed to :func:`make`
+        :returns: An instance of the X datatype parametrized by this resolver
+        """
+        query = data.get(key, None)
+        pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
+        return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
+
     def get_option(self, *flags: str, default: Optional[str] = None, **kwargs):
         """Get a click option for this resolver."""
         if default is None:
