@@ -2,8 +2,9 @@
 
 """Resolve classes."""
 
+from operator import attrgetter
 from textwrap import dedent
-from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Set, Type, TypeVar, Union
+from typing import Any, Collection, Generic, Iterable, Iterator, Mapping, Optional, Set, Type, TypeVar, Union
 
 __all__ = [
     'InstOrType',
@@ -70,6 +71,10 @@ class Resolver(Generic[X]):
             self.normalize_cls(cls): cls
             for cls in classes
         }
+
+    def __iter__(self) -> Iterator[Type[X]]:
+        """Return an iterator over the indexed classes sorted by name."""
+        return iter(sorted(self.lookup_dict.values(), key=attrgetter('__name__')))
 
     @classmethod
     def from_subclasses(cls, base: Type[X], *, skip: Optional[Collection[Type[X]]] = None, **kwargs) -> 'Resolver':

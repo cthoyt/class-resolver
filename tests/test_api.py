@@ -48,6 +48,10 @@ class TestResolver(unittest.TestCase):
         self.assertEqual(A, self.resolver.lookup('a'))
         self.assertEqual(A, self.resolver.lookup('A'))
 
+    def test_iterator(self):
+        """Test iterating over classes."""
+        self.assertEqual([A, B, C], list(self.resolver))
+
     def test_make(self):
         """Test making classes."""
         name = 'charlie'
