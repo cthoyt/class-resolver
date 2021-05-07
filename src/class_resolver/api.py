@@ -4,7 +4,13 @@
 
 from operator import attrgetter
 from textwrap import dedent
-from typing import Any, Collection, Generic, Iterable, Iterator, Mapping, Optional, Set, Type, TypeVar, Union
+from typing import (
+    Any, Callable, Collection, Generic, Iterable, Iterator, Mapping, Optional, Set, TYPE_CHECKING, Type,
+    TypeVar, Union,
+)
+
+if TYPE_CHECKING:
+    import click
 
 __all__ = [
     'InstOrType',
@@ -21,6 +27,7 @@ __all__ = [
 ]
 
 X = TypeVar('X')
+Y = TypeVar('Y')
 
 InstOrType = Union[X, Type[X]]
 
@@ -293,8 +300,8 @@ def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
     return s
 
 
-def _make_callback(f):
-    def _callback(_, __, value):
+def _make_callback(f: Callable[[X], Y]) -> Callable[['click.Context', 'click.Parameter', X], Y]:
+    def _callback(_ctx, _param, value: X) -> Y:
         return f(value)
 
     return _callback
