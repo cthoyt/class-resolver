@@ -6,6 +6,10 @@ from textwrap import dedent
 from typing import Any, Collection, Generic, Iterable, Mapping, Optional, Set, Type, TypeVar, Union
 
 __all__ = [
+    'InstOrType',
+    'Lookup',
+    'LookupType',
+    'LookupOrType',
     'Hint',
     'HintType',
     'HintOrType',
@@ -16,9 +20,16 @@ __all__ = [
 ]
 
 X = TypeVar('X')
-Hint = Union[None, str, X]
+
+InstOrType = Union[X, Type[X]]
+
+Lookup = Union[str, X]
+LookupType = Lookup[Type[X]]
+LookupOrType = Lookup[InstOrType[X]]
+
+Hint = Optional[Lookup[X]]
 HintType = Hint[Type[X]]
-HintOrType = Hint[Union[X, Type[X]]]
+HintOrType = Hint[InstOrType[X]]
 
 
 class Resolver(Generic[X]):
