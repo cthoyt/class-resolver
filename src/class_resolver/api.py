@@ -157,18 +157,21 @@ class Resolver(Generic[X]):
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
 
-    def get_option(self, *flags: str, default: Optional[str] = None, as_string: bool = False, **kwargs):
+    def get_option(self, *flags: str, default: Hint[Type[X]] = None, as_string: bool = False, **kwargs):
         """Get a click option for this resolver."""
+        if default is None and self.default is None:
+            raise ValueError('no default given either from resolver or explicitly')
         if default is None:
-            if self.default is None:
-                raise ValueError
-            default = self.normalize_cls(self.default)
+            default = self.default
+        else:
+            default = self.lookup(default)
+        default = self.normalize_cls(default)
 
         import click
 
         return click.option(
             *flags,
-            type=click.Choice(list(self.lookup_dict)),
+            type=click.Choice(list(self.lookup_dict), case_sensitive=False),
             default=default,
             show_default=True,
             callback=None if as_string else _make_callback(self.lookup),
@@ -301,7 +304,7 @@ def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
 
 
 def _make_callback(f: Callable[[X], Y]) -> Callable[['click.Context', 'click.Parameter', X], Y]:
-    def _callback(_ctx, _param, value: X) -> Y:
+    def _callback(_ctx: 'click.Context', _param: 'click.Parameter', value: X) -> Y:
         return f(value)
 
     return _callback
