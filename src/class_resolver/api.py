@@ -157,12 +157,15 @@ class Resolver(Generic[X]):
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
 
-    def get_option(self, *flags: str, default: Optional[str] = None, **kwargs):
+    def get_option(self, *flags: str, default: Hint[Type[X]] = None, **kwargs):
         """Get a click option for this resolver."""
+        if default is None and self.default is None:
+            raise ValueError('no default given either from resolver or explicitly')
         if default is None:
-            if self.default is None:
-                raise ValueError
-            default = self.normalize_cls(self.default)
+            default = self.default
+        else:
+            default = self.lookup(default)
+        default = self.normalize_cls(default)
 
         import click
 
