@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """Tests for the class resolver."""
+
 import itertools
 import unittest
+
+import click
+from click.testing import CliRunner, Result
 
 from class_resolver import Resolver
 
@@ -95,3 +99,32 @@ class TestResolver(unittest.TestCase):
             query = config.pop("query")
             instance = self.resolver.make(query=query, pos_kwargs=config)
             self.assertIsInstance(instance, Base)
+
+    def test_bad_click_option(self):
+        """Test failure to get a click option."""
+        with self.assertRaises(ValueError):
+            self.resolver.get_option('--opt')  # no default given
+
+    def test_click_option(self):
+        """Test the click option."""
+
+        @click.command()
+        @self.resolver.get_option('--opt', default='a')
+        def cli(opt):
+            """Run the test CLI."""
+            self.assertIsInstance(opt, type)
+            click.echo(opt.__name__, nl=False)
+
+        runner = CliRunner()
+
+        # Test default
+        result: Result = runner.invoke(cli, [])
+        self.assertEqual(A.__name__, result.output)
+
+        # Test canonical name
+        result: Result = runner.invoke(cli, ['--opt', 'A'])
+        self.assertEqual(A.__name__, result.output)
+
+        # Test normalizing name
+        result: Result = runner.invoke(cli, ['--opt', 'a'])
+        self.assertEqual(A.__name__, result.output)

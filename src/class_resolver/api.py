@@ -168,7 +168,7 @@ class Resolver(Generic[X]):
 
         return click.option(
             *flags,
-            type=click.Choice(list(self.lookup_dict)),
+            type=click.Choice(list(self.lookup_dict), case_sensitive=False),
             default=default,
             show_default=True,
             callback=_make_callback(self.lookup),
@@ -301,7 +301,7 @@ def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
 
 
 def _make_callback(f: Callable[[X], Y]) -> Callable[['click.Context', 'click.Parameter', X], Y]:
-    def _callback(_ctx, _param, value: X) -> Y:
+    def _callback(_ctx: 'click.Context', _param: 'click.Parameter', value: X) -> Y:
         return f(value)
 
     return _callback
