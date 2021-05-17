@@ -159,9 +159,9 @@ class Resolver(Generic[X]):
 
     def get_option(self, *flags: str, default: Hint[Type[X]] = None, **kwargs):
         """Get a click option for this resolver."""
-        if default is None and self.default is None:
-            raise ValueError('no default given either from resolver or explicitly')
         if default is None:
+            if self.default is None:
+                raise ValueError('no default given either from resolver or explicitly')
             default = self.default
         else:
             default = self.lookup(default)
