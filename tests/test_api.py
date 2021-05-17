@@ -115,6 +115,9 @@ class TestResolver(unittest.TestCase):
             self.assertIsInstance(opt, type)
             click.echo(opt.__name__, nl=False)
 
+        self._test_cli(cli)
+
+    def _test_cli(self, cli):
         runner = CliRunner()
 
         # Test default
@@ -128,3 +131,15 @@ class TestResolver(unittest.TestCase):
         # Test normalizing name
         result: Result = runner.invoke(cli, ['--opt', 'a'])
         self.assertEqual(A.__name__, result.output)
+
+    def test_click_option_str(self):
+        """Test the click option."""
+
+        @click.command()
+        @self.resolver.get_option('--opt', default='a', as_string=True)
+        def cli(opt):
+            """Run the test CLI."""
+            self.assertIsInstance(opt, str)
+            click.echo(self.resolver.lookup(opt).__name__, nl=False)
+
+        self._test_cli(cli)

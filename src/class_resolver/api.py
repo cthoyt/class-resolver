@@ -157,7 +157,7 @@ class Resolver(Generic[X]):
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
 
-    def get_option(self, *flags: str, default: Hint[Type[X]] = None, **kwargs):
+    def get_option(self, *flags: str, default: Hint[Type[X]] = None, as_string: bool = False, **kwargs):
         """Get a click option for this resolver."""
         if default is None:
             if self.default is None:
@@ -174,7 +174,7 @@ class Resolver(Generic[X]):
             type=click.Choice(list(self.lookup_dict), case_sensitive=False),
             default=default,
             show_default=True,
-            callback=_make_callback(self.lookup),
+            callback=None if as_string else _make_callback(self.lookup),
             **kwargs,
         )
 
