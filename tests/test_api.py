@@ -143,3 +143,8 @@ class TestResolver(unittest.TestCase):
             click.echo(self.resolver.lookup(opt).__name__, nl=False)
 
         self._test_cli(cli)
+
+    def test_signature(self):
+        """Check signature tests."""
+        self.assertTrue(self.resolver.supports_argument('A', 'name'))
+        self.assertFalse(self.resolver.supports_argument('A', 'nope'))
