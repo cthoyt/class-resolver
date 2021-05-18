@@ -5,7 +5,7 @@
 from operator import attrgetter
 from textwrap import dedent
 from typing import (
-    Any, Callable, Collection, Generic, Iterable, Iterator, Mapping, Optional, Set, TYPE_CHECKING, Type,
+    Any, Callable, Collection, Dict, Generic, Iterable, Iterator, Mapping, Optional, Set, TYPE_CHECKING, Type,
     TypeVar, Union,
 )
 
@@ -48,7 +48,9 @@ class Resolver(Generic[X]):
     #: The shared suffix fo all classes derived from the base class
     suffix: str
     #: The mapping from normalized class names to the classes indexed by this resolver
-    lookup_dict: Mapping[str, Type[X]]
+    lookup_dict: Dict[str, Type[X]]
+    #: The mapping from synonyms to the classes indexed by this resolver
+    synonyms: Dict[str, Type[X]]
 
     def __init__(
         self,
@@ -73,11 +75,35 @@ class Resolver(Generic[X]):
         if suffix is None:
             suffix = normalize_string(base.__name__)
         self.suffix = suffix
-        self.synonyms = synonyms
-        self.lookup_dict = {
-            self.normalize_cls(cls): cls
-            for cls in classes
-        }
+        self.synonyms = synonyms or {}
+        self.lookup_dict = {}
+        for cls in classes:
+            self.register(cls)
+
+    def register(self, cls: Type[X], synonyms: Optional[Iterable[str]] = None, raise_on_conflict: bool = True) -> None:
+        """Register an additional class with this resolver.
+
+        :param cls: The class to register
+        :param synonyms: An optional iterable of synonyms to add for the class
+        :param raise_on_conflict: Determines the behavior when a conflict is encountered on either
+            the normalized class name or a synonym. If true, will raise an exception. If false, will
+            simply disregard the entry.
+        """
+        key = self.normalize_cls(cls)
+        if key in self.lookup_dict:
+            if raise_on_conflict:
+                raise KeyError(f'This resolver already contains a class with key {key}: {self.lookup_dict[key]}')
+            else:
+                return
+
+        self.lookup_dict[key] = cls
+        for synonym in synonyms or []:
+            if synonym in self.synonyms:
+                if raise_on_conflict:
+                    raise KeyError(f'This resolver already contains synonym {synonym} for {self.synonyms[synonym]}')
+                else:
+                    continue
+            self.synonyms[synonym] = cls
 
     def __iter__(self) -> Iterator[Type[X]]:
         """Return an iterator over the indexed classes sorted by name."""
