@@ -2,6 +2,7 @@
 
 """Resolve classes."""
 
+import inspect
 from operator import attrgetter
 from textwrap import dedent
 from typing import (
@@ -125,6 +126,15 @@ class Resolver(Generic[X]):
             default=self.default,
             suffix=self.suffix,
         )
+
+    def signature(self, query: Hint[Type[X]]) -> inspect.Signature:
+        """Get the signature for the given class via :func:`inspect.signature`."""
+        cls = self.lookup(query)
+        return inspect.signature(cls)
+
+    def supports_argument(self, query: Hint[Type[X]], parameter_name: str) -> bool:
+        """Determine if the class constructor supports the given argument."""
+        return parameter_name in self.signature(query).parameters
 
     def make(self, query: HintOrType[X], pos_kwargs: Optional[Mapping[str, Any]] = None, **kwargs) -> X:
         """Instantiate a class with optional kwargs."""
