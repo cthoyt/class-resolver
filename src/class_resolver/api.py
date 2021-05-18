@@ -76,7 +76,7 @@ class Resolver(Generic[X]):
         if suffix is None:
             suffix = normalize_string(base.__name__)
         self.suffix = suffix
-        self.synonyms = synonyms or {}
+        self.synonyms = dict(synonyms or {})
         self.lookup_dict = {}
         for cls in classes:
             self.register(cls)
@@ -89,6 +89,9 @@ class Resolver(Generic[X]):
         :param raise_on_conflict: Determines the behavior when a conflict is encountered on either
             the normalized class name or a synonym. If true, will raise an exception. If false, will
             simply disregard the entry.
+
+        :raises KeyError: If ``raise_on_conflict`` is true and there's a conflict in either the class
+            name or a synonym name.
         """
         key = self.normalize_cls(cls)
         if key in self.lookup_dict:
