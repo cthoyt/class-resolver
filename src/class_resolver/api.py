@@ -169,7 +169,10 @@ class Resolver(Generic[X]):
         """Instantiate a class with optional kwargs."""
         if query is None or isinstance(query, (str, type)):
             cls: Type[X] = self.lookup(query)
-            return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
+            try:
+                return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
+            except TypeError as e:
+                raise TypeError(f'{cls.__name__}: {e.args[0]}')
 
         # An instance was passed, and it will go through without modification.
         return query
