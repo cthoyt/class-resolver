@@ -3,12 +3,15 @@
 """Resolve classes."""
 
 import inspect
+import logging
 from operator import attrgetter
 from textwrap import dedent
 from typing import (
     Any, Callable, Collection, Dict, Generic, Iterable, Iterator, Mapping, Optional, Set, TYPE_CHECKING, Type,
     TypeVar, Union,
 )
+
+from pkg_resources import iter_entry_points
 
 if TYPE_CHECKING:
     import click
@@ -39,6 +42,8 @@ LookupOrType = Lookup[InstOrType[X]]
 Hint = Optional[Lookup[X]]
 HintType = Hint[Type[X]]
 HintOrType = Hint[InstOrType[X]]
+
+logger = logging.getLogger(__name__)
 
 
 class Resolver(Generic[X]):
@@ -132,6 +137,19 @@ class Resolver(Generic[X]):
             base=base,
             **kwargs,
         )
+
+    @classmethod
+    def from_entrypoint(cls, group: str, *, base: Type[X], **kwargs) -> 'Resolver':
+        """Make a resolver from the classes registered at the given entrypoint."""
+        classes = set()
+        for entry in iter_entry_points(group=group):
+            try:
+                subcls = entry.load()
+            except ImportError:
+                logger.warning('could not load %s', entry.name)
+            else:
+                classes.add(subcls)
+        return Resolver(classes=classes, base=base, **kwargs)
 
     def normalize_inst(self, x: X) -> str:
         """Normalize the class name of the instance."""
