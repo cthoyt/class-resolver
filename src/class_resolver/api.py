@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     import click
 
 __all__ = [
+    # Type Hints
     'InstOrType',
     'Lookup',
     'LookupType',
@@ -24,10 +25,14 @@ __all__ = [
     'Hint',
     'HintType',
     'HintOrType',
+    # Classes
     'Resolver',
+    # Utilities
     'get_subclasses',
     'get_cls',
     'normalize_string',
+    # Exceptions
+    'KeywordArgumentError',
 ]
 
 X = TypeVar('X')
@@ -44,6 +49,22 @@ HintType = Hint[Type[X]]
 HintOrType = Hint[InstOrType[X]]
 
 logger = logging.getLogger(__name__)
+
+
+class KeywordArgumentError(TypeError):
+    """Thrown when missing a keyword-only argument."""
+
+    def __init__(self, cls, s: str):
+        """Initialize the error.
+
+        :param cls: The class that was trying to be instantiated
+        :param s: The string describing the original type error
+        """
+        self.cls = cls
+        self.name = s.rstrip("'").rsplit("'", 1)[1]
+
+    def __str__(self) -> str:  # noqa:D105
+        return f"{self.cls.__name__}: __init__() missing 1 required keyword-only argument: '{self.name}'"
 
 
 class Resolver(Generic[X]):
@@ -190,7 +211,9 @@ class Resolver(Generic[X]):
             try:
                 return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
             except TypeError as e:
-                raise TypeError(f'{cls.__name__}: {e.args[0]}')
+                if 'required keyword-only argument' in e.args[0]:
+                    raise KeywordArgumentError(cls, e.args[0])
+                raise e
 
         # An instance was passed, and it will go through without modification.
         return query
