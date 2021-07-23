@@ -163,14 +163,14 @@ class Resolver(Generic[X]):
         """Normalize the string with this resolve's suffix."""
         return normalize_string(s, suffix=self.suffix)
 
-    def lookup(self, query: Hint[Type[X]]) -> Type[X]:
+    def lookup(self, query: Hint[Type[X]], default: Optional[Type[X]] = None) -> Type[X]:
         """Lookup a class."""
         return get_cls(
             query,
             base=self.base,
             lookup_dict=self.lookup_dict,
             lookup_dict_synonyms=self.synonyms,
-            default=self.default,
+            default=default or self.default,
             suffix=self.suffix,
         )
 
