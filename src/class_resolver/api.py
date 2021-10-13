@@ -7,8 +7,20 @@ import logging
 from operator import attrgetter
 from textwrap import dedent
 from typing import (
-    Any, Callable, Collection, Dict, Generic, Iterable, Iterator, Mapping, Optional, Set, TYPE_CHECKING, Type,
-    TypeVar, Union,
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    Mapping,
+    Optional,
+    Set,
+    TYPE_CHECKING,
+    Type,
+    TypeVar,
+    Union,
 )
 
 from pkg_resources import iter_entry_points
@@ -18,26 +30,26 @@ if TYPE_CHECKING:
 
 __all__ = [
     # Type Hints
-    'InstOrType',
-    'Lookup',
-    'LookupType',
-    'LookupOrType',
-    'Hint',
-    'HintType',
-    'HintOrType',
+    "InstOrType",
+    "Lookup",
+    "LookupType",
+    "LookupOrType",
+    "Hint",
+    "HintType",
+    "HintOrType",
     # Classes
-    'Resolver',
+    "Resolver",
     # Utilities
-    'get_subclasses',
-    'get_cls',
-    'normalize_string',
+    "get_subclasses",
+    "get_cls",
+    "normalize_string",
     # Exceptions
-    'KeywordArgumentError',
-    'UnexpectedKeywordError',
+    "KeywordArgumentError",
+    "UnexpectedKeywordError",
 ]
 
-X = TypeVar('X')
-Y = TypeVar('Y')
+X = TypeVar("X")
+Y = TypeVar("Y")
 
 InstOrType = Union[X, Type[X]]
 
@@ -122,7 +134,12 @@ class Resolver(Generic[X]):
         for cls in classes:
             self.register(cls)
 
-    def register(self, cls: Type[X], synonyms: Optional[Iterable[str]] = None, raise_on_conflict: bool = True) -> None:
+    def register(
+        self,
+        cls: Type[X],
+        synonyms: Optional[Iterable[str]] = None,
+        raise_on_conflict: bool = True,
+    ) -> None:
         """Register an additional class with this resolver.
 
         :param cls: The class to register
@@ -137,7 +154,9 @@ class Resolver(Generic[X]):
         key = self.normalize_cls(cls)
         if key in self.lookup_dict:
             if raise_on_conflict:
-                raise KeyError(f'This resolver already contains a class with key {key}: {self.lookup_dict[key]}')
+                raise KeyError(
+                    f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
+                )
             else:
                 return
 
@@ -145,17 +164,21 @@ class Resolver(Generic[X]):
         for synonym in synonyms or []:
             if synonym in self.synonyms:
                 if raise_on_conflict:
-                    raise KeyError(f'This resolver already contains synonym {synonym} for {self.synonyms[synonym]}')
+                    raise KeyError(
+                        f"This resolver already contains synonym {synonym} for {self.synonyms[synonym]}"
+                    )
                 else:
                     continue
             self.synonyms[synonym] = cls
 
     def __iter__(self) -> Iterator[Type[X]]:
         """Return an iterator over the indexed classes sorted by name."""
-        return iter(sorted(self.lookup_dict.values(), key=attrgetter('__name__')))
+        return iter(sorted(self.lookup_dict.values(), key=attrgetter("__name__")))
 
     @classmethod
-    def from_subclasses(cls, base: Type[X], *, skip: Optional[Collection[Type[X]]] = None, **kwargs) -> 'Resolver':
+    def from_subclasses(
+        cls, base: Type[X], *, skip: Optional[Collection[Type[X]]] = None, **kwargs
+    ) -> "Resolver":
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
@@ -165,24 +188,20 @@ class Resolver(Generic[X]):
         """
         skip = set(skip) if skip else set()
         return Resolver(
-            {
-                subcls
-                for subcls in get_subclasses(base)
-                if subcls not in skip
-            },
+            {subcls for subcls in get_subclasses(base) if subcls not in skip},
             base=base,
             **kwargs,
         )
 
     @classmethod
-    def from_entrypoint(cls, group: str, *, base: Type[X], **kwargs) -> 'Resolver':
+    def from_entrypoint(cls, group: str, *, base: Type[X], **kwargs) -> "Resolver":
         """Make a resolver from the classes registered at the given entrypoint."""
         classes = set()
         for entry in iter_entry_points(group=group):
             try:
                 subcls = entry.load()
             except ImportError:
-                logger.warning('could not load %s', entry.name)
+                logger.warning("could not load %s", entry.name)
             else:
                 classes.add(subcls)
         return Resolver(classes=classes, base=base, **kwargs)
@@ -219,16 +238,21 @@ class Resolver(Generic[X]):
         """Determine if the class constructor supports the given argument."""
         return parameter_name in self.signature(query).parameters
 
-    def make(self, query: HintOrType[X], pos_kwargs: Optional[Mapping[str, Any]] = None, **kwargs) -> X:
+    def make(
+        self,
+        query: HintOrType[X],
+        pos_kwargs: Optional[Mapping[str, Any]] = None,
+        **kwargs,
+    ) -> X:
         """Instantiate a class with optional kwargs."""
         if query is None or isinstance(query, (str, type)):
             cls: Type[X] = self.lookup(query)
             try:
                 return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
             except TypeError as e:
-                if 'required keyword-only argument' in e.args[0]:
+                if "required keyword-only argument" in e.args[0]:
                     raise KeywordArgumentError(cls, e.args[0]) from None
-                if e.args[0].endswith(' takes no arguments'):
+                if e.args[0].endswith(" takes no arguments"):
                     raise UnexpectedKeywordError(cls) from None
                 raise e
 
@@ -257,11 +281,17 @@ class Resolver(Generic[X]):
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
 
-    def get_option(self, *flags: str, default: Hint[Type[X]] = None, as_string: bool = False, **kwargs):
+    def get_option(
+        self,
+        *flags: str,
+        default: Hint[Type[X]] = None,
+        as_string: bool = False,
+        **kwargs,
+    ):
         """Get a click option for this resolver."""
         if default is None:
             if self.default is None:
-                raise ValueError('no default given either from resolver or explicitly')
+                raise ValueError("no default given either from resolver or explicitly")
             default = self.default
         else:
             default = self.lookup(default)
@@ -327,8 +357,9 @@ class Resolver(Generic[X]):
         try:
             import ray.tune
         except ImportError:
-            raise ImportError(dedent(
-                """
+            raise ImportError(
+                dedent(
+                    """
                 To use ray_tune_search_space please install ray tune first.
 
                 You can do so by selecting the appropriate install option for the package
@@ -339,7 +370,8 @@ class Resolver(Generic[X]):
 
                     pip install ray[tune]
                 """,
-            )) from None
+                )
+            ) from None
 
         query = ray.tune.choice(self.options)
 
@@ -378,10 +410,10 @@ def get_cls(
     """Get a class by string, default, or implementation."""
     if query is None:
         if default is None:
-            raise ValueError(f'No default {base.__name__} set')
+            raise ValueError(f"No default {base.__name__} set")
         return default
     elif not isinstance(query, (str, type)):
-        raise TypeError(f'Invalid {base.__name__} type: {type(query)} - {query}')
+        raise TypeError(f"Invalid {base.__name__} type: {type(query)} - {query}")
     elif isinstance(query, str):
         key = normalize_string(query, suffix=suffix)
         if key in lookup_dict:
@@ -389,22 +421,24 @@ def get_cls(
         if lookup_dict_synonyms is not None and key in lookup_dict_synonyms:
             return lookup_dict_synonyms[key]
         valid_choices = sorted(set(lookup_dict.keys()).union(lookup_dict_synonyms or []))
-        raise ValueError(f'Invalid {base.__name__} name: {query}. Valid choices are: {valid_choices}')
+        raise ValueError(
+            f"Invalid {base.__name__} name: {query}. Valid choices are: {valid_choices}"
+        )
     elif issubclass(query, base):
         return query
-    raise TypeError(f'Not subclass of {base.__name__}: {query}')
+    raise TypeError(f"Not subclass of {base.__name__}: {query}")
 
 
 def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
     """Normalize a string for lookup."""
-    s = s.lower().replace('-', '').replace('_', '').replace(' ', '')
+    s = s.lower().replace("-", "").replace("_", "").replace(" ", "")
     if suffix is not None and s.endswith(suffix.lower()):
-        return s[:-len(suffix)]
+        return s[: -len(suffix)]
     return s
 
 
-def _make_callback(f: Callable[[X], Y]) -> Callable[['click.Context', 'click.Parameter', X], Y]:
-    def _callback(_ctx: 'click.Context', _param: 'click.Parameter', value: X) -> Y:
+def _make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Parameter", X], Y]:
+    def _callback(_ctx: "click.Context", _param: "click.Parameter", value: X) -> Y:
         return f(value)
 
     return _callback
