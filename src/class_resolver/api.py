@@ -33,6 +33,7 @@ __all__ = [
     'normalize_string',
     # Exceptions
     'KeywordArgumentError',
+    'UnexpectedKeywordError',
 ]
 
 X = TypeVar('X')
@@ -65,6 +66,20 @@ class KeywordArgumentError(TypeError):
 
     def __str__(self) -> str:  # noqa:D105
         return f"{self.cls.__name__}: __init__() missing 1 required keyword-only argument: '{self.name}'"
+
+
+class UnexpectedKeywordError(TypeError):
+    """Thrown when no arguments were expected."""
+
+    def __init__(self, cls):
+        """Initialize the error.
+
+        :param cls: The class that was trying to be instantiated
+        """
+        self.cls = cls
+
+    def __str__(self) -> str:  # noqa:D105
+        return f"{self.cls.__name__} did not expect any keyword arguments"
 
 
 class Resolver(Generic[X]):
@@ -212,7 +227,9 @@ class Resolver(Generic[X]):
                 return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
             except TypeError as e:
                 if 'required keyword-only argument' in e.args[0]:
-                    raise KeywordArgumentError(cls, e.args[0])
+                    raise KeywordArgumentError(cls, e.args[0]) from None
+                if e.args[0].endswith(' takes no arguments'):
+                    raise UnexpectedKeywordError(cls) from None
                 raise e
 
         # An instance was passed, and it will go through without modification.

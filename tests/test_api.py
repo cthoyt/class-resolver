@@ -8,7 +8,7 @@ import unittest
 import click
 from click.testing import CliRunner, Result
 
-from class_resolver import Resolver
+from class_resolver import Resolver, UnexpectedKeywordError
 
 try:
     import ray.tune as tune
@@ -38,6 +38,14 @@ class B(Base):
 
 class C(Base):
     """C base class."""
+
+
+class AltBase:
+    """An alternative base class."""
+
+
+class AAltBase(AltBase):
+    """A base class."""
 
 
 class TestResolver(unittest.TestCase):
@@ -148,3 +156,10 @@ class TestResolver(unittest.TestCase):
         """Check signature tests."""
         self.assertTrue(self.resolver.supports_argument('A', 'name'))
         self.assertFalse(self.resolver.supports_argument('A', 'nope'))
+
+    def test_no_arguments(self):
+        """Check that the unexpected keyword error is thrown properly."""
+        resolver = Resolver.from_subclasses(AltBase)
+        with self.assertRaises(UnexpectedKeywordError) as e:
+            resolver.make('A', nope='nopppeeee')
+            self.assertEqual('AAltBase did not expect any keyword arguments', str(e))

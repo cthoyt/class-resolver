@@ -2,7 +2,10 @@
 
 """Lookup and instantiate classes with style."""
 
-from .api import Hint, HintOrType, HintType, KeywordArgumentError, Resolver, get_cls, get_subclasses, normalize_string
+from .api import (
+    Hint, HintOrType, HintType, KeywordArgumentError, Resolver, UnexpectedKeywordError, get_cls,
+    get_subclasses, normalize_string,
+)
 
 __all__ = [
     # Type Hints
@@ -17,4 +20,5 @@ __all__ = [
     'normalize_string',
     # Exceptions
     'KeywordArgumentError',
+    'UnexpectedKeywordError',
 ]
