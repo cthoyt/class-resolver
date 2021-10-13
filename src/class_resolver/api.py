@@ -94,6 +94,12 @@ class UnexpectedKeywordError(TypeError):
         return f"{self.cls.__name__} did not expect any keyword arguments"
 
 
+MISSING_ARGS = [
+    "takes no parameters",  # in 3.6
+    "takes no arguments",  # > 3.7
+]
+
+
 class Resolver(Generic[X]):
     """Resolve from a list of classes."""
 
@@ -252,7 +258,7 @@ class Resolver(Generic[X]):
             except TypeError as e:
                 if "required keyword-only argument" in e.args[0]:
                     raise KeywordArgumentError(cls, e.args[0]) from None
-                if e.args[0].endswith(" takes no arguments"):
+                if any(text in e.args[0] for text in MISSING_ARGS):
                     raise UnexpectedKeywordError(cls) from None
                 raise e
 
