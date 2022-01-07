@@ -37,6 +37,7 @@ __all__ = [
     "Hint",
     "HintType",
     "HintOrType",
+    "OptionalKwargs",
     # Classes
     "Resolver",
     # Utilities
@@ -60,6 +61,8 @@ LookupOrType = Lookup[InstOrType[X]]
 Hint = Optional[Lookup[X]]
 HintType = Hint[Type[X]]
 HintOrType = Hint[InstOrType[X]]
+
+OptionalKwargs = Optional[Mapping[str, Any]]
 
 logger = logging.getLogger(__name__)
 

@@ -28,6 +28,7 @@ __all__ = [
     "Hint",
     "HintType",
     "HintOrType",
+    "OptionalKwargs",
     # Classes
     "Resolver",
     # Utilities
