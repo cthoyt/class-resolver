@@ -7,6 +7,7 @@ import logging
 from operator import attrgetter
 from textwrap import dedent
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Collection,
@@ -17,7 +18,6 @@ from typing import (
     Mapping,
     Optional,
     Set,
-    TYPE_CHECKING,
     Type,
     TypeVar,
     Union,
