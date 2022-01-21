@@ -2,6 +2,7 @@
 
 """Resolve classes."""
 
+import functools
 import inspect
 import logging
 from operator import attrgetter
@@ -451,3 +452,52 @@ def _make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Par
         return f(value)
 
     return _callback
+
+
+X = TypeVar("X", bound=Callable)
+
+
+class FunctionResolver(Generic[X]):
+    """A resolver for functions."""
+
+    def __init__(
+        self,
+        *,
+        default: Hint[X] = None,
+        label: str = None,
+    ) -> None:
+        """Initialize the resolver.
+
+        :param default: The default
+        """
+        self.default = default
+        self.lookup_dict = {}
+        self.label = "" if label is None else " " + label
+
+    def register(self, func: X) -> None:
+        if hasattr(func, "__name__"):
+            name = func.__name__
+        else:
+            name = str(func)
+        self.lookup_dict[normalize_string(name)] = func
+
+    def lookup(self, query: Hint[X]) -> X:
+        if query is None:
+            query = self.default
+        try:
+            query = self.lookup_dict[query]
+        except KeyError:
+            raise KeyError(f"{query} is an invalid. Try one of: {sorted(self.lookup_dict.keys())}")
+
+        if isinstance(query, str):
+            return self.lookup_dict[normalize_string(query)]
+        # cast(X, query)
+        return query
+
+    def make(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs) -> X:
+        if query is None or isinstance(query, str) or callable(query):
+            func = self.lookup(query)
+            if pos_kwargs is not None or kwargs:
+                func = functools.partial(func, **(pos_kwargs or {}), **kwargs)
+            return func
+        return query
