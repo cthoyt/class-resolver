@@ -265,6 +265,17 @@ class Resolver(Generic[X]):
         # An instance was passed, and it will go through without modification.
         return query
 
+    def make_safe(
+        self,
+        query: HintOrType[X],
+        pos_kwargs: Optional[Mapping[str, Any]] = None,
+        **kwargs,
+    ) -> Optional[X]:
+        """Run make, but pass through a none query."""
+        if query is None:
+            return None
+        return self.make(query=query, pos_kwargs=pos_kwargs, **kwargs)
+
     def make_from_kwargs(
         self,
         data: Mapping[str, Any],

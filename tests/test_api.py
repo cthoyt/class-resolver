@@ -91,6 +91,11 @@ class TestResolver(unittest.TestCase):
         # Test instantiating with kwargs
         self.assertEqual(A(name=name), self.resolver.make("a", name=name))
 
+    def test_make_safe(self):
+        """Test the make_safe function, which always returns none on none input."""
+        self.assertIsNone(self.resolver.make_safe(None))
+        self.assertIsNone(Resolver.from_subclasses(Base, default=A).make_safe(None))
+
     def test_registration_synonym(self):
         """Test failure of registration."""
         self.resolver.register(D, synonyms={"dope"})

@@ -69,6 +69,11 @@ class TestFunctionResolver(unittest.TestCase):
             f2 = self.resolver.make("add_y", y=1)
             self.assertEqual(add_one(x), f2(x))
 
+    def test_make_safe(self):
+        """Test the make_safe function, which always returns none on none input."""
+        self.assertIsNone(self.resolver.make_safe(None))
+        self.assertIsNone(FunctionResolver([add_one, add_two], default=add_two).make_safe(None))
+
     def test_passthrough(self):
         """Test instances are passed through unmodified."""
         for x in range(10):

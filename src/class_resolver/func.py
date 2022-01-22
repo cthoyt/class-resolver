@@ -116,3 +116,9 @@ class FunctionResolver(Generic[X]):
         if pos_kwargs or kwargs:
             return partial(func, **(pos_kwargs or {}), **kwargs)  # type: ignore
         return func
+
+    def make_safe(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs) -> Optional[X]:
+        """Run make, but pass through a none query."""
+        if query is None:
+            return None
+        return self.make(query=query, pos_kwargs=pos_kwargs, **kwargs)
