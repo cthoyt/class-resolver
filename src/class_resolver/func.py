@@ -78,7 +78,7 @@ class FunctionResolver(Generic[X]):
 
         for synonym in synonyms or []:
             synonym_key = self.normalize_string(synonym)
-            if synonym_key not in self.synonyms:
+            if synonym_key not in self.synonyms and synonym_key not in self.lookup_dict:
                 self.synonyms[synonym_key] = func
             elif raise_on_conflict:
                 raise KeyError(
@@ -108,9 +108,7 @@ class FunctionResolver(Generic[X]):
 
     def make(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs) -> X:
         """Make a function with partial bindings to the given kwargs."""
-        if query is None or isinstance(query, str) or callable(query):
-            func: X = self.lookup(query)
-            if pos_kwargs or kwargs:
-                return partial(func, **(pos_kwargs or {}), **kwargs)  # type: ignore
-            return func
-        return query
+        func: X = self.lookup(query)
+        if pos_kwargs or kwargs:
+            return partial(func, **(pos_kwargs or {}), **kwargs)  # type: ignore
+        return func

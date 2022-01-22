@@ -81,8 +81,8 @@ class TestFunctionResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.resolver.register(add_one)
 
-        def _add_one(x: int) -> int:
+        def _new_fn(x: int) -> int:
             return x + 1
 
         with self.assertRaises(KeyError):
-            self.resolver.register(_add_one, synonyms={"add_one"})
+            self.resolver.register(_new_fn, synonyms={"add_one"})
