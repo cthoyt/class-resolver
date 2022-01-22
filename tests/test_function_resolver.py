@@ -42,3 +42,19 @@ class TestFunctionResolver(unittest.TestCase):
             # Test instantiating with kwargs
             f2 = self.resolver.make("add_y", y=1)
             self.assertEqual(add_one(x), f2(x))
+
+    def test_passthrough(self):
+        """Test instances are passed through unmodified."""
+        for x in range(10):
+            self.assertEqual(add_one(x), self.resolver.make(add_one)(x))
+
+    def test_registration_failure(self):
+        """Test failure of registration"""
+        with self.assertRaises(KeyError):
+            self.resolver.register(add_one)
+
+        def _add_one(x: int) -> int:
+            return x + 1
+        
+        with self.assertRaises(KeyError):
+            self.resolver.register(_add_one, synonyms={"add_one"})

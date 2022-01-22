@@ -47,11 +47,7 @@ class FunctionResolver(Generic[X]):
 
     def normalize_func(self, func: X) -> str:
         """Normalize a function to a name."""
-        if hasattr(func, "__name__"):
-            name = func.__name__
-        else:
-            name = str(func)
-        return normalize_string(name)
+        return normalize_string(func.__name__)
 
     def register(
         self, func: X, synonyms: Optional[Iterable[str]] = None, raise_on_conflict: bool = True
