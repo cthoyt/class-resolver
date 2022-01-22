@@ -69,18 +69,20 @@ class FunctionResolver(Generic[X]):
             name or a synonym name.
         """
         key = self.normalize_func(func)
-        if key in self.lookup_dict and raise_on_conflict:
+        if key not in self.lookup_dict:
+            self.lookup_dict[key] = func
+        elif raise_on_conflict:
             raise KeyError(
                 f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
             )
 
-        self.lookup_dict[key] = func
         for synonym in synonyms or []:
-            if synonym not in self.synonyms:
-                self.synonyms[self.normalize_string(synonym)] = func
+            synonym_key = self.normalize_string(synonym)
+            if synonym_key not in self.synonyms:
+                self.synonyms[synonym_key] = func
             elif raise_on_conflict:
                 raise KeyError(
-                    f"This resolver already contains synonym {synonym} for {self.synonyms[synonym]}"
+                    f"This resolver already contains synonym {synonym} for {self.synonyms[synonym_key]}"
                 )
 
     def lookup(self, query: Hint[X]) -> X:

@@ -38,6 +38,23 @@ class TestFunctionResolver(unittest.TestCase):
         """Test looking up functions."""
         self.assertEqual(add_one, self.resolver.lookup("add_one"))
         self.assertEqual(add_one, self.resolver.lookup("ADD_ONE"))
+        with self.assertRaises(ValueError):
+            self.resolver.lookup(None)
+        with self.assertRaises(KeyError):
+            self.resolver.lookup("missing")
+        with self.assertRaises(TypeError):
+            self.resolver.lookup(3)
+
+    def test_default_lookup(self):
+        """Test lookup with default."""
+        resolver = FunctionResolver([add_one, add_two, add_y], default=add_two)
+        self.assertEqual(add_one, resolver.lookup("add_one"))
+        self.assertEqual(add_one, resolver.lookup("ADD_ONE"))
+        self.assertEqual(add_two, resolver.lookup(None))
+        with self.assertRaises(KeyError):
+            resolver.lookup("missing")
+        with self.assertRaises(TypeError):
+            resolver.lookup(3)
 
     def test_make(self):
         """Test making classes."""
