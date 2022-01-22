@@ -34,6 +34,10 @@ class TestFunctionResolver(unittest.TestCase):
         """Set up the resolver class."""
         self.resolver = FunctionResolver([add_one, add_two, add_y])
 
+    def test_contents(self):
+        """Test the functions."""
+        self.assertIn(add_one, set(self.resolver))
+
     def test_lookup(self):
         """Test looking up functions."""
         self.assertEqual(add_one, self.resolver.lookup("add_one"))
