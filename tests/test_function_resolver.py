@@ -8,14 +8,17 @@ from class_resolver import FunctionResolver
 
 
 def add_one(x: int) -> int:
+    """Add one to the number."""
     return x + 1
 
 
 def add_two(x: int) -> int:
+    """Add two to the number."""
     return x + 2
 
 
 def add_y(x: int, y: int) -> int:
+    """Add y to the number."""
     return x + y
 
 

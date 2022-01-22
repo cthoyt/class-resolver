@@ -2,7 +2,6 @@
 
 """Resolve classes."""
 
-import functools
 import inspect
 import logging
 from operator import attrgetter

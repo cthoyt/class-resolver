@@ -3,7 +3,7 @@
 """A resolver for functions."""
 
 from functools import partial
-from typing import Callable, Collection, Generic, Iterable, Mapping, Optional, TypeVar
+from typing import Callable, Collection, Dict, Generic, Iterable, Mapping, Optional, TypeVar
 
 from .api import Hint, OptionalKwargs, normalize_string
 
@@ -21,19 +21,17 @@ class FunctionResolver(Generic[X]):
         self,
         functions: Collection[X],
         *,
-        default: Hint[X] = None,
-        label: str = None,
+        default: Optional[X] = None,
         synonyms: Optional[Mapping[str, X]] = None,
     ) -> None:
         """Initialize the resolver.
 
+        :param functions: The functions to registry.
         :param default: The default
-        :param label: The label
         :param synonyms: The optional synonym dictionary
         """
         self.default = default
-        self.lookup_dict = {}
-        self.label = "" if label is None else " " + label
+        self.lookup_dict: Dict[str, X] = {}
         self.synonyms = dict(synonyms or {})
         for func in functions:
             self.register(func)
@@ -46,7 +44,9 @@ class FunctionResolver(Generic[X]):
             name = str(func)
         return normalize_string(name)
 
-    def register(self, func: X, synonyms: Optional[Iterable[str]] = None, raise_on_conflict: bool = True) -> None:
+    def register(
+        self, func: X, synonyms: Optional[Iterable[str]] = None, raise_on_conflict: bool = True
+    ):
         """Register an additional function with this resolver.
 
         :param func: The function to register
@@ -65,7 +65,7 @@ class FunctionResolver(Generic[X]):
                     f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
                 )
             else:
-                return None
+                return
 
         self.lookup_dict[key] = func
         for synonym in synonyms or []:
@@ -82,10 +82,10 @@ class FunctionResolver(Generic[X]):
         """Lookup a function."""
         if query is None:
             if self.default is None:
-                raise ValueError(f"No default is set")
+                raise ValueError("No default is set")
             return self.default
         elif callable(query):
-            return query
+            return query  # type: ignore
         elif isinstance(query, str):
             key = normalize_string(query)
             if key in self.lookup_dict:
@@ -93,7 +93,9 @@ class FunctionResolver(Generic[X]):
             if key in self.synonyms:
                 return self.synonyms[key]
             else:
-                raise KeyError(f"{query} is an invalid. Try one of: {sorted(self.lookup_dict.keys())}")
+                raise KeyError(
+                    f"{query} is an invalid. Try one of: {sorted(self.lookup_dict.keys())}"
+                )
         else:
             raise TypeError(f"Invalid function: {type(query)} - {query}")
 
@@ -102,6 +104,6 @@ class FunctionResolver(Generic[X]):
         if query is None or isinstance(query, str) or callable(query):
             func: X = self.lookup(query)
             if pos_kwargs or kwargs:
-                func = partial(func, **(pos_kwargs or {}), **kwargs)
+                return partial(func, **(pos_kwargs or {}), **kwargs)  # type: ignore
             return func
         return query

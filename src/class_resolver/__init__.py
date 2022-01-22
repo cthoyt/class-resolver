@@ -18,7 +18,6 @@ from .api import (
     get_subclasses,
     normalize_string,
 )
-
 from .func import FunctionResolver
 
 __all__ = [
