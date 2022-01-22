@@ -100,7 +100,7 @@ class FunctionResolver(Generic[X]):
             elif key in self.synonyms:
                 return self.synonyms[key]
             else:
-                valid_choices = valid_choices = sorted(
+                valid_choices = sorted(
                     set(self.lookup_dict.keys()).union(self.synonyms or [])
                 )
                 raise KeyError(f"{query} is an invalid. Try one of: {valid_choices}")

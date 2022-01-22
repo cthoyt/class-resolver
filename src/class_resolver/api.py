@@ -170,7 +170,7 @@ class Resolver(Generic[X]):
 
         for synonym in synonyms or []:
             synonym_key = self.normalize(synonym)
-            if synonym_key not in self.synonyms:
+            if synonym_key not in self.synonyms and synonym not in self.lookup_dict:
                 self.synonyms[synonym_key] = cls
             elif raise_on_conflict:
                 raise KeyError(
