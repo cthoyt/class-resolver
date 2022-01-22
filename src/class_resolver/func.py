@@ -47,7 +47,12 @@ class FunctionResolver(Generic[X]):
 
     def normalize_func(self, func: X) -> str:
         """Normalize a function to a name."""
-        return normalize_string(func.__name__)
+        return self.normalize_string(func.__name__)
+
+    @staticmethod
+    def normalize_string(s: str) -> str:
+        """Normalize a string."""
+        return normalize_string(s)
 
     def register(
         self, func: X, synonyms: Optional[Iterable[str]] = None, raise_on_conflict: bool = True
@@ -64,24 +69,19 @@ class FunctionResolver(Generic[X]):
             name or a synonym name.
         """
         key = self.normalize_func(func)
-        if key in self.lookup_dict:
-            if raise_on_conflict:
-                raise KeyError(
-                    f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
-                )
-            else:
-                return
+        if key in self.lookup_dict and raise_on_conflict:
+            raise KeyError(
+                f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
+            )
 
         self.lookup_dict[key] = func
         for synonym in synonyms or []:
-            if synonym in self.synonyms:
-                if raise_on_conflict:
-                    raise KeyError(
-                        f"This resolver already contains synonym {synonym} for {self.synonyms[synonym]}"
-                    )
-                else:
-                    continue
-            self.synonyms[synonym] = func
+            if synonym not in self.synonyms:
+                self.synonyms[self.normalize_string(synonym)] = func
+            elif raise_on_conflict:
+                raise KeyError(
+                    f"This resolver already contains synonym {synonym} for {self.synonyms[synonym]}"
+                )
 
     def lookup(self, query: Hint[X]) -> X:
         """Lookup a function."""
@@ -92,7 +92,7 @@ class FunctionResolver(Generic[X]):
         elif callable(query):
             return query  # type: ignore
         elif isinstance(query, str):
-            key = normalize_string(query)
+            key = self.normalize_string(query)
             if key in self.lookup_dict:
                 return self.lookup_dict[key]
             elif key in self.synonyms:

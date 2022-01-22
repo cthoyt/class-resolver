@@ -17,6 +17,11 @@ def add_two(x: int) -> int:
     return x + 2
 
 
+def add_three(x: int) -> int:
+    """Add three to the number."""
+    return x + 3
+
+
 def add_y(x: int, y: int) -> int:
     """Add y to the number."""
     return x + y
@@ -47,6 +52,12 @@ class TestFunctionResolver(unittest.TestCase):
         """Test instances are passed through unmodified."""
         for x in range(10):
             self.assertEqual(add_one(x), self.resolver.make(add_one)(x))
+
+    def test_registration_synonym(self):
+        """Test failure of registration."""
+        self.resolver.register(add_three, synonyms={"add_trio"})
+        for x in range(10):
+            self.assertEqual(add_three(x), self.resolver.make("add_trio")(x))
 
     def test_registration_failure(self):
         """Test failure of registration."""
