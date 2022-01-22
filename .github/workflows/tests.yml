@@ -65,3 +65,8 @@ jobs:
       - name: Test with pytest
         run:
           tox -e py
+      - name: Upload coverage report to codecov
+        uses: codecov/codecov-action@v1
+        if: success()
+        with:
+          file: coverage.xml
