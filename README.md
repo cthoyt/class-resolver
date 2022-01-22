@@ -92,44 +92,48 @@ $ cd class-resolver
 $ pip install -e .
 ```
 
-## ⚖️ License
-
-The code in this package is licensed under the MIT License.
-
 ## 🙏 Contributing
 
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
 [CONTRIBUTING.rst](https://github.com/cthoyt/class-resolver/blob/master/CONTRIBUTING.rst) for more
 information on getting involved.
 
-## 🍪 Cookiecutter Acknowledgement
+## 👋 Attribution
 
-This package was created with [@audreyr](https://github.com/audreyr)'s
-[cookiecutter](https://github.com/cookiecutter/cookiecutter) package
-using [@cthoyt](https://github.com/cthoyt)'s
-[cookiecutter-python-package](https://github.com/cthoyt/cookiecutter-python-package) template.
+### ⚖️ License
 
-## 🛠️ Development
+The code in this package is licensed under the MIT License.
+
+### 🍪 Cookiecutter
+
+This package was created with [@audreyfeldroy](https://github.com/audreyfeldroy)'s
+[cookiecutter](https://github.com/cookiecutter/cookiecutter) package using [@cthoyt](https://github.com/cthoyt)'s
+[cookiecutter-snekpack](https://github.com/cthoyt/cookiecutter-snekpack) template.
+
+## 🛠️ For Developers
+
+<details>
+  <summary>See developer instructions</summary>
+
 
 The final section of the README is for if you want to get involved by making a code contribution.
 
 ### ❓ Testing
 
-After cloning the repository and installing `tox` with `pip install tox`, the unit tests in
-the `tests/` folder can be run reproducibly with:
+After cloning the repository and installing `tox` with `pip install tox`, the unit tests in the `tests/` folder can be
+run reproducibly with:
 
 ```shell
 $ tox
 ```
 
-Additionally, these tests are automatically re-run with each commit in
-a [GitHub Action](https://github.com/cthoyt/class-resolver/actions?query=workflow%3ATests).
+Additionally, these tests are automatically re-run with each commit in a [GitHub Action](https://github.com/{{cookiecutter.github_organization_name}}/{{cookiecutter.github_repository_name}}/actions?query=workflow%3ATests).
 
 ### 📦 Making a Release
 
 After installing the package in development mode and installing
-`tox` with `pip install tox`, the commands for making a new release are contained within
-the `finish` environment in `tox.ini`. Run the following from the shell:
+`tox` with `pip install tox`, the commands for making a new release are contained within the `finish` environment
+in `tox.ini`. Run the following from the shell:
 
 ```shell
 $ tox -e finish
@@ -138,10 +142,11 @@ $ tox -e finish
 This script does the following:
 
 1. Uses BumpVersion to switch the version number in the `setup.cfg` and
-   `src/class_resolver/version.py` to not have the `-dev` suffix
+   `src/{{cookiecutter.package_name}}/version.py` to not have the `-dev` suffix
 2. Packages the code in both a tar archive and a wheel
-3. Uploads to PyPI using `twine`. Be sure to have a `.pypirc` file configured to avoid the need for
-   manual input at this step
+3. Uploads to PyPI using `twine`. Be sure to have a `.pypirc` file configured to avoid the need for manual input at this
+   step
 4. Push to GitHub. You'll need to make a release going with the commit where the version was bumped.
-5. Bump the version to the next patch. If you made big changes and want to bump the version by
-   minor, you can use `tox -e bumpversion minor` after.
+5. Bump the version to the next patch. If you made big changes and want to bump the version by minor, you can
+   use `tox -e bumpversion minor` after.
+</details>
