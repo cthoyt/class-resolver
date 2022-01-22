@@ -9,6 +9,7 @@ from typing import (
     Dict,
     Generic,
     Iterable,
+    Iterator,
     Mapping,
     Optional,
     TypeVar,
@@ -44,6 +45,10 @@ class FunctionResolver(Generic[X]):
         self.synonyms = dict(synonyms or {})
         for func in functions:
             self.register(func)
+
+    def __iter__(self) -> Iterator[X]:
+        """Iterate over the registered functions."""
+        return iter(self.lookup_dict.values())
 
     def normalize_func(self, func: X) -> str:
         """Normalize a function to a name."""
