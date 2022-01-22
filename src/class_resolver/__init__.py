@@ -19,6 +19,8 @@ from .api import (
     normalize_string,
 )
 
+from .func import FunctionResolver
+
 __all__ = [
     # Type Hints
     "InstOrType",
@@ -31,6 +33,7 @@ __all__ = [
     "OptionalKwargs",
     # Classes
     "Resolver",
+    "FunctionResolver",
     # Utilities
     "get_cls",
     "get_subclasses",
