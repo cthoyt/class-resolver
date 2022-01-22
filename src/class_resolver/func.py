@@ -95,7 +95,7 @@ class FunctionResolver(Generic[X]):
             key = normalize_string(query)
             if key in self.lookup_dict:
                 return self.lookup_dict[key]
-            if key in self.synonyms:
+            elif key in self.synonyms:
                 return self.synonyms[key]
             else:
                 raise KeyError(
