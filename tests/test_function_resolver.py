@@ -49,12 +49,12 @@ class TestFunctionResolver(unittest.TestCase):
             self.assertEqual(add_one(x), self.resolver.make(add_one)(x))
 
     def test_registration_failure(self):
-        """Test failure of registration"""
+        """Test failure of registration."""
         with self.assertRaises(KeyError):
             self.resolver.register(add_one)
 
         def _add_one(x: int) -> int:
             return x + 1
-        
+
         with self.assertRaises(KeyError):
             self.resolver.register(_add_one, synonyms={"add_one"})
