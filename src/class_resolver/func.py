@@ -3,7 +3,16 @@
 """A resolver for functions."""
 
 from functools import partial
-from typing import Callable, Collection, Dict, Generic, Iterable, Mapping, Optional, TypeVar
+from typing import (
+    Callable,
+    Collection,
+    Dict,
+    Generic,
+    Iterable,
+    Mapping,
+    Optional,
+    TypeVar,
+)
 
 from .api import Hint, OptionalKwargs, normalize_string
 
