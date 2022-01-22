@@ -18,6 +18,7 @@ from .api import (
     get_subclasses,
     normalize_string,
 )
+from .func import FunctionResolver
 
 __all__ = [
     # Type Hints
@@ -31,6 +32,7 @@ __all__ = [
     "OptionalKwargs",
     # Classes
     "Resolver",
+    "FunctionResolver",
     # Utilities
     "get_cls",
     "get_subclasses",
