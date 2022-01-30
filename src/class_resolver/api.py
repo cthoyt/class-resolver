@@ -114,7 +114,7 @@ class Resolver(Generic[X]):
     lookup_dict: Dict[str, Type[X]]
     #: The mapping from synonyms to the classes indexed by this resolver
     synonyms: Dict[str, Type[X]]
-    #: TODO
+    #: The variable name to look up synonyms in classes that are registered with this resolver
     synonyms_attribute: Optional[str]
 
     def __init__(
