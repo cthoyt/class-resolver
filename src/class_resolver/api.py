@@ -180,6 +180,9 @@ class Resolver(Generic[X]):
 
         self.lookup_dict[key] = cls
         for synonym in _synonyms:
+            if not synonym.strip():
+                raise ValueError(f"Tried to use empty synonym for {cls}")
+
             if synonym in self.synonyms:
                 if raise_on_conflict:
                     raise KeyError(
