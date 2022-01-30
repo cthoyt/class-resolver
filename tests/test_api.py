@@ -40,6 +40,10 @@ class C(Base):
     """C base class."""
 
 
+class D(Base):
+    """D base class."""
+
+
 class AltBase:
     """An alternative base class."""
 
@@ -55,14 +59,29 @@ class TestResolver(unittest.TestCase):
         """Set up the resolver class."""
         self.resolver = Resolver([A, B, C], base=Base)
 
-    def test_lookup(self):
-        """Test looking up classes."""
-        self.assertEqual(A, self.resolver.lookup("a"))
-        self.assertEqual(A, self.resolver.lookup("A"))
+    def test_contents(self):
+        """Test the functions."""
+        self.assertIn(A, set(self.resolver))
 
     def test_iterator(self):
         """Test iterating over classes."""
         self.assertEqual([A, B, C], list(self.resolver))
+
+    def test_lookup(self):
+        """Test looking up classes."""
+        self.assertEqual(A, self.resolver.lookup("a"))
+        self.assertEqual(A, self.resolver.lookup("A"))
+        with self.assertRaises(ValueError):
+            self.resolver.lookup(None)
+        with self.assertRaises(KeyError):
+            self.resolver.lookup("missing")
+        with self.assertRaises(TypeError):
+            self.resolver.lookup(3)
+
+    def test_passthrough(self):
+        """Test instances are passed through unmodified."""
+        a = A(name="charlie")
+        self.assertEqual(a, self.resolver.make(a))
 
     def test_make(self):
         """Test making classes."""
@@ -71,6 +90,24 @@ class TestResolver(unittest.TestCase):
         self.assertEqual(A(name=name), self.resolver.make("a", {"name": name}))
         # Test instantiating with kwargs
         self.assertEqual(A(name=name), self.resolver.make("a", name=name))
+
+    def test_make_safe(self):
+        """Test the make_safe function, which always returns none on none input."""
+        self.assertIsNone(self.resolver.make_safe(None))
+        self.assertIsNone(Resolver.from_subclasses(Base, default=A).make_safe(None))
+
+    def test_registration_synonym(self):
+        """Test failure of registration."""
+        self.resolver.register(D, synonyms={"dope"})
+        name = "charlie"
+        self.assertEqual(D(name=name), self.resolver.make("d", name=name))
+
+    def test_registration_failure(self):
+        """Test failure of registration."""
+        with self.assertRaises(KeyError):
+            self.resolver.register(A)
+        with self.assertRaises(KeyError):
+            self.resolver.register(D, synonyms={"a"})
 
     def test_make_from_kwargs(self):
         """Test making classes from kwargs."""
@@ -88,11 +125,6 @@ class TestResolver(unittest.TestCase):
                 ),
             ),
         )
-
-    def test_passthrough(self):
-        """Test instances are passed through unmodified."""
-        a = A(name="charlie")
-        self.assertEqual(a, self.resolver.make(a))
 
     @unittest.skipIf(tune is None, "ray[tune] was not installed properly")
     def test_variant_generation(self):

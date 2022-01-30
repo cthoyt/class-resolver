@@ -166,13 +166,12 @@ class Resolver(Generic[X]):
             name or a synonym name.
         """
         key = self.normalize_cls(cls)
-        if key in self.lookup_dict:
-            if raise_on_conflict:
-                raise KeyError(
-                    f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
-                )
-            else:
-                return
+        if key not in self.lookup_dict:
+            self.lookup_dict[key] = cls
+        elif raise_on_conflict:
+            raise KeyError(
+                f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
+            )
 
         _synonyms = set(synonyms or [])
         if self.synonyms_attribute is not None:
@@ -182,15 +181,13 @@ class Resolver(Generic[X]):
         for synonym in _synonyms:
             if not synonym.strip():
                 raise ValueError(f"Tried to use empty synonym for {cls}")
-
-            if synonym in self.synonyms:
-                if raise_on_conflict:
-                    raise KeyError(
-                        f"This resolver already contains synonym {synonym} for {self.synonyms[synonym]}"
-                    )
-                else:
-                    continue
-            self.synonyms[synonym] = cls
+            synonym_key = self.normalize(synonym)
+            if synonym_key not in self.synonyms and synonym not in self.lookup_dict:
+                self.synonyms[synonym_key] = cls
+            elif raise_on_conflict:
+                raise KeyError(
+                    f"This resolver already contains synonym {synonym} for {self.synonyms[synonym]}"
+                )
 
     def __iter__(self) -> Iterator[Type[X]]:
         """Return an iterator over the indexed classes sorted by name."""
@@ -279,6 +276,17 @@ class Resolver(Generic[X]):
 
         # An instance was passed, and it will go through without modification.
         return query
+
+    def make_safe(
+        self,
+        query: HintOrType[X],
+        pos_kwargs: Optional[Mapping[str, Any]] = None,
+        **kwargs,
+    ) -> Optional[X]:
+        """Run make, but pass through a none query."""
+        if query is None:
+            return None
+        return self.make(query=query, pos_kwargs=pos_kwargs, **kwargs)
 
     def make_from_kwargs(
         self,
@@ -439,12 +447,13 @@ def get_cls(
         key = normalize_string(query, suffix=suffix)
         if key in lookup_dict:
             return lookup_dict[key]
-        if lookup_dict_synonyms is not None and key in lookup_dict_synonyms:
+        elif lookup_dict_synonyms is not None and key in lookup_dict_synonyms:
             return lookup_dict_synonyms[key]
-        valid_choices = sorted(set(lookup_dict.keys()).union(lookup_dict_synonyms or []))
-        raise ValueError(
-            f"Invalid {base.__name__} name: {query}. Valid choices are: {valid_choices}"
-        )
+        else:
+            valid_choices = sorted(set(lookup_dict.keys()).union(lookup_dict_synonyms or []))
+            raise KeyError(
+                f"Invalid {base.__name__} name: {query}. Valid choices are: {valid_choices}"
+            )
     elif issubclass(query, base):
         return query
     raise TypeError(f"Not subclass of {base.__name__}: {query}")
