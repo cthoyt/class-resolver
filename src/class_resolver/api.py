@@ -114,6 +114,8 @@ class Resolver(Generic[X]):
     lookup_dict: Dict[str, Type[X]]
     #: The mapping from synonyms to the classes indexed by this resolver
     synonyms: Dict[str, Type[X]]
+    #: The variable name to look up synonyms in classes that are registered with this resolver
+    synonyms_attribute: Optional[str]
 
     def __init__(
         self,
@@ -123,6 +125,7 @@ class Resolver(Generic[X]):
         default: Optional[Type[X]] = None,
         suffix: Optional[str] = None,
         synonyms: Optional[Mapping[str, Type[X]]] = None,
+        synonym_attribute: Optional[str] = "synonyms",
     ) -> None:
         """Initialize the resolver.
 
@@ -132,12 +135,15 @@ class Resolver(Generic[X]):
         :param suffix: The optional shared suffix of all classes. If None, use the base class' name for it. To disable
             this behaviour, explicitly provide `suffix=""`.
         :param synonyms: The optional synonym dictionary
+        :param synonym_attribute: The attribute to look in each class for synonyms. Explicitly set to None
+            to turn off synonym lookup.
         """
         self.base = base
         self.default = default
         if suffix is None:
             suffix = normalize_string(base.__name__)
         self.suffix = suffix
+        self.synonyms_attribute = synonym_attribute
         self.synonyms = dict(synonyms or {})
         self.lookup_dict = {}
         for cls in classes:
@@ -159,6 +165,7 @@ class Resolver(Generic[X]):
 
         :raises KeyError: If ``raise_on_conflict`` is true and there's a conflict in either the class
             name or a synonym name.
+        :raises ValueError: If any given synonyms (either explicitly or by class lookup) are empty strings
         """
         key = self.normalize_cls(cls)
         if key not in self.lookup_dict:
@@ -168,8 +175,15 @@ class Resolver(Generic[X]):
                 f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
             )
 
-        for synonym in synonyms or []:
+        _synonyms = set(synonyms or [])
+        if self.synonyms_attribute is not None:
+            _synonyms.update(getattr(cls, self.synonyms_attribute, []))
+
+        self.lookup_dict[key] = cls
+        for synonym in _synonyms:
             synonym_key = self.normalize(synonym)
+            if not synonym_key:
+                raise ValueError(f"Tried to use empty synonym for {cls}")
             if synonym_key not in self.synonyms and synonym not in self.lookup_dict:
                 self.synonyms[synonym_key] = cls
             elif raise_on_conflict:
@@ -452,7 +466,7 @@ def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
     s = s.lower().replace("-", "").replace("_", "").replace(" ", "")
     if suffix is not None and s.endswith(suffix.lower()):
         return s[: -len(suffix)]
-    return s
+    return s.strip()
 
 
 def _make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Parameter", X], Y]:
