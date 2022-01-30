@@ -177,7 +177,7 @@ class Resolver(Generic[X]):
 
         _synonyms = set(synonyms or [])
         if self.synonyms_attribute is not None:
-            _synonyms.update(getattr(cls, self.synonyms_attribute, []))
+            _synonyms.update(getattr(cls, self.synonyms_attribute, None) or [])
 
         self.lookup_dict[key] = cls
         for synonym in _synonyms:
