@@ -165,6 +165,7 @@ class Resolver(Generic[X]):
 
         :raises KeyError: If ``raise_on_conflict`` is true and there's a conflict in either the class
             name or a synonym name.
+        :raises ValueError: If any given synonyms (either explicitly or by class lookup) are empty strings
         """
         key = self.normalize_cls(cls)
         if key not in self.lookup_dict:
@@ -180,9 +181,9 @@ class Resolver(Generic[X]):
 
         self.lookup_dict[key] = cls
         for synonym in _synonyms:
-            if not synonym.strip():
-                raise ValueError(f"Tried to use empty synonym for {cls}")
             synonym_key = self.normalize(synonym)
+            if not synonym_key:
+                raise ValueError(f"Tried to use empty synonym for {cls}")
             if synonym_key not in self.synonyms and synonym not in self.lookup_dict:
                 self.synonyms[synonym_key] = cls
             elif raise_on_conflict:
@@ -465,7 +466,7 @@ def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
     s = s.lower().replace("-", "").replace("_", "").replace(" ", "")
     if suffix is not None and s.endswith(suffix.lower()):
         return s[: -len(suffix)]
-    return s
+    return s.strip()
 
 
 def _make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Parameter", X], Y]:
