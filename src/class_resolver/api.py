@@ -135,7 +135,8 @@ class Resolver(Generic[X]):
         :param suffix: The optional shared suffix of all classes. If None, use the base class' name for it. To disable
             this behaviour, explicitly provide `suffix=""`.
         :param synonyms: The optional synonym dictionary
-        :param synonym_attribute: The attribute to look in each class for synonyms
+        :param synonym_attribute: The attribute to look in each class for synonyms. Explicitly set to None
+            to turn off synonym lookup.
         """
         self.base = base
         self.default = default

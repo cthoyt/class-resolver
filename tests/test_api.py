@@ -4,6 +4,7 @@
 
 import itertools
 import unittest
+from typing import ClassVar, Collection
 
 import click
 from click.testing import CliRunner, Result
@@ -30,6 +31,8 @@ class Base:
 
 class A(Base):
     """A base class."""
+
+    synonyms: ClassVar[Collection[str]] = {"a_synonym_1", "a_synonym_2"}
 
 
 class B(Base):
@@ -71,6 +74,8 @@ class TestResolver(unittest.TestCase):
         """Test looking up classes."""
         self.assertEqual(A, self.resolver.lookup("a"))
         self.assertEqual(A, self.resolver.lookup("A"))
+        self.assertEqual(A, self.resolver.lookup("a_synonym_1"))
+        self.assertEqual(A, self.resolver.lookup("a_synonym_2"))
         with self.assertRaises(ValueError):
             self.resolver.lookup(None)
         with self.assertRaises(KeyError):
@@ -98,9 +103,16 @@ class TestResolver(unittest.TestCase):
 
     def test_registration_synonym(self):
         """Test failure of registration."""
+        self.assertNotIn(D, self.resolver.lookup_dict.values())
         self.resolver.register(D, synonyms={"dope"})
         name = "charlie"
         self.assertEqual(D(name=name), self.resolver.make("d", name=name))
+
+    def test_registration_synonym_failure(self):
+        """Test failure of registration."""
+        self.assertNotIn(D, self.resolver.lookup_dict.values())
+        with self.assertRaises(ValueError):
+            self.resolver.register(D, synonyms={""})
 
     def test_registration_failure(self):
         """Test failure of registration."""
