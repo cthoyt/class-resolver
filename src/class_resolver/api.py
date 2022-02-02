@@ -346,7 +346,7 @@ class Resolver(Generic[X]):
     @property
     def options(self) -> Set[str]:
         """Return the normalized option names."""
-        return set(self.lookup_dict.keys())
+        return set(self.lookup_dict.keys()).union(self.synonyms.keys())
 
     @property
     def classes(self) -> Set[Type[X]]:
