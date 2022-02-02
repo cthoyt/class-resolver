@@ -2,6 +2,7 @@
 
 """Resolve classes."""
 
+import collections.abc
 import inspect
 import logging
 from operator import attrgetter
@@ -15,8 +16,10 @@ from typing import (
     Generic,
     Iterable,
     Iterator,
+    List,
     Mapping,
     Optional,
+    Sequence,
     Set,
     Type,
     TypeVar,
@@ -63,6 +66,7 @@ HintType = Hint[Type[X]]
 HintOrType = Hint[InstOrType[X]]
 
 OptionalKwargs = Optional[Mapping[str, Any]]
+OneOrSequence = Union[X, Sequence[X]]
 
 logger = logging.getLogger(__name__)
 
@@ -414,6 +418,52 @@ class Resolver(Generic[X]):
             **kwargs_search_space,
         )
 
+    def make_many(
+        self,
+        queries: Optional[OneOrSequence[HintType[X]]] = None,
+        kwargs: Optional[OneOrSequence[OptionalKwargs]] = None,
+    ) -> List[X]:
+        """Resolve and compose several queries together.
+
+        :param queries: Either none (will result in the default X),
+            a single X (as either a class, instance, or string for class name), or a list
+            of X's (as either a class, instance, or string for class name
+        :param kwargs: Either none (will use all defaults), a single dictionary
+            (will be used for all instances), or a list of dictionaries with the same length
+            as ``queries``
+        :raises ValueError: If the number of queries and kwargs has a mismatch
+        :returns: A list of X instances
+        """
+        _query_list: Sequence[HintType[X]]
+        _kwargs_list: Sequence[Optional[Mapping[str, Any]]]
+
+        # Prepare the query list
+        if queries is not None:
+            _query_list = upgrade_to_sequence(queries)
+        elif self.default is None:
+            raise ValueError
+        else:
+            _query_list = [self.default]
+
+        # Prepare the keyword arguments list
+        if kwargs is None:
+            _kwargs_list = [None] * len(_query_list)
+        else:
+            _kwargs_list = upgrade_to_sequence(kwargs)
+
+        if 1 == len(_query_list) and 1 < len(_kwargs_list):
+            _query_list = list(_query_list) * len(_kwargs_list)
+        if 0 < len(_kwargs_list) and 0 == len(_query_list):
+            raise ValueError("Keyword arguments were given but no query")
+        elif 1 == len(_kwargs_list) == 1 and 1 < len(_query_list):
+            _kwargs_list = list(_kwargs_list) * len(_query_list)
+        elif len(_kwargs_list) != len(_query_list):
+            raise ValueError("Mismatch in number number of queries and kwargs")
+        return [
+            self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs)
+            for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
+        ]
+
 
 def _not_hint(x: Any) -> bool:
     return x is not None and not isinstance(x, (str, type))
@@ -474,3 +524,26 @@ def _make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Par
         return f(value)
 
     return _callback
+
+
+def upgrade_to_sequence(x: Union[X, Sequence[X]]) -> Sequence[X]:
+    """Ensure that the input is a sequence.
+
+    :param x: A literal or sequence of literals (don't consider a string x as a sequence)
+    :return: If a literal was given, a one element tuple with it in it. Otherwise, return the given value.
+
+    >>> upgrade_to_sequence(1)
+    (1,)
+    >>> upgrade_to_sequence((1, 2, 3))
+    (1, 2, 3)
+    >>> upgrade_to_sequence("test")
+    ('test',)
+    >>> upgrade_to_sequence(tuple("test"))
+    ('t', 'e', 's', 't')
+    """
+    if isinstance(x, str):
+        return (x,)  # type: ignore
+    elif isinstance(x, collections.abc.Sequence):
+        return x
+    else:
+        return (x,)
