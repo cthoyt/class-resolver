@@ -4,7 +4,7 @@
 
 import itertools
 import unittest
-from typing import ClassVar, Collection
+from typing import ClassVar, Collection, Optional
 
 import click
 from click.testing import CliRunner, Result
@@ -20,7 +20,7 @@ except ImportError:
 class Base:
     """A base class."""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         """Initialize the class."""
         self.name = name
 
@@ -47,6 +47,14 @@ class D(Base):
     """D base class."""
 
 
+class E(Base):
+    """E base class."""
+
+    def __init__(self, name: Optional[str] = None):
+        """Initialize the class."""
+        super().__init__(name or "default_name")
+
+
 class AltBase:
     """An alternative base class."""
 
@@ -60,7 +68,7 @@ class TestResolver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up the resolver class."""
-        self.resolver = Resolver([A, B, C], base=Base)
+        self.resolver = Resolver([A, B, C, E], base=Base)
 
     def test_contents(self):
         """Test the functions."""
@@ -68,7 +76,7 @@ class TestResolver(unittest.TestCase):
 
     def test_iterator(self):
         """Test iterating over classes."""
-        self.assertEqual([A, B, C], list(self.resolver))
+        self.assertEqual([A, B, C, E], list(self.resolver))
 
     def test_lookup(self):
         """Test looking up classes."""
@@ -231,7 +239,13 @@ class TestResolver(unittest.TestCase):
         instances = self.resolver.make_many("a", dict(name="name"))
         self.assertEqual([A(name="name")], instances)
 
+        instances = self.resolver.make_many("a", [dict(name="name")])
+        self.assertEqual([A(name="name")], instances)
+
         instances = self.resolver.make_many(["a"], dict(name="name"))
+        self.assertEqual([A(name="name")], instances)
+
+        instances = self.resolver.make_many(["a"], [dict(name="name")])
         self.assertEqual([A(name="name")], instances)
 
         instances = self.resolver.make_many(["a", "b", "c"], dict(name="name"))
@@ -241,3 +255,23 @@ class TestResolver(unittest.TestCase):
             ["a", "b", "c"], [dict(name="name1"), dict(name="name2"), dict(name="name3")]
         )
         self.assertEqual([A(name="name1"), B(name="name2"), C(name="name3")], instances)
+
+        # When dealing with no kwargs
+        instances = self.resolver.make_many("e")
+        self.assertEqual([E()], instances)
+
+        instances = self.resolver.make_many(["e"])
+        self.assertEqual([E()], instances)
+
+        instances = self.resolver.make_many("e", None)
+        self.assertEqual([E()], instances)
+
+        instances = self.resolver.make_many(["e"], None)
+        self.assertEqual([E()], instances)
+
+        instances = self.resolver.make_many(["e"], [None])
+        self.assertEqual([E()], instances)
+
+        resolver = Resolver.from_subclasses(Base, default=A)
+        instances = resolver.make_many(None, dict(name="name"))
+        self.assertEqual([A(name="name")], instances)
