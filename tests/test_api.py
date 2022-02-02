@@ -248,6 +248,12 @@ class TestResolver(unittest.TestCase):
         instances = self.resolver.make_many(["a"], [dict(name="name")])
         self.assertEqual([A(name="name")], instances)
 
+        # Single class, multiple kwargs
+        instances = self.resolver.make_many("a", [dict(name="name1"), dict(name="name2")])
+        self.assertEqual([A(name="name1"), A(name="name2")], instances)
+        instances = self.resolver.make_many(["a"], [dict(name="name1"), dict(name="name2")])
+        self.assertEqual([A(name="name1"), A(name="name2")], instances)
+
         instances = self.resolver.make_many(["a", "b", "c"], dict(name="name"))
         self.assertEqual([A(name="name"), B(name="name"), C(name="name")], instances)
 
