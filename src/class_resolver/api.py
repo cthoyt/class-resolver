@@ -2,7 +2,7 @@
 
 """Resolve classes."""
 
-import collections
+import collections.abc
 import inspect
 import logging
 from operator import attrgetter
@@ -541,7 +541,7 @@ def upgrade_to_sequence(x: Union[X, Sequence[X]]) -> Sequence[X]:
     """
     if isinstance(x, str):
         return (x,)  # type: ignore
-    elif isinstance(x, collections.Sequence):
+    elif isinstance(x, collections.abc.Sequence):
         return x
     else:
         return (x,)
