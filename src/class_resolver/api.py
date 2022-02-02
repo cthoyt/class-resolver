@@ -451,6 +451,8 @@ class Resolver(Generic[X]):
         else:
             _kwargs_list = upgrade_to_sequence(kwargs)
 
+        if 1 == len(_query_list) and 1 < len(_kwargs_list):
+            _query_list = list(_query_list) * len(_kwargs_list)
         if 0 < len(_kwargs_list) and 0 == len(_query_list):
             raise ValueError("Keyword arguments were given but no query")
         elif 1 == len(_kwargs_list) == 1 and 1 < len(_query_list):

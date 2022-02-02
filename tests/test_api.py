@@ -230,10 +230,6 @@ class TestResolver(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             # wrong number of kwargs is given
-            self.resolver.make_many(["a"], [{}, {}])
-
-        with self.assertRaises(ValueError):
-            # wrong number of kwargs is given
             self.resolver.make_many(["a", "a", "a"], [{}, {}])
 
         # One class, one kwarg
