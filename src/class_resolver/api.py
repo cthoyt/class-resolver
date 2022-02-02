@@ -431,6 +431,7 @@ class Resolver(Generic[X]):
         :param kwargs: Either none (will use all defaults), a single dictionary
             (will be used for all instances), or a list of dictionaries with the same length
             as ``queries``
+        :raises ValueError: If the number of queries and kwargs has a mismatch
         :returns: A list of X instances
         """
         _query_list: Sequence[HintType[X]]

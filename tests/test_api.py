@@ -209,3 +209,35 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(UnexpectedKeywordError) as e:
             resolver.make("A", nope="nopppeeee")
             self.assertEqual("AAltBase did not expect any keyword arguments", str(e))
+
+    def test_make_many(self):
+        """Test the make_many function."""
+        with self.assertRaises(ValueError):
+            # no default is given
+            self.resolver.make_many(None)
+
+        with self.assertRaises(ValueError):
+            # wrong number of kwargs is given
+            self.resolver.make_many([], [{}, {}])
+
+        with self.assertRaises(ValueError):
+            # wrong number of kwargs is given
+            self.resolver.make_many(["a"], [{}, {}])
+
+        with self.assertRaises(ValueError):
+            # wrong number of kwargs is given
+            self.resolver.make_many(["a", "a", "a"], [{}, {}])
+
+        instances = self.resolver.make_many("a", dict(name="name"))
+        self.assertEqual([A(name="name")], instances)
+
+        instances = self.resolver.make_many(["a"], dict(name="name"))
+        self.assertEqual([A(name="name")], instances)
+
+        instances = self.resolver.make_many(["a", "b", "c"], dict(name="name"))
+        self.assertEqual([A(name="name"), B(name="name"), C(name="name")], instances)
+
+        instances = self.resolver.make_many(
+            ["a", "b", "c"], [dict(name="name1"), dict(name="name2"), dict(name="name3")]
+        )
+        self.assertEqual([A(name="name1"), B(name="name2"), C(name="name3")], instances)
