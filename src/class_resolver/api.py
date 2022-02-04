@@ -493,7 +493,7 @@ def get_cls(
         if default is None:
             raise ValueError(f"No default {base.__name__} set")
         return default
-    elif not isinstance(query, (str, type)):
+    elif not isinstance(query, (str, type, base)):
         raise TypeError(f"Invalid {base.__name__} type: {type(query)} - {query}")
     elif isinstance(query, str):
         key = normalize_string(query, suffix=suffix)
@@ -506,6 +506,8 @@ def get_cls(
             raise KeyError(
                 f"Invalid {base.__name__} name: {query}. Valid choices are: {valid_choices}"
             )
+    elif isinstance(query, base):
+        return query.__class__
     elif issubclass(query, base):
         return query
     raise TypeError(f"Not subclass of {base.__name__}: {query}")
