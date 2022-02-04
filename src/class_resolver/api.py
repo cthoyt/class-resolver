@@ -242,7 +242,7 @@ class Resolver(Generic[X]):
         """Normalize the string with this resolve's suffix."""
         return normalize_string(s, suffix=self.suffix)
 
-    def lookup(self, query: Hint[Type[X]], default: Optional[Type[X]] = None) -> Type[X]:
+    def lookup(self, query: HintOrType[X], default: Optional[Type[X]] = None) -> Type[X]:
         """Lookup a class."""
         return get_cls(
             query,
@@ -481,7 +481,7 @@ def get_subclasses(cls: Type[X]) -> Iterable[Type[X]]:
 
 
 def get_cls(
-    query: Union[None, str, Type[X]],
+    query: HintOrType[X],
     base: Type[X],
     lookup_dict: Mapping[str, Type[X]],
     lookup_dict_synonyms: Optional[Mapping[str, Type[X]]] = None,
@@ -493,7 +493,7 @@ def get_cls(
         if default is None:
             raise ValueError(f"No default {base.__name__} set")
         return default
-    elif not isinstance(query, (str, type)):
+    elif not isinstance(query, (str, type, base)):
         raise TypeError(f"Invalid {base.__name__} type: {type(query)} - {query}")
     elif isinstance(query, str):
         key = normalize_string(query, suffix=suffix)
@@ -506,7 +506,9 @@ def get_cls(
             raise KeyError(
                 f"Invalid {base.__name__} name: {query}. Valid choices are: {valid_choices}"
             )
-    elif issubclass(query, base):
+    elif isinstance(query, base):
+        return query.__class__
+    elif isinstance(query, type) and issubclass(query, base):
         return query
     raise TypeError(f"Not subclass of {base.__name__}: {query}")
 
