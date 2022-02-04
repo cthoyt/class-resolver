@@ -481,7 +481,7 @@ def get_subclasses(cls: Type[X]) -> Iterable[Type[X]]:
 
 
 def get_cls(
-    query: Union[None, str, Type[X]],
+    query: HintOrType[X],
     base: Type[X],
     lookup_dict: Mapping[str, Type[X]],
     lookup_dict_synonyms: Optional[Mapping[str, Type[X]]] = None,
@@ -508,7 +508,7 @@ def get_cls(
             )
     elif isinstance(query, base):
         return query.__class__
-    elif issubclass(query, base):
+    elif isinstance(query, type) and issubclass(query, base):
         return query
     raise TypeError(f"Not subclass of {base.__name__}: {query}")
 
