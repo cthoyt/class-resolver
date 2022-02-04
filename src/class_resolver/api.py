@@ -337,7 +337,7 @@ class Resolver(Generic[X]):
         return click.option(
             *flags,
             type=click.Choice(list(self.lookup_dict), case_sensitive=False),
-            default=default,
+            default=[default] if kwargs.get("multiple") else default,
             show_default=True,
             callback=None if as_string else _make_callback(self.lookup),
             **kwargs,
