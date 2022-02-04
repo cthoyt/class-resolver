@@ -90,6 +90,7 @@ class TestResolver(unittest.TestCase):
             self.resolver.lookup("missing")
         with self.assertRaises(TypeError):
             self.resolver.lookup(3)
+        self.assertEqual(self.resolver.lookup(A(name="max")), A)
 
     def test_passthrough(self):
         """Test instances are passed through unmodified."""
