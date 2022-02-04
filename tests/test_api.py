@@ -4,7 +4,7 @@
 
 import itertools
 import unittest
-from typing import ClassVar, Collection, Optional
+from typing import ClassVar, Collection, Optional, Sequence
 
 import click
 from click.testing import CliRunner, Result
@@ -204,6 +204,20 @@ class TestResolver(unittest.TestCase):
             """Run the test CLI."""
             self.assertIsInstance(opt, str)
             click.echo(self.resolver.lookup(opt).__name__, nl=False)
+
+        self._test_cli(cli)
+
+    def test_click_option_multiple(self):
+        """Test the click option with multiple arguments."""
+
+        @click.command()
+        @self.resolver.get_option("--opt", default="a", as_string=True, multiple=True)
+        def cli(opt):
+            """Run the test CLI."""
+            self.assertIsInstance(opt, Sequence)
+            for opt_ in opt:
+                self.assertIsInstance(opt_, str)
+                click.echo(self.resolver.lookup(opt_).__name__, nl=False)
 
         self._test_cli(cli)
 
