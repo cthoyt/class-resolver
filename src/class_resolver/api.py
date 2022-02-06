@@ -22,6 +22,7 @@ from .utils import (
 __all__ = [
     # Type Hints
     # Classes
+    "ClassResolver",
     "Resolver",
     # Utilities
     "get_cls",
@@ -71,7 +72,7 @@ MISSING_ARGS = [
 ]
 
 
-class Resolver(BaseResolver[Type[X], X]):
+class ClassResolver(BaseResolver[Type[X], X]):
     """Resolve from a list of classes."""
 
     #: The base class
@@ -131,7 +132,7 @@ class Resolver(BaseResolver[Type[X], X]):
     @classmethod
     def from_subclasses(
         cls, base: Type[X], *, skip: Optional[Collection[Type[X]]] = None, **kwargs
-    ) -> "Resolver":
+    ) -> "ClassResolver":
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
@@ -327,6 +328,10 @@ class Resolver(BaseResolver[Type[X], X]):
             self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs)
             for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
         ]
+
+
+#: An alias to ClassResolver for backwards compatibility
+Resolver = ClassResolver
 
 
 def get_cls(

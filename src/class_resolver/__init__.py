@@ -2,7 +2,13 @@
 
 """Lookup and instantiate classes with style."""
 
-from .api import KeywordArgumentError, Resolver, UnexpectedKeywordError, get_cls
+from .api import (
+    ClassResolver,
+    KeywordArgumentError,
+    Resolver,
+    UnexpectedKeywordError,
+    get_cls,
+)
 from .base import (
     RegistrationError,
     RegistrationNameConflict,
@@ -34,6 +40,7 @@ __all__ = [
     "OptionalKwargs",
     # Classes
     "Resolver",
+    "ClassResolver",
     "FunctionResolver",
     # Utilities
     "get_cls",
