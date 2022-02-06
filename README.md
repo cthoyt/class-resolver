@@ -194,14 +194,15 @@ This is pretty good, but it still has a few issues:
    (error-prone) in any place that creates an MLP
 5. you have to re-write this logic for all of your classes
 
-Enter the `class_resolver` package, which takes care of all four of these
+Enter the `class_resolver` package, which takes care of all of these
 things using the following:
 
 ```python
-from torch import nn
 from itertools import chain
-from more_itertools import pairwise
+
 from class_resolver import ClassResolver, Hint
+from more_itertools import pairwise
+from torch import nn
 
 activation_resolver = ClassResolver(
     [nn.ReLU, nn.Tanh, nn.Hardtanh],
@@ -210,11 +211,43 @@ activation_resolver = ClassResolver(
 )
 
 class MLP(nn.Sequential):
-    def __init__(self, dims: list[int], activation: Hint[nn.Module] = None):
+    def __init__(
+        self, 
+        dims: list[int], 
+        activation: Hint[nn.Module] = None,
+        activation_kwargs: None | dict[str, any] = None,
+    ):
         super().__init__(chain.from_iterable(
             (
                 nn.Linear(in_features, out_features),
-                activation_resolver.make(activation),
+                activation_resolver.make(activation, activation_kwargs),
+            )
+            for in_features, out_features in pairwise(dims)
+        ))
+```
+
+Because this is such a common pattern, we've made it available through contrib
+module in `class_resolver.contrib.torch`:
+
+```python
+from itertools import chain
+
+from class_resolver import Hint
+from class_resolver.contrib.torch import activation_resolver
+from more_itertools import pairwise
+from torch import nn
+
+class MLP(nn.Sequential):
+    def __init__(
+        self, 
+        dims: list[int], 
+        activation: Hint[nn.Module] = None,
+        activation_kwargs: None | dict[str, any] = None,
+    ):
+        super().__init__(chain.from_iterable(
+            (
+                nn.Linear(in_features, out_features),
+                activation_resolver.make(activation, activation_kwargs),
             )
             for in_features, out_features in pairwise(dims)
         ))
