@@ -16,6 +16,7 @@ __all__ = [
     "initializer_resolver",
 ]
 
+#: A resolver for :class:`torch.optim.Optimizer` classes
 optimizer_resolver = Resolver.from_subclasses(
     Optimizer,
     default=Adam,
@@ -23,9 +24,11 @@ optimizer_resolver = Resolver.from_subclasses(
 )
 
 ACTIVATION_SKIP = {
-    nn.MultiheadAttention,
-    nn.Softmax2d,
+    activation.MultiheadAttention,
+    activation.Softmax2d,
 }
+
+#: A resolver for :mod:`torch.nn.modules.activation` classes
 activation_resolver = Resolver(
     classes=[
         module
@@ -35,10 +38,11 @@ activation_resolver = Resolver(
         and module not in ACTIVATION_SKIP
     ],
     base=nn.Module,
-    default=nn.ReLU,
+    default=activation.ReLU,
     base_as_suffix=False,
 )
 
+#: A resolver for :mod:`torch.nn.init` functions
 initializer_resolver = FunctionResolver(
     [func for name, func in vars(init).items() if not name.startswith("_") and name.endswith("_")],
     default=init.normal_,
