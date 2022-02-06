@@ -22,7 +22,7 @@ class TestTorch(unittest.TestCase):
 
         self.assertEqual(Softplus, activation_resolver.lookup("softplus"))
         self.assertEqual(ReLU, activation_resolver.lookup("relu"))
-        self.assertEqual(ReLU, activation_resolver.lookup())
+        self.assertEqual(ReLU, activation_resolver.lookup(None))
 
     def test_optimizer(self):
         """Tests for the optimizer resolver."""
@@ -32,7 +32,7 @@ class TestTorch(unittest.TestCase):
 
         self.assertEqual(Adagrad, optimizer_resolver.lookup("adagrad"))
         self.assertEqual(Adam, optimizer_resolver.lookup("adam"))
-        self.assertEqual(Adam, optimizer_resolver.lookup())
+        self.assertEqual(Adam, optimizer_resolver.lookup(None))
 
     def test_initializer(self):
         """Tests for the initializer function resolver."""
@@ -40,4 +40,6 @@ class TestTorch(unittest.TestCase):
 
         from class_resolver.contrib.torch import initializer_resolver
 
-        self.assertEqual(xavier_normal_, initializer_resolver.lookup("xavier_normalize_"))
+        self.assertEqual(xavier_normal_, initializer_resolver.lookup("xavier_normal_"))
+        self.assertEqual(xavier_normal_, initializer_resolver.lookup("xavier_normal"))
+        self.assertEqual(xavier_normal_, initializer_resolver.lookup("xaviernormal"))
