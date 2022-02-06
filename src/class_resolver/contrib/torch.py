@@ -7,7 +7,7 @@ from torch.nn import init
 from torch.nn.modules import activation
 from torch.optim import Adam, Optimizer
 
-from ..api import Resolver
+from ..api import ClassResolver
 from ..func import FunctionResolver
 
 __all__ = [
@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 #: A resolver for :class:`torch.optim.Optimizer` classes
-optimizer_resolver = Resolver.from_subclasses(
+optimizer_resolver = ClassResolver.from_subclasses(
     Optimizer,
     default=Adam,
     base_as_suffix=False,
@@ -29,7 +29,7 @@ ACTIVATION_SKIP = {
 }
 
 #: A resolver for :mod:`torch.nn.modules.activation` classes
-activation_resolver = Resolver(
+activation_resolver = ClassResolver(
     classes=[
         module
         for module in vars(activation).values()

@@ -43,7 +43,7 @@ Lookup and instantiate classes with style.
 ## 💪 Getting Started
 
 ```python
-from class_resolver import Resolver
+from class_resolver import ClassResolver
 from dataclasses import dataclass
 
 class Base: pass
@@ -57,7 +57,7 @@ class B(Base):
    name: str
 
 # Index
-resolver = Resolver([A, B], base=Base)
+resolver = ClassResolver([A, B], base=Base)
 
 # Lookup
 assert A == resolver.lookup('A')
