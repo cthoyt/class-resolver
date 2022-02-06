@@ -35,6 +35,7 @@ class RegistrationError(KeyError, Generic[X], ABC):
         self.key = key
         self.proposed = proposed
         self.label = label
+        self.existing = self._get_existing()
 
     @abstractmethod
     def _get_existing(self):
@@ -44,7 +45,7 @@ class RegistrationError(KeyError, Generic[X], ABC):
         """Coerce the registration error to a string."""
         return (
             f"Conflict on registration of {self.label} {self.key}:\n"
-            f"Existing: {self._get_existing()}\n"
+            f"Existing: {self.existing}\n"
             f"Proposed: {self.proposed}"
         )
 
@@ -163,9 +164,9 @@ class BaseResolver(ABC, Generic[X, Y]):
             if synonym_key not in self.synonyms and synonym_key not in self.lookup_dict:
                 self.synonyms[synonym_key] = element
             elif synonym_key in self.lookup_dict and raise_on_conflict:
-                raise RegistrationNameConflict(self, synonym, element, label="synonym")
+                raise RegistrationNameConflict(self, synonym_key, element, label="synonym")
             elif synonym_key in self.synonyms and raise_on_conflict:
-                raise RegistrationSynonymConflict(self, key, element, label="synonym")
+                raise RegistrationSynonymConflict(self, synonym_key, element, label="synonym")
 
     @abstractmethod
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
