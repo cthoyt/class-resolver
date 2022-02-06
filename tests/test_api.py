@@ -9,7 +9,12 @@ from typing import ClassVar, Collection, Optional, Sequence
 import click
 from click.testing import CliRunner, Result
 
-from class_resolver import Resolver, UnexpectedKeywordError
+from class_resolver import (
+    RegistrationNameConflict,
+    RegistrationSynonymConflict,
+    Resolver,
+    UnexpectedKeywordError,
+)
 
 try:
     import ray.tune as tune
@@ -131,18 +136,39 @@ class TestResolver(unittest.TestCase):
         name = "charlie"
         self.assertEqual(D(name=name), self.resolver.make("d", name=name))
 
-    def test_registration_synonym_failure(self):
+    def test_registration_empty_synonym_failure(self):
         """Test failure of registration."""
         self.assertNotIn(D, self.resolver.lookup_dict.values())
         with self.assertRaises(ValueError):
             self.resolver.register(D, synonyms={""})
 
-    def test_registration_failure(self):
+    def test_registration_name_failure(self):
         """Test failure of registration."""
-        with self.assertRaises(KeyError):
+        with self.assertRaises(RegistrationNameConflict) as e:
             self.resolver.register(A)
-        with self.assertRaises(KeyError):
+        self.assertEqual("name", e.exception.label)
+        self.assertIn("name", str(e.exception))
+        with self.assertRaises(RegistrationNameConflict) as e:
             self.resolver.register(D, synonyms={"a"})
+        self.assertEqual("synonym", e.exception.label)
+        self.assertIn("synonym", str(e.exception))
+
+    def test_registration_synonym_failure(self):
+        """Test failure of registration."""
+        resolver = Resolver([], base=Base)
+        resolver.register(A, synonyms={"B"})
+        with self.assertRaises(RegistrationSynonymConflict) as e:
+            resolver.register(B)
+        self.assertEqual("name", e.exception.label)
+        self.assertIn("name", str(e.exception))
+
+        class F(Base):
+            """Extra class for testing."""
+
+        with self.assertRaises(RegistrationSynonymConflict) as e:
+            resolver.register(F, synonyms={"B"})
+        self.assertEqual("synonym", e.exception.label)
+        self.assertIn("synonym", str(e.exception))
 
     def test_make_from_kwargs(self):
         """Test making classes from kwargs."""
