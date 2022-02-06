@@ -6,6 +6,7 @@ from torch import nn
 from torch.nn import init
 from torch.nn.modules import activation
 from torch.optim import Adam, Optimizer
+from torch.optim.lr_scheduler import ExponentialLR, _LRScheduler
 
 from ..api import ClassResolver
 from ..func import FunctionResolver
@@ -13,7 +14,9 @@ from ..func import FunctionResolver
 __all__ = [
     "optimizer_resolver",
     "activation_resolver",
+    "margin_activation_resolver",
     "initializer_resolver",
+    "lr_scheduler_resolver",
 ]
 
 #: A resolver for :class:`torch.optim.Optimizer` classes
@@ -42,8 +45,28 @@ activation_resolver = ClassResolver(
     base_as_suffix=False,
 )
 
+margin_activation_resolver = ClassResolver(
+    classes={
+        nn.ReLU,
+        nn.Softplus,
+    },
+    base=nn.Module,  # type: ignore
+    default=nn.ReLU,
+    synonyms=dict(
+        hard=nn.ReLU,
+        soft=nn.Softplus,
+    ),
+)
+
 #: A resolver for :mod:`torch.nn.init` functions
 initializer_resolver = FunctionResolver(
     [func for name, func in vars(init).items() if not name.startswith("_") and name.endswith("_")],
     default=init.normal_,
+)
+
+#: A resolver for learning rate schedulers
+lr_scheduler_resolver = ClassResolver.from_subclasses(
+    _LRScheduler,
+    default=ExponentialLR,
+    suffix="LR",
 )
