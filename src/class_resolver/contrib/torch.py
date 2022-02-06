@@ -6,6 +6,7 @@ from torch import nn
 from torch.optim import Adam, Optimizer
 
 from ..api import Resolver
+from ..func import FunctionResolver
 
 __all__ = [
     "optimizer_resolver",
@@ -28,6 +29,16 @@ activation_resolver = Resolver(
     default=nn.ReLU,
 )
 
-if __name__ == '__main__':
+initializer_resolver = FunctionResolver(
+    [
+        getattr(nn.init, func)
+        for func in dir(nn.init)
+        if not func.startswith("_") and func.endswith("_")
+    ],
+    default=nn.init.normal_,
+)
+
+if __name__ == "__main__":
     print(activation_resolver.options)
     print(optimizer_resolver.options)
+    print(initializer_resolver.options)
