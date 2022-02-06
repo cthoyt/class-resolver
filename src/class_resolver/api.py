@@ -131,18 +131,30 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
     @classmethod
     def from_subclasses(
-        cls, base: Type[X], *, skip: Optional[Collection[Type[X]]] = None, **kwargs
+        cls,
+        base: Type[X],
+        *,
+        skip: Optional[Collection[Type[X]]] = None,
+        exclude_private: bool = True,
+        **kwargs,
     ) -> "ClassResolver":
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
         :param skip: Any subclasses to skip (usually good to hardcode intermediate base classes)
+        :param exclude_private: If true, will skip any class that comes from a module
+            starting with an underscore (i.e., a private module). This is typically
+            done when having shadow duplicate classes implemented in C
         :param kwargs: remaining keyword arguments to pass to :func:`Resolver.__init__`
         :return: A resolver instance
         """
         skip = set(skip) if skip else set()
         return cls(
-            {subcls for subcls in get_subclasses(base) if subcls not in skip},
+            {
+                subcls
+                for subcls in get_subclasses(base, exclude_private=exclude_private)
+                if subcls not in skip
+            },
             base=base,
             **kwargs,
         )
