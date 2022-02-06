@@ -3,7 +3,7 @@
 """Class resolvers for PyTorch."""
 
 from torch import nn
-from torch.optim import SGD, Adadelta, Adagrad, Adam, Adamax, AdamW, Optimizer
+from torch.optim import Adam, Optimizer
 
 from ..api import Resolver
 from ..func import FunctionResolver
@@ -14,16 +14,8 @@ __all__ = [
     "initializer_resolver",
 ]
 
-optimizer_resolver = Resolver(
-    (
-        Adadelta,
-        Adagrad,
-        Adam,
-        Adamax,
-        AdamW,
-        SGD,
-    ),
-    base=Optimizer,
+optimizer_resolver = Resolver.from_subclasses(
+    Optimizer,
     default=Adam,
     base_as_suffix=False,
 )
