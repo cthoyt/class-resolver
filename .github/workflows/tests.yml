@@ -30,8 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # can't run documentation build on 3.10 since torch isn't available there
-        python-version: [ "3.7", "3.9" ]
+        python-version: [ "3.7", "3.10" ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}

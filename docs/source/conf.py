@@ -20,6 +20,10 @@ from datetime import date
 
 sys.path.insert(0, os.path.abspath('../../src'))
 
+autodoc_mock_imports = [
+    "torch",
+]
+
 # -- Project information -----------------------------------------------------
 
 project = 'class_resolver'
