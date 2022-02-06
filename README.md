@@ -214,7 +214,7 @@ class MLP(nn.Sequential):
     def __init__(
         self, 
         dims: list[int], 
-        activation: Hint[nn.Module] = None,
+        activation: Hint[nn.Module] = None,  # Hint = Union[None, str, nn.Module, type[nn.Module]]
         activation_kwargs: None | dict[str, any] = None,
     ):
         super().__init__(chain.from_iterable(
