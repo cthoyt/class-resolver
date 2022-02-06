@@ -13,4 +13,3 @@ python:
       extra_requirements:
         - docs
         - click
-        - torch
