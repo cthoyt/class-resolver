@@ -11,6 +11,7 @@ from ..func import FunctionResolver
 __all__ = [
     "optimizer_resolver",
     "activation_resolver",
+    "initializer_resolver",
 ]
 
 optimizer_resolver = Resolver.from_subclasses(Optimizer, default=Adam, suffix="")
