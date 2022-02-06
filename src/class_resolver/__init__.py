@@ -2,23 +2,20 @@
 
 """Lookup and instantiate classes with style."""
 
-from .api import (
+from .api import KeywordArgumentError, Resolver, UnexpectedKeywordError, get_cls
+from .func import FunctionResolver
+from .utils import (
     Hint,
     HintOrType,
     HintType,
     InstOrType,
-    KeywordArgumentError,
     Lookup,
     LookupOrType,
     LookupType,
     OptionalKwargs,
-    Resolver,
-    UnexpectedKeywordError,
-    get_cls,
     get_subclasses,
     normalize_string,
 )
-from .func import FunctionResolver
 
 __all__ = [
     # Type Hints

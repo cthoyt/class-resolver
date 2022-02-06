@@ -15,7 +15,7 @@ from typing import (
     TypeVar,
 )
 
-from .api import Hint, OptionalKwargs, normalize_string
+from .utils import Hint, OptionalKwargs, normalize_string
 
 __all__ = [
     "FunctionResolver",

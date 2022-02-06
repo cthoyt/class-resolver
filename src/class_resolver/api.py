@@ -2,15 +2,12 @@
 
 """Resolve classes."""
 
-import collections.abc
 import inspect
 import logging
 from operator import attrgetter
 from textwrap import dedent
 from typing import (
-    TYPE_CHECKING,
     Any,
-    Callable,
     Collection,
     Dict,
     Generic,
@@ -23,50 +20,34 @@ from typing import (
     Set,
     Type,
     TypeVar,
-    Union,
 )
 
 from pkg_resources import iter_entry_points
 
-if TYPE_CHECKING:
-    import click
+from .utils import (
+    Hint,
+    HintOrType,
+    HintType,
+    OneOrSequence,
+    OptionalKwargs,
+    get_subclasses,
+    make_callback,
+    normalize_string,
+    upgrade_to_sequence,
+)
 
 __all__ = [
     # Type Hints
-    "InstOrType",
-    "Lookup",
-    "LookupType",
-    "LookupOrType",
-    "Hint",
-    "HintType",
-    "HintOrType",
-    "OptionalKwargs",
     # Classes
     "Resolver",
     # Utilities
-    "get_subclasses",
     "get_cls",
-    "normalize_string",
     # Exceptions
     "KeywordArgumentError",
     "UnexpectedKeywordError",
 ]
 
 X = TypeVar("X")
-Y = TypeVar("Y")
-
-InstOrType = Union[X, Type[X]]
-
-Lookup = Union[str, X]
-LookupType = Lookup[Type[X]]
-LookupOrType = Lookup[InstOrType[X]]
-
-Hint = Optional[Lookup[X]]
-HintType = Hint[Type[X]]
-HintOrType = Hint[InstOrType[X]]
-
-OptionalKwargs = Optional[Mapping[str, Any]]
-OneOrSequence = Union[X, Sequence[X]]
 
 logger = logging.getLogger(__name__)
 
@@ -339,7 +320,7 @@ class Resolver(Generic[X]):
             type=click.Choice(list(self.lookup_dict), case_sensitive=False),
             default=[default] if kwargs.get("multiple") else default,
             show_default=True,
-            callback=None if as_string else _make_callback(self.lookup),
+            callback=None if as_string else make_callback(self.lookup),
             **kwargs,
         )
 
@@ -469,17 +450,6 @@ def _not_hint(x: Any) -> bool:
     return x is not None and not isinstance(x, (str, type))
 
 
-def get_subclasses(cls: Type[X]) -> Iterable[Type[X]]:
-    """Get all subclasses.
-
-    :param cls: The ancestor class
-    :yields: Descendant classes of the ancestor class
-    """
-    for subclass in cls.__subclasses__():
-        yield from get_subclasses(subclass)
-        yield subclass
-
-
 def get_cls(
     query: HintOrType[X],
     base: Type[X],
@@ -511,41 +481,3 @@ def get_cls(
     elif isinstance(query, type) and issubclass(query, base):
         return query
     raise TypeError(f"Not subclass of {base.__name__}: {query}")
-
-
-def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
-    """Normalize a string for lookup."""
-    s = s.lower().replace("-", "").replace("_", "").replace(" ", "")
-    if suffix is not None and s.endswith(suffix.lower()):
-        return s[: -len(suffix)]
-    return s.strip()
-
-
-def _make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Parameter", X], Y]:
-    def _callback(_ctx: "click.Context", _param: "click.Parameter", value: X) -> Y:
-        return f(value)
-
-    return _callback
-
-
-def upgrade_to_sequence(x: Union[X, Sequence[X]]) -> Sequence[X]:
-    """Ensure that the input is a sequence.
-
-    :param x: A literal or sequence of literals (don't consider a string x as a sequence)
-    :return: If a literal was given, a one element tuple with it in it. Otherwise, return the given value.
-
-    >>> upgrade_to_sequence(1)
-    (1,)
-    >>> upgrade_to_sequence((1, 2, 3))
-    (1, 2, 3)
-    >>> upgrade_to_sequence("test")
-    ('test',)
-    >>> upgrade_to_sequence(tuple("test"))
-    ('t', 'e', 's', 't')
-    """
-    if isinstance(x, str):
-        return (x,)  # type: ignore
-    elif isinstance(x, collections.abc.Sequence):
-        return x
-    else:
-        return (x,)
