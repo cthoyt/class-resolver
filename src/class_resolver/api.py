@@ -4,15 +4,10 @@
 
 import inspect
 import logging
-from operator import attrgetter
 from textwrap import dedent
 from typing import (
     Any,
     Collection,
-    Dict,
-    Generic,
-    Iterable,
-    Iterator,
     List,
     Mapping,
     Optional,
@@ -24,6 +19,7 @@ from typing import (
 
 from pkg_resources import iter_entry_points
 
+from .base import BaseResolver
 from .utils import (
     Hint,
     HintOrType,
@@ -31,7 +27,6 @@ from .utils import (
     OneOrSequence,
     OptionalKwargs,
     get_subclasses,
-    make_callback,
     normalize_string,
     upgrade_to_sequence,
 )
@@ -88,23 +83,19 @@ MISSING_ARGS = [
 ]
 
 
-class Resolver(Generic[X]):
+class Resolver(BaseResolver[Type[X]]):
     """Resolve from a list of classes."""
 
     #: The base class
     base: Type[X]
     #: The shared suffix fo all classes derived from the base class
     suffix: str
-    #: The mapping from normalized class names to the classes indexed by this resolver
-    lookup_dict: Dict[str, Type[X]]
-    #: The mapping from synonyms to the classes indexed by this resolver
-    synonyms: Dict[str, Type[X]]
     #: The variable name to look up synonyms in classes that are registered with this resolver
     synonyms_attribute: Optional[str]
 
     def __init__(
         self,
-        classes: Collection[Type[X]],
+        classes: Optional[Collection[Type[X]]] = None,
         *,
         base: Type[X],
         default: Optional[Type[X]] = None,
@@ -124,61 +115,23 @@ class Resolver(Generic[X]):
             to turn off synonym lookup.
         """
         self.base = base
-        self.default = default
-        if suffix is None:
-            suffix = normalize_string(base.__name__)
-        self.suffix = suffix
         self.synonyms_attribute = synonym_attribute
-        self.synonyms = dict(synonyms or {})
-        self.lookup_dict = {}
-        for cls in classes:
-            self.register(cls)
+        super().__init__(
+            elements=classes,
+            synonyms=synonyms,
+            default=default,
+            suffix=normalize_string(self.base.__name__) if suffix is None else suffix,
+        )
 
-    def register(
-        self,
-        cls: Type[X],
-        synonyms: Optional[Iterable[str]] = None,
-        raise_on_conflict: bool = True,
-    ) -> None:
-        """Register an additional class with this resolver.
+    def extract_name(self, element: Type[X]) -> str:
+        """Get the name for an element."""
+        return element.__name__
 
-        :param cls: The class to register
-        :param synonyms: An optional iterable of synonyms to add for the class
-        :param raise_on_conflict: Determines the behavior when a conflict is encountered on either
-            the normalized class name or a synonym. If true, will raise an exception. If false, will
-            simply disregard the entry.
-
-        :raises KeyError: If ``raise_on_conflict`` is true and there's a conflict in either the class
-            name or a synonym name.
-        :raises ValueError: If any given synonyms (either explicitly or by class lookup) are empty strings
-        """
-        key = self.normalize_cls(cls)
-        if key not in self.lookup_dict:
-            self.lookup_dict[key] = cls
-        elif raise_on_conflict:
-            raise KeyError(
-                f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
-            )
-
-        _synonyms = set(synonyms or [])
-        if self.synonyms_attribute is not None:
-            _synonyms.update(getattr(cls, self.synonyms_attribute, None) or [])
-
-        self.lookup_dict[key] = cls
-        for synonym in _synonyms:
-            synonym_key = self.normalize(synonym)
-            if not synonym_key:
-                raise ValueError(f"Tried to use empty synonym for {cls}")
-            if synonym_key not in self.synonyms and synonym not in self.lookup_dict:
-                self.synonyms[synonym_key] = cls
-            elif raise_on_conflict:
-                raise KeyError(
-                    f"This resolver already contains synonym {synonym} for {self.synonyms[synonym]}"
-                )
-
-    def __iter__(self) -> Iterator[Type[X]]:
-        """Return an iterator over the indexed classes sorted by name."""
-        return iter(sorted(self.lookup_dict.values(), key=attrgetter("__name__")))
+    def extract_synonyms(self, element: Type[X]) -> Collection[str]:
+        """Get synonyms from an element."""
+        if not self.synonyms_attribute:
+            return []
+        return getattr(element, self.synonyms_attribute, None) or []
 
     @classmethod
     def from_subclasses(
@@ -218,10 +171,6 @@ class Resolver(Generic[X]):
     def normalize_cls(self, cls: Type[X]) -> str:
         """Normalize the class name."""
         return self.normalize(cls.__name__)
-
-    def normalize(self, s: str) -> str:
-        """Normalize the string with this resolve's suffix."""
-        return normalize_string(s, suffix=self.suffix)
 
     def lookup(self, query: HintOrType[X], default: Optional[Type[X]] = None) -> Type[X]:
         """Lookup a class."""
@@ -296,38 +245,6 @@ class Resolver(Generic[X]):
         query = data.get(key, None)
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
-
-    def get_option(
-        self,
-        *flags: str,
-        default: Hint[Type[X]] = None,
-        as_string: bool = False,
-        **kwargs,
-    ):
-        """Get a click option for this resolver."""
-        if default is None:
-            if self.default is None:
-                raise ValueError("no default given either from resolver or explicitly")
-            default = self.default
-        else:
-            default = self.lookup(default)
-        default = self.normalize_cls(default)
-
-        import click
-
-        return click.option(
-            *flags,
-            type=click.Choice(list(self.lookup_dict), case_sensitive=False),
-            default=[default] if kwargs.get("multiple") else default,
-            show_default=True,
-            callback=None if as_string else make_callback(self.lookup),
-            **kwargs,
-        )
-
-    @property
-    def options(self) -> Set[str]:
-        """Return the normalized option names."""
-        return set(self.lookup_dict.keys()).union(self.synonyms.keys())
 
     @property
     def classes(self) -> Set[Type[X]]:

@@ -3,19 +3,10 @@
 """A resolver for functions."""
 
 from functools import partial
-from typing import (
-    Callable,
-    Collection,
-    Dict,
-    Generic,
-    Iterable,
-    Iterator,
-    Mapping,
-    Optional,
-    TypeVar,
-)
+from typing import Callable, Optional, TypeVar
 
-from .utils import Hint, OptionalKwargs, normalize_string
+from .base import BaseResolver
+from .utils import Hint, OptionalKwargs
 
 __all__ = [
     "FunctionResolver",
@@ -24,71 +15,12 @@ __all__ = [
 X = TypeVar("X", bound=Callable)
 
 
-class FunctionResolver(Generic[X]):
+class FunctionResolver(BaseResolver[X]):
     """A resolver for functions."""
 
-    def __init__(
-        self,
-        functions: Collection[X],
-        *,
-        default: Optional[X] = None,
-        synonyms: Optional[Mapping[str, X]] = None,
-    ) -> None:
-        """Initialize the resolver.
-
-        :param functions: The functions to registry.
-        :param default: The default
-        :param synonyms: The optional synonym dictionary
-        """
-        self.default = default
-        self.lookup_dict: Dict[str, X] = {}
-        self.synonyms = dict(synonyms or {})
-        for func in functions:
-            self.register(func)
-
-    def __iter__(self) -> Iterator[X]:
-        """Iterate over the registered functions."""
-        return iter(self.lookup_dict.values())
-
-    def normalize_func(self, func: X) -> str:
-        """Normalize a function to a name."""
-        return self.normalize_string(func.__name__)
-
-    @staticmethod
-    def normalize_string(s: str) -> str:
-        """Normalize a string."""
-        return normalize_string(s)
-
-    def register(
-        self, func: X, synonyms: Optional[Iterable[str]] = None, raise_on_conflict: bool = True
-    ):
-        """Register an additional function with this resolver.
-
-        :param func: The function to register
-        :param synonyms: An optional iterable of synonyms to add for the class
-        :param raise_on_conflict: Determines the behavior when a conflict is encountered on either
-            the normalized class name or a synonym. If true, will raise an exception. If false, will
-            simply disregard the entry.
-
-        :raises KeyError: If ``raise_on_conflict`` is true and there's a conflict in either the class
-            name or a synonym name.
-        """
-        key = self.normalize_func(func)
-        if key not in self.lookup_dict:
-            self.lookup_dict[key] = func
-        elif raise_on_conflict:
-            raise KeyError(
-                f"This resolver already contains a class with key {key}: {self.lookup_dict[key]}"
-            )
-
-        for synonym in synonyms or []:
-            synonym_key = self.normalize_string(synonym)
-            if synonym_key not in self.synonyms and synonym_key not in self.lookup_dict:
-                self.synonyms[synonym_key] = func
-            elif raise_on_conflict:
-                raise KeyError(
-                    f"This resolver already contains synonym {synonym} for {self.synonyms[synonym_key]}"
-                )
+    def extract_name(self, element: X) -> str:
+        """Get the name for an element."""
+        return element.__name__
 
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup a function."""
@@ -102,13 +34,13 @@ class FunctionResolver(Generic[X]):
         elif callable(query):
             return query  # type: ignore
         elif isinstance(query, str):
-            key = self.normalize_string(query)
+            key = self.normalize(query)
             if key in self.lookup_dict:
                 return self.lookup_dict[key]
             elif key in self.synonyms:
                 return self.synonyms[key]
             else:
-                valid_choices = sorted(set(self.lookup_dict.keys()).union(self.synonyms or []))
+                valid_choices = sorted(self.options)
                 raise KeyError(f"{query} is an invalid. Try one of: {valid_choices}")
         else:
             raise TypeError(f"Invalid function: {type(query)} - {query}")
