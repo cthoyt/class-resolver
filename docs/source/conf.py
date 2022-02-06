@@ -223,6 +223,7 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'https://docs.python.org/3/': None,
+    'torch': ('https://pytorch.org/docs/stable', None),
 }
 
 autoclass_content = 'both'

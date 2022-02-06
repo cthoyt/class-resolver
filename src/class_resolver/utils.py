@@ -54,14 +54,19 @@ OptionalKwargs = Optional[Mapping[str, Any]]
 OneOrSequence = Union[X, Sequence[X]]
 
 
-def get_subclasses(cls: Type[X]) -> Iterable[Type[X]]:
+def get_subclasses(cls: Type[X], exclude_private: bool = True) -> Iterable[Type[X]]:
     """Get all subclasses.
 
     :param cls: The ancestor class
+    :param exclude_private: If true, will skip any class that comes from a module
+        starting with an underscore (i.e., a private module). This is typically
+        done when having shadow duplicate classes implemented in C
     :yields: Descendant classes of the ancestor class
     """
     for subclass in cls.__subclasses__():
         yield from get_subclasses(subclass)
+        if exclude_private and any(part.startswith("_") for part in subclass.__module__.split(".")):
+            continue
         yield subclass
 
 

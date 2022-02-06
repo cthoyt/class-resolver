@@ -8,6 +8,7 @@ Class Resolver |release| Documentation
 
    installation
    usage
+   contrib
 
 Indices and Tables
 ------------------
