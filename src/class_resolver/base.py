@@ -12,6 +12,9 @@ from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
 __all__ = [
     "BaseResolver",
+    "RegistrationError",
+    "RegistrationNameConflict",
+    "RegistrationSynonymConflict",
 ]
 
 logger = logging.getLogger(__name__)

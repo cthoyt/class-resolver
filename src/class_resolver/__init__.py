@@ -3,6 +3,11 @@
 """Lookup and instantiate classes with style."""
 
 from .api import KeywordArgumentError, Resolver, UnexpectedKeywordError, get_cls
+from .base import (
+    RegistrationError,
+    RegistrationNameConflict,
+    RegistrationSynonymConflict,
+)
 from .func import FunctionResolver
 from .utils import (
     Hint,
@@ -35,6 +40,9 @@ __all__ = [
     "get_subclasses",
     "normalize_string",
     # Exceptions
+    "RegistrationError",
+    "RegistrationNameConflict",
+    "RegistrationSynonymConflict",
     "KeywordArgumentError",
     "UnexpectedKeywordError",
 ]
