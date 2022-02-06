@@ -4,7 +4,17 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Collection, Dict, Generic, Iterable, Iterator, Mapping, Optional, Set
+from typing import (
+    ClassVar,
+    Collection,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    Mapping,
+    Optional,
+    Set,
+)
 
 from pkg_resources import iter_entry_points
 
@@ -15,6 +25,62 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+
+class RegistrationError(KeyError, Generic[X], ABC):
+    """Raised when trying to add a new element to a resolver with a pre-existing lookup key."""
+
+    label: ClassVar[str]
+
+    def __init__(self, resolver: "BaseResolver[X, Y]", key: str, proposed: X):
+        """Initialize the registration error.
+
+        :param resolver: The resolver where the registration error occurred
+        :param key: The key (either in the ``lookup_dict`` or ``synonyms``) where the conflict occurred
+        :param proposed: The proposed overwrite on the given key
+        """
+        self.resolver = resolver
+        self.key = key
+        self.proposed = proposed
+
+    @abstractmethod
+    def _get_existing(self):
+        """Get the pre-existing element based on the error type and the given key."""
+
+    def __str__(self) -> str:
+        """Coerce the registration error to a string."""
+        return (
+            f"Conflict on registration of {self.label} {self.key}:\n"
+            f"Existing: {self._get_existing()}\n"
+            f"Proposed: {self.proposed}"
+        )
+
+
+class RegistrationNameConflict(RegistrationError):
+    """Raised on a conflict in the lookup dict."""
+
+    label = "name"
+
+    def _get_existing(self) -> str:
+        return self.resolver.lookup_dict[self.key]
+
+
+class RegistrationSynonymConflict(RegistrationError):
+    """Raised on a conflict of a synonym in the synonym dict."""
+
+    label = "synonym"
+
+    def _get_existing(self) -> str:
+        return self.resolver.synonyms[self.key]
+
+
+class RegistrationNameSynonymConflict(RegistrationError):
+    """Raised on a conflict of a synonym with the lookup dict."""
+
+    label = "name"
+
+    def _get_existing(self) -> str:
+        return self.resolver.synonyms[self.key]
 
 
 class BaseResolver(ABC, Generic[X, Y]):
@@ -101,9 +167,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         if key not in self.lookup_dict:
             self.lookup_dict[key] = element
         elif raise_on_conflict:
-            raise KeyError(
-                f"This resolver already contains an element with key {key}: {self.lookup_dict[key]}"
-            )
+            raise RegistrationNameConflict(self, key, element)
 
         _synonyms = set(synonyms or [])
         _synonyms.update(self.extract_synonyms(element))
@@ -114,10 +178,10 @@ class BaseResolver(ABC, Generic[X, Y]):
                 raise ValueError(f"Tried to use empty synonym for {element}")
             if synonym_key not in self.synonyms and synonym_key not in self.lookup_dict:
                 self.synonyms[synonym_key] = element
-            elif raise_on_conflict:
-                raise KeyError(
-                    f"This resolver already contains synonym {synonym} for {self.synonyms[synonym]}"
-                )
+            elif synonym_key in self.lookup_dict and raise_on_conflict:
+                raise RegistrationNameSynonymConflict(self, synonym, element)
+            elif synonym_key in self.synonyms and raise_on_conflict:
+                raise RegistrationSynonymConflict(self, synonym, element)
 
     @abstractmethod
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
