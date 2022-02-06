@@ -3,6 +3,7 @@
 """Class resolvers for PyTorch."""
 
 from torch import nn
+from torch.nn.modules import activation
 from torch.optim import Adam, Optimizer
 
 from ..api import Resolver
@@ -20,15 +21,18 @@ optimizer_resolver = Resolver.from_subclasses(
     base_as_suffix=False,
 )
 
+ACTIVATION_SKIP = {
+    nn.MultiheadAttention,
+    nn.Softmax2d,
+}
 activation_resolver = Resolver(
-    classes=(
-        nn.LeakyReLU,
-        nn.PReLU,
-        nn.ReLU,
-        nn.Softplus,
-        nn.Sigmoid,
-        nn.Tanh,
-    ),
+    classes=[
+        module
+        for module in vars(activation).values()
+        if isinstance(module, type)
+        and issubclass(module, nn.Module)
+        and module not in ACTIVATION_SKIP
+    ],
     base=nn.Module,
     default=nn.ReLU,
     base_as_suffix=False,
