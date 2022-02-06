@@ -93,8 +93,10 @@ class MLP(nn.Sequential):
         ))
 ```
 
-This architecture can be used to describe an entire class of MLPs with
-different activation functions, so it might make sense to generalize:
+This MLP uses a hard-coded rectified linear unit as the non-linear activation
+function between layers. We can generalize this MLP to use a variety of
+non-linear activation functions by adding an argument to its
+`__init__()` function like in:
 
 ```python
 from itertools import chain
@@ -108,6 +110,8 @@ class MLP(nn.Sequential):
             activation = nn.ReLU()
         elif activation == "tanh":
             activation = nn.Tanh()
+        elif activation == "hardtanh":
+            activation = nn.Hardtanh()
         else:
             raise KeyError(f"Unsupported activation: {activation}")
         super().__init__(chain.from_iterable(
@@ -119,7 +123,9 @@ class MLP(nn.Sequential):
         ))
 ```
 
-A better way would be to create a dictionary:
+The first issue with this implementation is it relies on a hard-coded set of
+conditional statements and is therefore hard to extend. It can be improved
+by using a dictionary lookup:
 
 ```python
 from itertools import chain
@@ -127,24 +133,69 @@ from itertools import chain
 from more_itertools import pairwise
 from torch import nn
 
-activations: dict[str, type[nn.Module]] = {
-   "relu": nn.ReLU,
-   "tanh": nn.Tanh,
+activation_lookup: dict[str, nn.Module] = {
+   "relu": nn.ReLU(),
+   "tanh": nn.Tanh(),
+   "hardtanh": nn.Hardtanh(),
 }
 
 class MLP(nn.Sequential):
     def __init__(self, dims: list[int], activation: str = "relu"):
-        activation_cls = activations[activation]
+        activation = activation_lookup[activation]
         super().__init__(chain.from_iterable(
             (
                 nn.Linear(in_features, out_features),
-                activation_cls(),
+                activation,
             )
             for in_features, out_features in pairwise(dims)
         ))
 ```
 
-The `class-resolver` takes care of this, and more:
+This approach is rigid because it requires pre-instantiation of the activations.
+If we needed to vary the arguments to the `nn.HardTanh` class, the previous
+approach wouldn't work. We can change the implementation to lookup on the 
+class *before instantiation* then optionally pass some arguments:
+
+```python
+from itertools import chain
+
+from more_itertools import pairwise
+from torch import nn
+
+activation_lookup: dict[str, type[nn.Module]] = {
+   "relu": nn.ReLU,
+   "tanh": nn.Tanh,
+   "hardtanh": nn.Hardtanh,
+}
+
+class MLP(nn.Sequential):
+    def __init__(
+        self, 
+        dims: list[int], 
+        activation: str = "relu", 
+        activation_kwargs: None | dict[str, any] = None,
+    ):
+        activation_cls = activation_lookup[activation]
+        activation = activation_cls(**(activation_kwargs or {}))
+        super().__init__(chain.from_iterable(
+            (
+                nn.Linear(in_features, out_features),
+                activation,
+            )
+            for in_features, out_features in pairwise(dims)
+        ))
+```
+
+This is pretty good, but it still has a few issues:
+1. you have to manually maintain the `activation_lookup` dictionary,
+2. you can't pass an instance or class through the `activation` keyword
+3. you have to get the casing just right
+4. the default is hard-coded as a string, which means this has to get copied
+   (error-prone) in any place that creates an MLP
+5. you have to re-write this logic for all of your classes
+
+Enter the `class_resolver` package, which takes care of all four of these
+things using the following:
 
 ```python
 from torch import nn
@@ -153,13 +204,13 @@ from more_itertools import pairwise
 from class_resolver import ClassResolver, Hint
 
 activation_resolver = ClassResolver(
-    [nn.ReLU, nn.Tanh, nn.Sigmoid],
+    [nn.ReLU, nn.Tanh, nn.Hardtanh],
     base=nn.Module,
     default=nn.ReLU,
 )
 
 class MLP(nn.Sequential):
-    def __init__(self, dims: list[int], activation: Hint[str] = None):
+    def __init__(self, dims: list[int], activation: Hint[nn.Module] = None):
         super().__init__(chain.from_iterable(
             (
                 nn.Linear(in_features, out_features),
@@ -168,6 +219,23 @@ class MLP(nn.Sequential):
             for in_features, out_features in pairwise(dims)
         ))
 ```
+
+Now, you can instantiate the MLP with any of the following:
+
+```python
+MLP(dims=[10, 200, 40])  # uses default, which is ReLU
+MLP(dims=[10, 200, 40], activation="relu")  # uses lowercase
+MLP(dims=[10, 200, 40], activation="ReLU")  # uses stylized
+MLP(dims=[10, 200, 40], activation=nn.ReLU)  # uses class
+MLP(dims=[10, 200, 40], activation=nn.ReLU())  # uses instance
+
+MLP(dims=[10, 200, 40], activation="hardtanh", activation_kwargs={"min_val": 0.0, "max_value": 6.0})  # uses kwargs
+MLP(dims=[10, 200, 40], activation=nn.HardTanh, activation_kwargs={"min_val": 0.0, "max_value": 6.0})  # uses kwargs
+MLP(dims=[10, 200, 40], activation=nn.HardTanh(0.0, 6.0))  # uses instance
+```
+
+In practice, it makes sense to stick to using the strings in combination with
+hyper-parameter optimization libraries like [Optuna](https://optuna.org/).
 
 ## ⬇️ Installation
 
