@@ -4,17 +4,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import (
-    ClassVar,
-    Collection,
-    Dict,
-    Generic,
-    Iterable,
-    Iterator,
-    Mapping,
-    Optional,
-    Set,
-)
+from typing import Collection, Dict, Generic, Iterable, Iterator, Mapping, Optional, Set
 
 from pkg_resources import iter_entry_points
 
@@ -30,18 +20,18 @@ logger = logging.getLogger(__name__)
 class RegistrationError(KeyError, Generic[X], ABC):
     """Raised when trying to add a new element to a resolver with a pre-existing lookup key."""
 
-    label: ClassVar[str]
-
-    def __init__(self, resolver: "BaseResolver[X, Y]", key: str, proposed: X):
+    def __init__(self, resolver: "BaseResolver[X, Y]", key: str, proposed: X, label: str):
         """Initialize the registration error.
 
         :param resolver: The resolver where the registration error occurred
         :param key: The key (either in the ``lookup_dict`` or ``synonyms``) where the conflict occurred
         :param proposed: The proposed overwrite on the given key
+        :param label: The origin of the error (either "name" or "synonym")
         """
         self.resolver = resolver
         self.key = key
         self.proposed = proposed
+        self.label = label
 
     @abstractmethod
     def _get_existing(self):
@@ -57,27 +47,14 @@ class RegistrationError(KeyError, Generic[X], ABC):
 
 
 class RegistrationNameConflict(RegistrationError):
-    """Raised on a conflict in the lookup dict."""
-
-    label = "name"
+    """Raised on a conflict with the lookup dict."""
 
     def _get_existing(self) -> str:
         return self.resolver.lookup_dict[self.key]
 
 
 class RegistrationSynonymConflict(RegistrationError):
-    """Raised on a conflict of a synonym in the synonym dict."""
-
-    label = "synonym"
-
-    def _get_existing(self) -> str:
-        return self.resolver.synonyms[self.key]
-
-
-class RegistrationNameSynonymConflict(RegistrationError):
-    """Raised on a conflict of a synonym with the lookup dict."""
-
-    label = "name"
+    """Raised on a conflict with the synonym dict."""
 
     def _get_existing(self) -> str:
         return self.resolver.synonyms[self.key]
@@ -159,15 +136,19 @@ class BaseResolver(ABC, Generic[X, Y]):
             the normalized element name or a synonym. If true, will raise an exception. If false, will
             simply disregard the entry.
 
-        :raises KeyError: If ``raise_on_conflict`` is true and there's a conflict in either the element
-            name or synonym.
+        :raises RegistrationNameConflict: If ``raise_on_conflict`` is true
+            and there's a conflict with the lookup dict
+        :raises RegistrationSynonymConflict: If ``raise_on_conflict`` is true
+            and there's a conflict with the synonym dict
         :raises ValueError: If any given synonyms are empty strings
         """
         key = self.normalize(self.extract_name(element))
-        if key not in self.lookup_dict:
+        if key not in self.lookup_dict and key not in self.synonyms:
             self.lookup_dict[key] = element
-        elif raise_on_conflict:
-            raise RegistrationNameConflict(self, key, element)
+        elif key in self.lookup_dict and raise_on_conflict:
+            raise RegistrationNameConflict(self, key, element, label="name")
+        elif key in self.synonyms and raise_on_conflict:
+            raise RegistrationSynonymConflict(self, key, element, label="name")
 
         _synonyms = set(synonyms or [])
         _synonyms.update(self.extract_synonyms(element))
@@ -179,9 +160,9 @@ class BaseResolver(ABC, Generic[X, Y]):
             if synonym_key not in self.synonyms and synonym_key not in self.lookup_dict:
                 self.synonyms[synonym_key] = element
             elif synonym_key in self.lookup_dict and raise_on_conflict:
-                raise RegistrationNameSynonymConflict(self, synonym, element)
+                raise RegistrationNameConflict(self, synonym, element, label="synonym")
             elif synonym_key in self.synonyms and raise_on_conflict:
-                raise RegistrationSynonymConflict(self, synonym, element)
+                raise RegistrationSynonymConflict(self, key, element, label="synonym")
 
     @abstractmethod
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
