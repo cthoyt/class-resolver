@@ -90,12 +90,15 @@ class FunctionResolver(Generic[X]):
                     f"This resolver already contains synonym {synonym} for {self.synonyms[synonym_key]}"
                 )
 
-    def lookup(self, query: Hint[X]) -> X:
+    def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup a function."""
         if query is None:
-            if self.default is None:
+            if default is not None:
+                return default
+            elif self.default is not None:
+                return self.default
+            else:
                 raise ValueError("No default is set")
-            return self.default
         elif callable(query):
             return query  # type: ignore
         elif isinstance(query, str):
