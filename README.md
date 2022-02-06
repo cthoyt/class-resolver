@@ -72,6 +72,103 @@ assert A(name='hi') == resolver.make('A', name='hi')
 assert A(name='hi') == resolver.make(A(name='hi'))
 ```
 
+## 🤖 Writing Extensible Machine Learning Models with `class-resolver`
+
+Assume you've implemented a simple multi-layer perceptron in PyTorch:
+
+```python
+from itertools import chain
+
+from more_itertools import pairwise
+from torch import nn
+
+class MLP(nn.Sequential):
+    def __init__(self, dims: list[int]):
+        super().__init__(chain.from_iterable(
+            (
+                nn.Linear(in_features, out_features),
+                nn.ReLU(),
+            )
+            for in_features, out_features in pairwise(dims)
+        ))
+```
+
+This architecture can be used to describe an entire class of MLPs with
+different activation functions, so it might make sense to generalize:
+
+```python
+from itertools import chain
+
+from more_itertools import pairwise
+from torch import nn
+
+class MLP(nn.Sequential):
+    def __init__(self, dims: list[int], activation: str = "relu"):
+        if activation == "relu":
+            activation = nn.ReLU()
+        elif activation == "tanh":
+            activation = nn.Tanh()
+        else:
+            raise KeyError(f"Unsupported activation: {activation}")
+        super().__init__(chain.from_iterable(
+            (
+                nn.Linear(in_features, out_features),
+                activation,
+            )
+            for in_features, out_features in pairwise(dims)
+        ))
+```
+
+A better way would be to create a dictionary:
+
+```python
+from itertools import chain
+
+from more_itertools import pairwise
+from torch import nn
+
+activations: dict[str, type[nn.Module]] = {
+   "relu": nn.ReLU,
+   "tanh": nn.Tanh,
+}
+
+class MLP(nn.Sequential):
+    def __init__(self, dims: list[int], activation: str = "relu"):
+        activation_cls = activations[activation]
+        super().__init__(chain.from_iterable(
+            (
+                nn.Linear(in_features, out_features),
+                activation_cls(),
+            )
+            for in_features, out_features in pairwise(dims)
+        ))
+```
+
+The `class-resolver` takes care of this, and more:
+
+```python
+from torch import nn
+from itertools import chain
+from more_itertools import pairwise
+from class_resolver import ClassResolver, Hint
+
+activation_resolver = ClassResolver(
+    [nn.ReLU, nn.Tanh, nn.Sigmoid],
+    base=nn.Module,
+    default=nn.ReLU,
+)
+
+class MLP(nn.Sequential):
+    def __init__(self, dims: list[int], activation: Hint[str] = None):
+        super().__init__(chain.from_iterable(
+            (
+                nn.Linear(in_features, out_features),
+                activation_resolver.make(activation),
+            )
+            for in_features, out_features in pairwise(dims)
+        ))
+```
+
 ## ⬇️ Installation
 
 The most recent release can be installed from
