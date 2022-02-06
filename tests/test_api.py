@@ -286,6 +286,27 @@ class TestResolver(unittest.TestCase):
             resolver.make("A", nope="nopppeeee")
             self.assertEqual("AAltBase did not expect any keyword arguments", str(e))
 
+    def test_base_suffix(self):
+        """Check that the unexpected keyword error is thrown properly."""
+        resolver = Resolver.from_subclasses(AltBase, suffix=None, base_as_suffix=True)
+        self.assertEqual(AAltBase, resolver.lookup("AAltBase"))
+        self.assertEqual(AAltBase, resolver.lookup("A"))
+
+        resolver = Resolver.from_subclasses(AltBase, suffix="nope", base_as_suffix=True)
+        self.assertEqual(AAltBase, resolver.lookup("AAltBase"))
+        with self.assertRaises(KeyError):
+            resolver.lookup("A")
+
+        resolver = Resolver.from_subclasses(AltBase, suffix="")
+        self.assertEqual(AAltBase, resolver.lookup("AAltBase"))
+        with self.assertRaises(KeyError):
+            resolver.lookup("A")
+
+        resolver = Resolver.from_subclasses(AltBase, base_as_suffix=False)
+        self.assertEqual(AAltBase, resolver.lookup("AAltBase"))
+        with self.assertRaises(KeyError):
+            resolver.lookup("A")
+
     def test_make_many(self):
         """Test the make_many function."""
         with self.assertRaises(ValueError):

@@ -90,25 +90,32 @@ class Resolver(BaseResolver[Type[X], X]):
         suffix: Optional[str] = None,
         synonyms: Optional[Mapping[str, Type[X]]] = None,
         synonym_attribute: Optional[str] = "synonyms",
+        base_as_suffix: bool = True,
     ) -> None:
         """Initialize the resolver.
 
         :param classes: A list of classes
         :param base: The base class
         :param default: The default class
-        :param suffix: The optional shared suffix of all instances. If None, use the base class' name for it. To disable
-            this behaviour, explicitly provide `suffix=""`.
+        :param suffix: The optional shared suffix of all instances. If not none, will override
+            ``base_as_suffix``.
         :param synonyms: The optional synonym dictionary
         :param synonym_attribute: The attribute to look in each class for synonyms. Explicitly set to None
             to turn off synonym lookup.
+        :param base_as_suffix: Should the base class's name be used as the suffix if none is given? Defaults to true.
         """
         self.base = base
         self.synonyms_attribute = synonym_attribute
+        if suffix is not None:
+            if suffix == "":
+                suffix = None
+        elif base_as_suffix:
+            suffix = normalize_string(self.base.__name__)
         super().__init__(
             elements=classes,
             synonyms=synonyms,
             default=default,
-            suffix=normalize_string(self.base.__name__) if suffix is None else suffix,
+            suffix=suffix,
         )
 
     def extract_name(self, element: Type[X]) -> str:
