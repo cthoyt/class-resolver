@@ -3,6 +3,7 @@
 """Class resolvers for PyTorch."""
 
 from torch import nn
+from torch.nn import init
 from torch.nn.modules import activation
 from torch.optim import Adam, Optimizer
 
@@ -39,15 +40,6 @@ activation_resolver = Resolver(
 )
 
 initializer_resolver = FunctionResolver(
-    [
-        getattr(nn.init, func)
-        for func in dir(nn.init)
-        if not func.startswith("_") and func.endswith("_")
-    ],
-    default=nn.init.normal_,
+    [func for name, func in vars(init).items() if not name.startswith("_") and name.endswith("_")],
+    default=init.normal_,
 )
-
-if __name__ == "__main__":
-    print(activation_resolver.options)
-    print(optimizer_resolver.options)
-    print(initializer_resolver.options)
