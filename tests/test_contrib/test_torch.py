@@ -24,6 +24,18 @@ class TestTorch(unittest.TestCase):
         self.assertEqual(ReLU, activation_resolver.lookup("relu"))
         self.assertEqual(ReLU, activation_resolver.lookup(None))
 
+    def test_margin_activation(self):
+        """Tests for the argin activation resolver."""
+        from torch.nn import ReLU, Softplus
+
+        from class_resolver.contrib.torch import margin_activation_resolver
+
+        self.assertEqual(Softplus, margin_activation_resolver.lookup("softplus"))
+        self.assertEqual(Softplus, margin_activation_resolver.lookup("soft"))
+        self.assertEqual(ReLU, margin_activation_resolver.lookup("relu"))
+        self.assertEqual(ReLU, margin_activation_resolver.lookup("hard"))
+        self.assertEqual(ReLU, margin_activation_resolver.lookup(None))
+
     def test_optimizer(self):
         """Tests for the optimizer resolver."""
         from torch.optim import Adagrad, Adam
@@ -43,3 +55,15 @@ class TestTorch(unittest.TestCase):
         self.assertEqual(xavier_normal_, initializer_resolver.lookup("xavier_normal_"))
         self.assertEqual(xavier_normal_, initializer_resolver.lookup("xavier_normal"))
         self.assertEqual(xavier_normal_, initializer_resolver.lookup("xaviernormal"))
+
+    def test_lr(self):
+        """Tests for the learning rate scheduler."""
+        from torch.optim.lr_scheduler import ExponentialLR, LambdaLR
+
+        from class_resolver.contrib.torch import lr_scheduler_resolver
+
+        self.assertEqual(LambdaLR, lr_scheduler_resolver.lookup("lambda"))
+        self.assertEqual(LambdaLR, lr_scheduler_resolver.lookup("lambdalr"))
+        self.assertEqual(ExponentialLR, lr_scheduler_resolver.lookup("exponential"))
+        self.assertEqual(ExponentialLR, lr_scheduler_resolver.lookup("exponentiallr"))
+        self.assertEqual(ExponentialLR, lr_scheduler_resolver.lookup(None))
