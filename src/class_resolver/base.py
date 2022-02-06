@@ -2,18 +2,30 @@
 
 """A base resolver."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import Collection, Dict, Generic, Iterable, Iterator, Mapping, Optional, Set
 
-from .utils import Hint, X, make_callback, normalize_string
+from pkg_resources import iter_entry_points
+
+from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
 __all__ = [
     "BaseResolver",
 ]
 
+logger = logging.getLogger(__name__)
 
-class BaseResolver(ABC, Generic[X]):
-    """A resolver for arbitrary elements."""
+
+class BaseResolver(ABC, Generic[X, Y]):
+    """A resolver for arbitrary elements.
+
+    This class is parametrized by two variables:
+
+    - ``X`` is the type of element in the resolver
+    - ``Y`` is the type that gets made by the ``make`` function. This is typically
+      the same as ``X``, but might be different from ``X``, such as in the class resolver.
+    """
 
     default: Optional[X]
     #: The mapping from synonyms to the classes indexed by this resolver
@@ -33,11 +45,10 @@ class BaseResolver(ABC, Generic[X]):
     ):
         """Initialize the resolver.
 
-        :param elements: The elements to register.
+        :param elements: The elements to register
         :param default: The optional default element
         :param synonyms: The optional synonym dictionary
-        :param suffix: The optional shared suffix of all classes. If None, use the base class' name for it.
-            To disable this behaviour, explicitly provide `suffix=""`.
+        :param suffix: The optional shared suffix of all instances
         """
         self.default = default
         self.synonyms = dict(synonyms or {})
@@ -112,6 +123,29 @@ class BaseResolver(ABC, Generic[X]):
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup an element."""
 
+    @abstractmethod
+    def make(
+        self,
+        query,
+        pos_kwargs: OptionalKwargs = None,
+        **kwargs,
+    ) -> Y:
+        """Make an element."""
+
+    def make_safe(self, query, pos_kwargs: OptionalKwargs = None, **kwargs) -> Optional[Y]:
+        """Run make, but pass through a none query."""
+        if query is None:
+            return None
+        return self.make(query=query, pos_kwargs=pos_kwargs, **kwargs)
+
+    def _default(self, default):
+        if default is not None:
+            return default
+        elif self.default is not None:
+            return self.default
+        else:
+            raise ValueError("no default given either from resolver or explicitly")
+
     def get_option(
         self,
         *flags: str,
@@ -120,21 +154,33 @@ class BaseResolver(ABC, Generic[X]):
         **kwargs,
     ):
         """Get a click option for this resolver."""
-        if default is None:
-            if self.default is None:
-                raise ValueError("no default given either from resolver or explicitly")
-            default = self.default
-        else:
-            default = self.lookup(default)
-        default = self.extract_name(default)
+        key = self.normalize(self.extract_name(self.lookup(self._default(default))))
 
         import click
 
         return click.option(
             *flags,
             type=click.Choice(list(self.lookup_dict), case_sensitive=False),
-            default=[default] if kwargs.get("multiple") else default,
+            default=[key] if kwargs.get("multiple") else key,
             show_default=True,
             callback=None if as_string else make_callback(self.lookup),
             **kwargs,
         )
+
+    @staticmethod
+    def _from_entrypoint(group: str) -> Set[X]:
+        elements = set()
+        for entry in iter_entry_points(group=group):
+            try:
+                element = entry.load()
+            except ImportError:
+                logger.warning("could not load %s", entry.name)
+            else:
+                elements.add(element)
+        return elements
+
+    @classmethod
+    def from_entrypoint(cls, group: str, **kwargs) -> "BaseResolver":
+        """Make a resolver from the elements registered at the given entrypoint."""
+        elements = cls._from_entrypoint(group)
+        return cls(elements, **kwargs)

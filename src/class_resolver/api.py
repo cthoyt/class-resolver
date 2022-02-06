@@ -5,19 +5,7 @@
 import inspect
 import logging
 from textwrap import dedent
-from typing import (
-    Any,
-    Collection,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Set,
-    Type,
-    TypeVar,
-)
-
-from pkg_resources import iter_entry_points
+from typing import Any, Collection, List, Mapping, Optional, Sequence, Type, TypeVar
 
 from .base import BaseResolver
 from .utils import (
@@ -83,7 +71,7 @@ MISSING_ARGS = [
 ]
 
 
-class Resolver(BaseResolver[Type[X]]):
+class Resolver(BaseResolver[Type[X], X]):
     """Resolve from a list of classes."""
 
     #: The base class
@@ -108,7 +96,7 @@ class Resolver(BaseResolver[Type[X]]):
         :param classes: A list of classes
         :param base: The base class
         :param default: The default class
-        :param suffix: The optional shared suffix of all classes. If None, use the base class' name for it. To disable
+        :param suffix: The optional shared suffix of all instances. If None, use the base class' name for it. To disable
             this behaviour, explicitly provide `suffix=""`.
         :param synonyms: The optional synonym dictionary
         :param synonym_attribute: The attribute to look in each class for synonyms. Explicitly set to None
@@ -145,24 +133,11 @@ class Resolver(BaseResolver[Type[X]]):
         :return: A resolver instance
         """
         skip = set(skip) if skip else set()
-        return Resolver(
+        return cls(
             {subcls for subcls in get_subclasses(base) if subcls not in skip},
             base=base,
             **kwargs,
         )
-
-    @classmethod
-    def from_entrypoint(cls, group: str, *, base: Type[X], **kwargs) -> "Resolver":
-        """Make a resolver from the classes registered at the given entrypoint."""
-        classes = set()
-        for entry in iter_entry_points(group=group):
-            try:
-                subcls = entry.load()
-            except ImportError:
-                logger.warning("could not load %s", entry.name)
-            else:
-                classes.add(subcls)
-        return Resolver(classes=classes, base=base, **kwargs)
 
     def normalize_inst(self, x: X) -> str:
         """Normalize the class name of the instance."""
@@ -213,17 +188,6 @@ class Resolver(BaseResolver[Type[X]]):
         # An instance was passed, and it will go through without modification.
         return query
 
-    def make_safe(
-        self,
-        query: HintOrType[X],
-        pos_kwargs: Optional[Mapping[str, Any]] = None,
-        **kwargs,
-    ) -> Optional[X]:
-        """Run make, but pass through a none query."""
-        if query is None:
-            return None
-        return self.make(query=query, pos_kwargs=pos_kwargs, **kwargs)
-
     def make_from_kwargs(
         self,
         data: Mapping[str, Any],
@@ -245,11 +209,6 @@ class Resolver(BaseResolver[Type[X]]):
         query = data.get(key, None)
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
-
-    @property
-    def classes(self) -> Set[Type[X]]:
-        """Return the available classes."""
-        return set(self.lookup_dict.values())
 
     def ray_tune_search_space(self, kwargs_search_space: Optional[Mapping[str, Any]] = None):
         """Return a search space for ray.tune.
@@ -361,10 +320,6 @@ class Resolver(BaseResolver[Type[X]]):
             self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs)
             for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
         ]
-
-
-def _not_hint(x: Any) -> bool:
-    return x is not None and not isinstance(x, (str, type))
 
 
 def get_cls(

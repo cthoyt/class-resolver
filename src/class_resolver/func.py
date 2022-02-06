@@ -15,7 +15,7 @@ __all__ = [
 X = TypeVar("X", bound=Callable)
 
 
-class FunctionResolver(BaseResolver[X]):
+class FunctionResolver(BaseResolver[X, X]):
     """A resolver for functions."""
 
     def extract_name(self, element: X) -> str:
@@ -25,12 +25,7 @@ class FunctionResolver(BaseResolver[X]):
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup a function."""
         if query is None:
-            if default is not None:
-                return default
-            elif self.default is not None:
-                return self.default
-            else:
-                raise ValueError("No default is set")
+            return self._default(default)
         elif callable(query):
             return query  # type: ignore
         elif isinstance(query, str):
@@ -51,9 +46,3 @@ class FunctionResolver(BaseResolver[X]):
         if pos_kwargs or kwargs:
             return partial(func, **(pos_kwargs or {}), **kwargs)  # type: ignore
         return func
-
-    def make_safe(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs) -> Optional[X]:
-        """Run make, but pass through a none query."""
-        if query is None:
-            return None
-        return self.make(query=query, pos_kwargs=pos_kwargs, **kwargs)

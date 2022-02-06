@@ -95,3 +95,10 @@ class TestFunctionResolver(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             self.resolver.register(_new_fn, synonyms={"add_one"})
+
+    def test_entrypoints(self):
+        """Test loading from entrypoints."""
+        resolver = FunctionResolver.from_entrypoint("class_resolver_demo")
+        self.assertEqual({"add", "sub", "mul"}, set(resolver.lookup_dict))
+        self.assertEqual(set(), set(resolver.synonyms))
+        self.assertNotIn("expected_failure", resolver.lookup_dict)

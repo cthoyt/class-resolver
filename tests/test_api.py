@@ -92,6 +92,14 @@ class TestResolver(unittest.TestCase):
             self.resolver.lookup(3)
         self.assertEqual(self.resolver.lookup(A(name="max")), A)
 
+    def test_lookup_no_synonyms(self):
+        """Test looking up classes without auto-synonym."""
+        resolver = Resolver([A], base=Base, synonym_attribute=None)
+        self.assertEqual(A, resolver.lookup("a"))
+        self.assertEqual(A, resolver.lookup("A"))
+        with self.assertRaises(KeyError):
+            self.assertEqual(A, resolver.lookup("a_synonym_1"))
+
     def test_passthrough(self):
         """Test instances are passed through unmodified."""
         a = A(name="charlie")
@@ -109,6 +117,12 @@ class TestResolver(unittest.TestCase):
         """Test the make_safe function, which always returns none on none input."""
         self.assertIsNone(self.resolver.make_safe(None))
         self.assertIsNone(Resolver.from_subclasses(Base, default=A).make_safe(None))
+
+        name = "charlie"
+        # Test instantiating with positional dict into kwargs
+        self.assertEqual(A(name=name), self.resolver.make_safe("a", {"name": name}))
+        # Test instantiating with kwargs
+        self.assertEqual(A(name=name), self.resolver.make_safe("a", name=name))
 
     def test_registration_synonym(self):
         """Test failure of registration."""
@@ -200,6 +214,19 @@ class TestResolver(unittest.TestCase):
 
         @click.command()
         @self.resolver.get_option("--opt", default="a", as_string=True)
+        def cli(opt):
+            """Run the test CLI."""
+            self.assertIsInstance(opt, str)
+            click.echo(self.resolver.lookup(opt).__name__, nl=False)
+
+        self._test_cli(cli)
+
+    def test_click_option_default(self):
+        """Test generating an option with a default."""
+        resolver = Resolver([A, B, C, E], base=Base, default=A)
+
+        @click.command()
+        @resolver.get_option("--opt", as_string=True)
         def cli(opt):
             """Run the test CLI."""
             self.assertIsInstance(opt, str)
