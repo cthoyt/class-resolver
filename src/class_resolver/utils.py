@@ -35,6 +35,7 @@ __all__ = [
     "normalize_string",
     "upgrade_to_sequence",
     "make_callback",
+    "same_module",
 ]
 
 X = TypeVar("X")
@@ -71,15 +72,19 @@ def get_subclasses(
     """
     for subclass in cls.__subclasses__():
         yield from get_subclasses(subclass)
-        if exclude_private and any(part.startswith("_") for part in subclass.__module__.split(".")):
-            continue
-        if exclude_external and _is_external(cls, subclass):
+        if exclude_private:
+            if any(part.startswith("_") for part in subclass.__module__.split(".")):
+                continue
+            if subclass.__name__.startswith("_"):
+                continue
+        if exclude_external and not same_module(cls, subclass):
             continue
         yield subclass
 
 
-def _is_external(cls: type, subcls: type) -> bool:
-    raise NotImplementedError
+def same_module(cls1: type, cls2: type) -> bool:
+    """Return if two classes come from the same module via the ``__module__`` attribute."""
+    return cls1.__module__.split(".")[0] == cls2.__module__.split(".")[0]
 
 
 def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:

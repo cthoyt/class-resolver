@@ -136,6 +136,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         *,
         skip: Optional[Collection[Type[X]]] = None,
         exclude_private: bool = True,
+        exclude_external: bool = True,
         **kwargs,
     ) -> "ClassResolver":
         """Make a resolver from the subclasses of a given class.
@@ -145,6 +146,8 @@ class ClassResolver(BaseResolver[Type[X], X]):
         :param exclude_private: If true, will skip any class that comes from a module
             starting with an underscore (i.e., a private module). This is typically
             done when having shadow duplicate classes implemented in C
+        :param exclude_external: If true, will exclude any class that does not originate
+            from the same package as the base class.
         :param kwargs: remaining keyword arguments to pass to :func:`Resolver.__init__`
         :return: A resolver instance
         """
@@ -152,7 +155,9 @@ class ClassResolver(BaseResolver[Type[X], X]):
         return cls(
             {
                 subcls
-                for subcls in get_subclasses(base, exclude_private=exclude_private)
+                for subcls in get_subclasses(
+                    base, exclude_private=exclude_private, exclude_external=exclude_external
+                )
                 if subcls not in skip
             },
             base=base,
