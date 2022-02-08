@@ -31,7 +31,6 @@ ACTIVATION_SKIP = {
     activation.Softmax2d,
 }
 
-#: A resolver for :mod:`torch.nn.modules.activation` classes
 activation_resolver = ClassResolver(
     classes=[
         module
@@ -44,7 +43,37 @@ activation_resolver = ClassResolver(
     default=activation.ReLU,
     base_as_suffix=False,
 )
+"""A resolver for :mod:`torch.nn.modules.activation` classes
 
+.. code-block:: python
+
+    import torch
+    from class_resolver.contrib.torch import activation_resolver
+    from more_itertools import pairwise
+    from torch import nn
+    from torch.nn import functional as F
+
+    class TwoLayerPerceptron(nn.Module):
+        def __init__(
+            self,
+            dims: list[int]
+            activation: Hint[nn.Module] = None
+        )
+            layers = []
+            for in_features, out_features in pairwise(dims):
+                layers.extend((
+                    nn.Linear(in_features, out_features),
+                    activation_resolver.make(activation),
+                ))
+            self.layers = nn.Sequential(*layers)
+
+        def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
+            return self.layers(x)
+"""
+
+#: This resolver fulfills the same idea as :data:`activation_resolver` but
+#: it is explicitly limited to :class:`torch.nn.ReLU` and :class:`torch.nn.Softplus`
+#: for certain scenarios where a margin-style activation is appropriate.
 margin_activation_resolver = ClassResolver(
     classes={
         nn.ReLU,
