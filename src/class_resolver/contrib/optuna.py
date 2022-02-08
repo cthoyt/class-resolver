@@ -18,6 +18,7 @@ sampler_resolver = ClassResolver.from_subclasses(
     suffix="Sampler",
     exclude_private=False,
 )
+"""A resolver for :class:`optuna.samplers.BaseSampler` subclasses."""
 
 pruner_resolver = ClassResolver.from_subclasses(
     BasePruner,
@@ -25,5 +26,7 @@ pruner_resolver = ClassResolver.from_subclasses(
     suffix="Pruner",
     exclude_private=False,
 )
+"""A resolver for :class:`optuna.pruners.BasePruner subclasses."""
+
 # TODO figure out why this isn't auto-registered
 pruner_resolver.register(MedianPruner)
