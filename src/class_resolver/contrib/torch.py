@@ -19,12 +19,35 @@ __all__ = [
     "lr_scheduler_resolver",
 ]
 
-#: A resolver for :class:`torch.optim.Optimizer` classes
 optimizer_resolver = ClassResolver.from_subclasses(
     Optimizer,
     default=Adam,
     base_as_suffix=False,
 )
+"""A resolver for :class:`torch.optim.Optimizer` classes.
+
+.. code-block:: python
+
+    from class_resolver import Hint, OptionalKwargs
+    from class_resolver.contrib.torch import optimizer_resolver
+    from torch import Parameter
+    from torch.optim import Optimizer
+
+    def train(optimizer: Hint[Optimizer] = "adam", optimizer_kwargs: OptionalKwargs = None):
+        model = [Parameter(torch.randn(2, 2, requires_grad=True))]
+        optimizer = optimizer_resolver.make(optimizer, optimizer_kwargs, model=model)
+
+        for epoch in range(20):
+            for input, target in dataset:
+                optimizer.zero_grad()
+                output = model(input)
+                loss = loss_fn(output, target)
+                loss.backward()
+                optimizer.step()
+
+        return model
+
+"""
 
 ACTIVATION_SKIP = {
     activation.MultiheadAttention,
@@ -43,7 +66,7 @@ activation_resolver = ClassResolver(
     default=activation.ReLU,
     base_as_suffix=False,
 )
-"""A resolver for :mod:`torch.nn.modules.activation` classes
+"""A resolver for :mod:`torch.nn.modules.activation` classes.
 
 .. code-block:: python
 
@@ -71,9 +94,6 @@ activation_resolver = ClassResolver(
             return self.layers(x)
 """
 
-#: This resolver fulfills the same idea as :data:`activation_resolver` but
-#: it is explicitly limited to :class:`torch.nn.ReLU` and :class:`torch.nn.Softplus`
-#: for certain scenarios where a margin-style activation is appropriate.
 margin_activation_resolver = ClassResolver(
     classes={
         nn.ReLU,
@@ -86,6 +106,12 @@ margin_activation_resolver = ClassResolver(
         soft=nn.Softplus,
     ),
 )
+"""A resolver for a subset of :mod:`torch.nn.modules.activation` classes.
+
+This resolver fulfills the same idea as :data:`activation_resolver` but
+it is explicitly limited to :class:`torch.nn.ReLU` and :class:`torch.nn.Softplus`
+for certain scenarios where a margin-style activation is appropriate.
+"""
 
 initializer_resolver = FunctionResolver(
     [func for name, func in vars(init).items() if not name.startswith("_") and name.endswith("_")],
@@ -104,8 +130,8 @@ initializer_resolver = FunctionResolver(
         def __init__(
             self,
             in_features: int,
-            hidden_features: int, 
-            out_features: int, 
+            hidden_features: int,
+            out_features: int,
             initializer=nn.init.xavier_normal_,
         )
             self.layer_1 = nn.Linear(in_features, hidden_features)
