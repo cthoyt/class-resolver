@@ -35,6 +35,7 @@ __all__ = [
     "normalize_string",
     "upgrade_to_sequence",
     "make_callback",
+    "same_module",
 ]
 
 X = TypeVar("X")
@@ -54,20 +55,36 @@ OptionalKwargs = Optional[Mapping[str, Any]]
 OneOrSequence = Union[X, Sequence[X]]
 
 
-def get_subclasses(cls: Type[X], exclude_private: bool = True) -> Iterable[Type[X]]:
+def get_subclasses(
+    cls: Type[X],
+    exclude_private: bool = True,
+    exclude_external: bool = True,
+) -> Iterable[Type[X]]:
     """Get all subclasses.
 
     :param cls: The ancestor class
     :param exclude_private: If true, will skip any class that comes from a module
         starting with an underscore (i.e., a private module). This is typically
         done when having shadow duplicate classes implemented in C
+    :param exclude_external: If true, will exclude any class that does not originate
+        from the same package as the base class.
     :yields: Descendant classes of the ancestor class
     """
     for subclass in cls.__subclasses__():
         yield from get_subclasses(subclass)
-        if exclude_private and any(part.startswith("_") for part in subclass.__module__.split(".")):
+        if exclude_private:
+            if any(part.startswith("_") for part in subclass.__module__.split(".")):
+                continue
+            if subclass.__name__.startswith("_"):
+                continue
+        if exclude_external and not same_module(cls, subclass):
             continue
         yield subclass
+
+
+def same_module(cls1: type, cls2: type) -> bool:
+    """Return if two classes come from the same module via the ``__module__`` attribute."""
+    return cls1.__module__.split(".")[0] == cls2.__module__.split(".")[0]
 
 
 def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
