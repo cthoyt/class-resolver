@@ -6,8 +6,8 @@ import unittest
 
 try:
     import optuna
-except ImportError:
-    optuna = None
+except ImportError:  # pragma: no cover
+    optuna = None  # pragma: no cover
 
 
 @unittest.skipUnless(optuna, "Can not test optuna contrib without ``pip install optuna``.")

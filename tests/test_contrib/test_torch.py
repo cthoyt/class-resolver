@@ -6,8 +6,8 @@ import unittest
 
 try:
     import torch
-except ImportError:
-    torch = None
+except ImportError:  # pragma: no cover
+    torch = None  # pragma: no cover
 
 
 @unittest.skipUnless(torch, "Can not test torch contrib without ``pip install torch``.")

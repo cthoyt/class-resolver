@@ -17,7 +17,7 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    import click
+    import click  # pragma: no cover
 
 __all__ = [
     # Type Hints
