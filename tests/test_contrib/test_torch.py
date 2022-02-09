@@ -58,12 +58,13 @@ class TestTorch(unittest.TestCase):
 
     def test_lr(self):
         """Tests for the learning rate scheduler."""
-        from torch.optim.lr_scheduler import ExponentialLR, LambdaLR
+        from torch.optim.lr_scheduler import ExponentialLR, LambdaLR, ReduceLROnPlateau
 
         from class_resolver.contrib.torch import lr_scheduler_resolver
 
         self.assertEqual(LambdaLR, lr_scheduler_resolver.lookup("lambda"))
         self.assertEqual(LambdaLR, lr_scheduler_resolver.lookup("lambdalr"))
+        self.assertEqual(ReduceLROnPlateau, lr_scheduler_resolver.lookup("reducelronplateau"))
         self.assertEqual(ExponentialLR, lr_scheduler_resolver.lookup("exponential"))
         self.assertEqual(ExponentialLR, lr_scheduler_resolver.lookup("exponentiallr"))
         self.assertEqual(ExponentialLR, lr_scheduler_resolver.lookup(None))
