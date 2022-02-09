@@ -6,7 +6,7 @@ from torch import nn
 from torch.nn import init
 from torch.nn.modules import activation
 from torch.optim import Adam, Optimizer
-from torch.optim.lr_scheduler import ExponentialLR, _LRScheduler
+from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau, _LRScheduler
 
 from ..api import ClassResolver
 from ..func import FunctionResolver
@@ -59,8 +59,8 @@ activation_resolver = ClassResolver(
         module
         for module in vars(activation).values()
         if isinstance(module, type)
-        and issubclass(module, nn.Module)
-        and module not in ACTIVATION_SKIP
+           and issubclass(module, nn.Module)
+           and module not in ACTIVATION_SKIP
     ],
     base=nn.Module,
     default=activation.ReLU,
@@ -185,3 +185,5 @@ then parametrized to accept a LRScheduler hint.
 
         return model
 """
+
+lr_scheduler_resolver.register(ReduceLROnPlateau)
