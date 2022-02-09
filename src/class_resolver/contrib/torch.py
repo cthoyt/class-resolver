@@ -70,4 +70,4 @@ lr_scheduler_resolver = ClassResolver.from_subclasses(
     default=ExponentialLR,
     suffix="LR",
 )
-lr_scheduler_resolver.register(ReduceLROnPlateau, raise_on_conflict=False)
+lr_scheduler_resolver.register(ReduceLROnPlateau)
