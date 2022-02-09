@@ -1,5 +1,7 @@
 Class Resolver |release| Documentation
 ======================================
+.. automodule:: class_resolver
+   :noindex:
 
 .. toctree::
    :maxdepth: 2
@@ -8,7 +10,7 @@ Class Resolver |release| Documentation
 
    installation
    usage
-   contrib
+   contrib/index
 
 Indices and Tables
 ------------------
