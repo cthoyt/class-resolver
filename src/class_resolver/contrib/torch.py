@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""Class resolvers for PyTorch."""
+"""
+PyTorch is a tensor and autograd library widely used for machine learning.
+The ``class-resolver`` provides several class resolvers and function resolvers
+to make it possible to more easily parametrize models and training loops.
+"""  # noqa:D205,D400
 
 from torch import nn
 from torch.nn import init
@@ -59,8 +63,8 @@ activation_resolver = ClassResolver(
         module
         for module in vars(activation).values()
         if isinstance(module, type)
-           and issubclass(module, nn.Module)
-           and module not in ACTIVATION_SKIP
+        and issubclass(module, nn.Module)
+        and module not in ACTIVATION_SKIP
     ],
     base=nn.Module,
     default=activation.ReLU,

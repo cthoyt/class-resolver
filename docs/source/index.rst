@@ -1,5 +1,7 @@
 Class Resolver |release| Documentation
 ======================================
+.. automodule:: class_resolver
+   :noindex:
 
 .. toctree::
    :maxdepth: 2
