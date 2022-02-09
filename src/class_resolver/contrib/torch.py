@@ -5,7 +5,7 @@
 from torch import nn
 from torch.nn import init
 from torch.nn.modules import activation
-from torch.optim import Adam, Optimizer
+from torch.optim import Adam, Optimizer, ReduceLROnPlateau
 from torch.optim.lr_scheduler import ExponentialLR, _LRScheduler
 
 from ..api import ClassResolver
@@ -70,3 +70,4 @@ lr_scheduler_resolver = ClassResolver.from_subclasses(
     default=ExponentialLR,
     suffix="LR",
 )
+lr_scheduler_resolver.register(ReduceLROnPlateau, raise_on_conflict=False)
