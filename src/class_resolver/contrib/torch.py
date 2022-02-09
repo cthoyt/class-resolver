@@ -5,8 +5,8 @@
 from torch import nn
 from torch.nn import init
 from torch.nn.modules import activation
-from torch.optim import Adam, Optimizer, ReduceLROnPlateau
-from torch.optim.lr_scheduler import ExponentialLR, _LRScheduler
+from torch.optim import Adam, Optimizer
+from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau, _LRScheduler
 
 from ..api import ClassResolver
 from ..func import FunctionResolver
