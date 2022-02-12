@@ -13,7 +13,7 @@
         <img alt="Tests" src="https://github.com/cthoyt/class-resolver/workflows/Tests/badge.svg" />
     </a>
     <a href="https://github.com/cthoyt/cookiecutter-python-package">
-        <img alt="Cookiecutter template from @cthoyt" src="https://img.shields.io/badge/Cookiecutter-python--package-yellow" /> 
+        <img alt="Cookiecutter template from @cthoyt" src="https://img.shields.io/badge/Cookiecutter-snekpack-blue" /> 
     </a>
     <a href="https://pypi.org/project/class_resolver">
         <img alt="PyPI" src="https://img.shields.io/pypi/v/class_resolver" />
