@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""Tests for the argument checker."""
+
 import unittest
 from typing import Optional, Type
 
@@ -6,23 +10,27 @@ from class_resolver.metaresolver import Metaresolver, is_hint
 
 
 class Baz:
-    def __init__(self, value: bool = False):
+    """A dummy class."""
+
+    def __init__(self, value: bool = False):  # noqa:D107
         self.value = value
 
 
 class XBaz(Baz):
-    pass
+    """A dummy child of the Baz class."""
 
 
 class YBaz(Baz):
-    pass
+    """A dummy child of the Baz class."""
 
 
 baz_resolver = ClassResolver.from_subclasses(Baz)
 
 
 class Bar:
-    def __init__(
+    """A dummy class."""
+
+    def __init__(  # noqa:D107
         self,
         baz: Hint[Baz] = None,
         baz_kwargs: OptionalKwargs = None,
@@ -31,18 +39,20 @@ class Bar:
 
 
 class AlphaBar(Bar):
-    pass
+    """A dummy child of the Bar class."""
 
 
 class BetaBar(Bar):
-    pass
+    """A dummy child of the Bar class."""
 
 
 bar_resolver = ClassResolver.from_subclasses(Bar)
 
 
 class Foo:
-    def __init__(
+    """A dummy class."""
+
+    def __init__(  # noqa:D107
         self,
         *,
         bar: Hint[Bar] = None,
@@ -56,20 +66,21 @@ class Foo:
 
 
 class AFoo(Foo):
-    pass
+    """A dummy child of the Foo class."""
 
 
 class BFoo(Foo):
-    pass
+    """A dummy child of the Foo class."""
 
 
 foo_resolver = ClassResolver.from_subclasses(Foo)
 
 
 class TestMetaResolver(unittest.TestCase):
-    """"""
+    """A test case for the argument checker."""
 
     def setUp(self) -> None:
+        """Set up the test case."""
         self.meta_resolver = Metaresolver([baz_resolver, bar_resolver, foo_resolver])
 
     def test_is_hint(self):
@@ -79,8 +90,11 @@ class TestMetaResolver(unittest.TestCase):
         self.assertFalse(is_hint(Type[Bar], Bar))
         self.assertFalse(is_hint(str, Bar))
         self.assertFalse(is_hint(None, Bar))
+        with self.assertRaises(TypeError):
+            is_hint(..., 5)
 
-    def test_check(self):
+    def test_argument_checker(self):
+        """Test the argument checker."""
         true_kwargs = [
             (
                 AFoo,
