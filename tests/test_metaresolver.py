@@ -81,9 +81,8 @@ class TestMetaResolver(unittest.TestCase):
         self.assertFalse(is_hint(None, Bar))
 
     def test_check(self):
-        self.assertTrue(
-            self.meta_resolver.check_kwargs(
-                Foo,
+        true_kwargs = [
+            (
                 AFoo,
                 {
                     "bar": "alpha",
@@ -96,26 +95,14 @@ class TestMetaResolver(unittest.TestCase):
                     "param_1": 3.0,
                     # Param 2 is optional, so not necessary to give
                 },
-            )
-        )
-        self.assertTrue(
-            self.meta_resolver.check_kwargs(
-                Foo,
-                AFoo,
-                {
-                    "bar": "alpha",
-                    "bar_kwargs": {
-                        "baz": "x",
-                        # baz_kwargs value not necessary since has default
-                    },
-                    "param_1": 3.0,
-                    # Param 2 is optional, so not necessary to give
-                },
-            )
-        )
-        self.assertFalse(
-            self.meta_resolver.check_kwargs(
-                Foo,
+            ),
+        ]
+        for func, kwargs in true_kwargs:
+            with self.subTest():
+                self.assertTrue(self.meta_resolver.check_kwargs(func, kwargs))
+
+        false_kwargs = [
+            (
                 AFoo,
                 {
                     "bar": "alpha",
@@ -125,4 +112,7 @@ class TestMetaResolver(unittest.TestCase):
                     # Missing param_1 !!
                 },
             )
-        )
+        ]
+        for func, kwargs in false_kwargs:
+            with self.subTest(), self.assertRaises(ValueError):
+                self.meta_resolver.check_kwargs(func, kwargs)

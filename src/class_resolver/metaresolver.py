@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Iterable, Mapping, Optional, Tuple, Type, TypeVar
+from typing import Any, Callable, Iterable, Mapping, Optional, Tuple, Type, TypeVar
 
 from .api import ClassResolver
 from .utils import Hint, OptionalKwargs
@@ -24,44 +24,46 @@ class Metaresolver:
         }
         self.names = {resolver.suffix: resolver for cls, resolver in self.resolvers.items()}
 
-    def check_kwargs(self, base: Type[X], query: Hint[X], kwargs: OptionalKwargs) -> bool:
-        main = self.resolvers[base]
-        signature = main.signature(query)
-        parameters = signature.parameters
+    def check_kwargs(self, func: Callable, kwargs: OptionalKwargs = None) -> bool:
+        signature = inspect.signature(func)
+        parameters = dict(signature.parameters)
+        if kwargs is None:
+            kwargs = {}
         for key, parameter, related_key, related_parameter in _iter_params(parameters):
             annotation = parameter.annotation
             next_resolver = self.names.get(key)
-            if next_resolver is None:
+            if next_resolver is not None:
+                if not is_hint(annotation, next_resolver.base):
+                    raise TypeError(
+                        f"{key} has bad annotation {annotation} wrt resolver {next_resolver}"
+                    )
+                self.check_kwargs(
+                    next_resolver.lookup(kwargs[key]),
+                    kwargs.get(related_key, {}),
+                )
+            else:
                 if key not in kwargs:
                     if parameter.default is parameter.empty:
                         raise ValueError(f"{key} without default not given")
                 else:
-                    if not isinstance(kwargs[key], parameter.annotation):
-                        raise TypeError
-            elif not is_hint(annotation, next_resolver.base):
-                raise TypeError(
-                    f"{key} has bad annotation {annotation} wrt resolver {next_resolver}"
-                )
-            elif not self.check_kwargs(
-                next_resolver.base,
-                next_resolver.lookup(kwargs[key]),
-                kwargs[related_key],
-            ):
-                return False
-            else:
-                continue
+                    try:
+                        instance_flag = isinstance(kwargs[key], parameter.annotation)
+                    except TypeError:
+                        raise TypeError(f"{key} {kwargs[key]} {parameter.annotation}") from None
+                    if not instance_flag:
+                        raise ValueError
+        return True
 
 
 def _iter_params(
     parameters,
 ) -> Iterable[Tuple[str, inspect.Parameter, str, Optional[inspect.Parameter]]]:
     kwarg_map = {}
-    for key in parameters.items():
-        related_key = f"{key}_kwargs"
-        if related_key in parameters:
-            kwarg_map[key] = related_key
     for key in parameters:
         related_key = f"{key}_kwargs"
+        if related_key in parameters:
+            kwarg_map[related_key] = key
+    for key in parameters:
         if key in kwarg_map:
             continue
-        yield key, parameters[key], related_key, parameters.get(related_key)
+        yield key, parameters[key], f"{key}_kwargs", parameters.get(f"{key}_kwargs")
