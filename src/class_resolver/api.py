@@ -9,7 +9,6 @@ from typing import Any, Collection, List, Mapping, Optional, Sequence, Type, Typ
 
 from .base import BaseResolver
 from .utils import (
-    Hint,
     HintOrType,
     HintType,
     OneOrSequence,
@@ -183,12 +182,12 @@ class ClassResolver(BaseResolver[Type[X], X]):
             suffix=self.suffix,
         )
 
-    def signature(self, query: Hint[Type[X]]) -> inspect.Signature:
+    def signature(self, query: HintOrType[X]) -> inspect.Signature:
         """Get the signature for the given class via :func:`inspect.signature`."""
         cls = self.lookup(query)
         return inspect.signature(cls)
 
-    def supports_argument(self, query: Hint[Type[X]], parameter_name: str) -> bool:
+    def supports_argument(self, query: HintOrType[X], parameter_name: str) -> bool:
         """Determine if the class constructor supports the given argument."""
         return parameter_name in self.signature(query).parameters
 
