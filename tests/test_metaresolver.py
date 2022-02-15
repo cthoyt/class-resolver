@@ -81,39 +81,48 @@ class TestMetaResolver(unittest.TestCase):
         self.assertFalse(is_hint(None, Bar))
 
     def test_check(self):
-        self.assertTrue(self.meta_resolver.check_kwargs(
-            Foo, AFoo,
-            {
-                "bar": "alpha",
-                "bar_kwargs": {
-                    "baz": "x",
-                    "baz_kwargs": {
-                        "value": True,
-                    }
+        self.assertTrue(
+            self.meta_resolver.check_kwargs(
+                Foo,
+                AFoo,
+                {
+                    "bar": "alpha",
+                    "bar_kwargs": {
+                        "baz": "x",
+                        "baz_kwargs": {
+                            "value": True,
+                        },
+                    },
+                    "param_1": 3.0,
+                    # Param 2 is optional, so not necessary to give
                 },
-                "param_1": 3.0,
-                # Param 2 is optional, so not necessary to give
-            },
-        ))
-        self.assertTrue(self.meta_resolver.check_kwargs(
-            Foo, AFoo,
-            {
-                "bar": "alpha",
-                "bar_kwargs": {
-                    "baz": "x",
-                    # baz_kwargs value not necessary since has default
+            )
+        )
+        self.assertTrue(
+            self.meta_resolver.check_kwargs(
+                Foo,
+                AFoo,
+                {
+                    "bar": "alpha",
+                    "bar_kwargs": {
+                        "baz": "x",
+                        # baz_kwargs value not necessary since has default
+                    },
+                    "param_1": 3.0,
+                    # Param 2 is optional, so not necessary to give
                 },
-                "param_1": 3.0,
-                # Param 2 is optional, so not necessary to give
-            },
-        ))
-        self.assertFalse(self.meta_resolver.check_kwargs(
-            Foo, AFoo,
-            {
-                "bar": "alpha",
-                "bar_kwargs": {
-                    "baz": "x",
+            )
+        )
+        self.assertFalse(
+            self.meta_resolver.check_kwargs(
+                Foo,
+                AFoo,
+                {
+                    "bar": "alpha",
+                    "bar_kwargs": {
+                        "baz": "x",
+                    },
+                    # Missing param_1 !!
                 },
-                # Missing param_1 !!
-            },
-        ))
+            )
+        )
