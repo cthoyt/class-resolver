@@ -37,9 +37,12 @@ class Metaresolver:
                     raise TypeError(
                         f"{key} has bad annotation {annotation} wrt resolver {next_resolver}"
                     )
+                query = kwargs.get(key)
+                if query is None:
+                    raise KeyError
                 self.check_kwargs(
-                    next_resolver.lookup(kwargs[key]),
-                    kwargs.get(related_key, {}),
+                    next_resolver.lookup(query),
+                    kwargs.get(related_key),
                 )
             else:
                 if key not in kwargs:

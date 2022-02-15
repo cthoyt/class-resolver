@@ -111,8 +111,20 @@ class TestMetaResolver(unittest.TestCase):
                     },
                     # Missing param_1 !!
                 },
-            )
+            ),
+            (
+                AFoo,
+                {
+                    "bar": "alpha",
+                    "bar_kwargs": {
+                        "baz": "x",
+                    },
+                    "param_1": "3.0",  # wrong type, should be float
+                },
+            ),
+            (AFoo, None),
+            (AFoo, {}),
         ]
         for func, kwargs in false_kwargs:
-            with self.subTest(), self.assertRaises(ValueError):
+            with self.subTest(), self.assertRaises((ValueError, KeyError)):
                 self.meta_resolver.check_kwargs(func, kwargs)
