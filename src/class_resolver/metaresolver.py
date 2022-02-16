@@ -3,7 +3,9 @@
 """An argument checker."""
 
 import inspect
-from typing import Any, Callable, Iterable, Mapping, Tuple, Type, TypeVar
+from typing import Any, Callable, Iterable, Mapping, Tuple, Type, TypeVar, Union
+
+from typing_extensions import get_args, get_origin
 
 from .api import ClassResolver
 from .utils import Hint, OptionalKwargs
@@ -28,6 +30,9 @@ def is_hint(hint: Any, cls: Type[X]) -> bool:
     if not isinstance(cls, type):
         raise TypeError
     return hint == Hint[cls]  # type: ignore
+
+
+SIMPLE_TYPES = {float, int, bool, str, type(None)}
 
 
 def check_kwargs(
@@ -76,29 +81,40 @@ class Metaresolver:
         for key, parameter, related_key in _iter_params(func):
             annotation = parameter.annotation
             next_resolver = self.names.get(key)
+            value = kwargs.get(key)
             if next_resolver is not None:
                 if not is_hint(annotation, next_resolver.base):
                     raise ArgumentError(
                         f"{key} has bad annotation {annotation} wrt resolver {next_resolver}"
                     )
-                query = kwargs.get(key)
-                if query is None:
+                if value is None:
                     raise ArgumentError(f"{key} is missing from the arguments")
                 self.check_kwargs(
-                    next_resolver.lookup(query),
+                    next_resolver.lookup(value),
                     kwargs.get(related_key),
                 )
             else:
-                if key not in kwargs:
+                if value is None:
                     if parameter.default is parameter.empty:
                         raise ArgumentError(f"{key} without default not given")
                 else:
-                    try:
-                        instance_flag = isinstance(kwargs[key], parameter.annotation)
-                    except TypeError:
-                        raise ArgumentError(f"{key} {kwargs[key]} {parameter.annotation}") from None
-                    if not instance_flag:
-                        raise ArgumentError
+                    origin = get_origin(annotation)
+                    if origin is Union:
+                        args = get_args(annotation)
+                        if all(arg in SIMPLE_TYPES for arg in args):
+                            if isinstance(value, args):
+                                pass
+                            else:
+                                raise ArgumentError
+                        else:
+                            raise NotImplementedError(f"{args}")
+                    elif origin is None:
+                        if isinstance(value, annotation):
+                            pass
+                        else:
+                            raise ArgumentError
+                    else:
+                        raise NotImplementedError(f"origin: {origin}")
         return True
 
 

@@ -100,6 +100,30 @@ class TestMetaResolver(unittest.TestCase):
         with self.assertRaises(TypeError):
             is_hint(..., 5)
 
+    def test_annotation_resolver_mismatch(self):
+        """Test when the key for a resolver is annotated incorrectly."""
+
+        class Bax:
+            """A dummy class."""
+
+            def __init__(self, baz: int):
+                """Instantiate the dummy class."""
+
+        with self.assertRaises(ArgumentError):
+            self.check_kwargs(Bax, {"baz": "x"})
+
+    def test_annotation_mismatch(self):
+        """Test when a random value is annotated incorrectly."""
+
+        class Bax:
+            """A dummy class."""
+
+            def __init__(self, value: Optional[int]):
+                """Instantiate the dummy class."""
+                self.value = value
+
+        self.assertTrue(self.check_kwargs(Bax, {"value": 5}))
+
     def test_argument_checker(self):
         """Test the argument checker."""
         true_kwargs = [
@@ -115,6 +139,20 @@ class TestMetaResolver(unittest.TestCase):
                     },
                     "param_1": 3.0,
                     # Param 2 is optional, so not necessary to give
+                },
+            ),
+            (
+                AFoo,
+                {
+                    "bar": "alpha",
+                    "bar_kwargs": {
+                        "baz": "x",
+                        "baz_kwargs": {
+                            "value": True,
+                        },
+                    },
+                    "param_1": 3.0,
+                    "param_2": 2,
                 },
             ),
         ]
