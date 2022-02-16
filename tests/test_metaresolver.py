@@ -12,7 +12,8 @@ from class_resolver.metaresolver import ArgumentError, check_kwargs, is_hint
 class Baz:
     """A dummy class."""
 
-    def __init__(self, value: bool = False):  # noqa:D107
+    def __init__(self, value: bool = False):
+        """Instantiate the dummy class."""
         self.value = value
 
 
@@ -30,11 +31,12 @@ baz_resolver = ClassResolver.from_subclasses(Baz)
 class Bar:
     """A dummy class."""
 
-    def __init__(  # noqa:D107
+    def __init__(
         self,
         baz: Hint[Baz] = None,
         baz_kwargs: OptionalKwargs = None,
     ):
+        """Instantiate the dummy class."""
         self.baz = baz_resolver.make(baz, baz_kwargs)
 
 
@@ -52,7 +54,7 @@ bar_resolver = ClassResolver.from_subclasses(Bar)
 class Foo:
     """A dummy class."""
 
-    def __init__(  # noqa:D107
+    def __init__(
         self,
         *,
         bar: Hint[Bar] = None,
@@ -60,6 +62,7 @@ class Foo:
         param_1: float,
         param_2: Optional[int] = None,
     ):
+        """Instantiate the dummy class."""
         self.bar = bar_resolver.make(bar, bar_kwargs)
         self.param_1 = param_1
         self.param_2 = param_2 or 5

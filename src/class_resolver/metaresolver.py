@@ -3,7 +3,7 @@
 """An argument checker."""
 
 import inspect
-from typing import Any, Callable, Iterable, Mapping, Optional, Tuple, Type, TypeVar
+from typing import Any, Callable, Iterable, Mapping, Tuple, Type, TypeVar
 
 from .api import ClassResolver
 from .utils import Hint, OptionalKwargs
