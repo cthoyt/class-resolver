@@ -6,7 +6,7 @@ import unittest
 from typing import Optional, Type
 
 from class_resolver import ClassResolver, Hint, OptionalKwargs
-from class_resolver.metaresolver import Metaresolver, is_hint
+from class_resolver.metaresolver import ArgumentError, check_kwargs, is_hint
 
 
 class Baz:
@@ -81,7 +81,11 @@ class TestMetaResolver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up the test case."""
-        self.meta_resolver = Metaresolver([baz_resolver, bar_resolver, foo_resolver])
+        self.resolvers = [baz_resolver, bar_resolver, foo_resolver]
+
+    def check_kwargs(self, func, kwargs) -> bool:
+        """Check the kwargs."""
+        return check_kwargs(func, kwargs, resolvers=self.resolvers)
 
     def test_is_hint(self):
         """Test hint predicate."""
@@ -113,7 +117,7 @@ class TestMetaResolver(unittest.TestCase):
         ]
         for func, kwargs in true_kwargs:
             with self.subTest():
-                self.assertTrue(self.meta_resolver.check_kwargs(func, kwargs))
+                self.assertTrue(self.check_kwargs(func, kwargs))
 
         false_kwargs = [
             (
@@ -140,5 +144,5 @@ class TestMetaResolver(unittest.TestCase):
             (AFoo, {}),
         ]
         for func, kwargs in false_kwargs:
-            with self.subTest(), self.assertRaises((ValueError, KeyError)):
-                self.meta_resolver.check_kwargs(func, kwargs)
+            with self.subTest(), self.assertRaises(ArgumentError):
+                self.check_kwargs(func, kwargs)
