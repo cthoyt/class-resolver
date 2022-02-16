@@ -107,14 +107,14 @@ class Metaresolver:
                             else:
                                 raise ArgumentError
                         else:
-                            raise NotImplementedError(f"{args}")
+                            raise ArgumentError
                     elif origin is None:
                         if isinstance(value, annotation):
                             pass
                         else:
                             raise ArgumentError
                     else:
-                        raise NotImplementedError(f"origin: {origin}")
+                        raise ArgumentError(f"origin: {origin}")
         return True
 
 

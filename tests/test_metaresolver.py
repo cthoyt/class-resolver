@@ -2,6 +2,7 @@
 
 """Tests for the argument checker."""
 
+import typing as t
 import unittest
 from typing import Optional, Type
 
@@ -123,6 +124,42 @@ class TestMetaResolver(unittest.TestCase):
                 self.value = value
 
         self.assertTrue(self.check_kwargs(Bax, {"value": 5}))
+
+    def test_annotation_extended_origin_mismatch(self):
+        """Test when a random value is annotated incorrectly."""
+
+        class Bax:
+            """A dummy class."""
+
+            def __init__(self, value: t.Union[int, float, None]):
+                """Instantiate the dummy class."""
+
+        with self.assertRaises(ArgumentError):
+            self.check_kwargs(Bax, {"value": "nope"})
+
+    def test_annotation_extended_origin_mismatch_2(self):
+        """Test when a random value is annotated incorrectly."""
+
+        class Bax:
+            """A dummy class."""
+
+            def __init__(self, value: t.Union[int, float, None, t.Iterable[int]]):
+                """Instantiate the dummy class."""
+
+        with self.assertRaises(ArgumentError):
+            self.check_kwargs(Bax, {"value": 1})
+
+    def test_annotation_invalid_origin(self):
+        """Test when a random value is annotated incorrectly."""
+
+        class Bax:
+            """A dummy class."""
+
+            def __init__(self, value: t.Iterable[int]):
+                """Instantiate the dummy class."""
+
+        with self.assertRaises(ArgumentError):
+            self.check_kwargs(Bax, {"value": 5})
 
     def test_argument_checker(self):
         """Test the argument checker."""
