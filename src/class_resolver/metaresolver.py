@@ -3,12 +3,24 @@
 """An argument checker."""
 
 import inspect
-from typing import Any, Callable, Iterable, Mapping, Tuple, Type, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Iterable,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import get_args, get_origin
 
-from .api import ClassResolver
-from .utils import Hint, OptionalKwargs
+from class_resolver.api import ClassResolver
+from class_resolver.base import BaseResolver
+from class_resolver.func import FunctionResolver
+from class_resolver.utils import Hint, HintOrType, HintType, OptionalKwargs
 
 __all__ = [
     "check_kwargs",
@@ -29,10 +41,20 @@ def is_hint(hint: Any, cls: Type[X]) -> bool:
     """
     if not isinstance(cls, type):
         raise TypeError
-    return hint == Hint[cls]  # type: ignore
+    if hint == Hint[cls]:  # type: ignore
+        return True
+    if hint == HintType[cls]:  # type: ignore
+        return True
+    if hint == HintOrType[cls]:  # type: ignore
+        return True
+    return False
 
 
 SIMPLE_TYPES = {float, int, bool, str, type(None)}
+
+
+def _is_simple_union(u) -> bool:
+    return all(arg in SIMPLE_TYPES for arg in get_args(u))
 
 
 def check_kwargs(
@@ -54,19 +76,30 @@ def check_kwargs(
 class ArgumentError(TypeError):
     """A custom argument error."""
 
+    def __init__(self, func, key, text):
+        self.func = func
+        self.key = key
+        self.text = text
+
+    def __str__(self):
+        return f"{self.func} {self.key}: {self.text}"
+
 
 class Metaresolver:
     """A resolver of resolvers."""
 
-    def __init__(self, resolvers: Iterable[ClassResolver]):
+    def __init__(
+        self,
+        resolvers: Iterable[ClassResolver],
+        extras: Optional[Mapping[str, BaseResolver]] = None,
+    ):
         """Instantiate a meta-resolver.
 
         :param resolvers: A set of resolvers to index for checking kwargs
         """
-        self.resolvers: Mapping[Type, ClassResolver] = {
-            resolver.base: resolver for resolver in resolvers
-        }
-        self.names = {resolver.suffix: resolver for cls, resolver in self.resolvers.items()}
+        self.names = {resolver.suffix: resolver for resolver in resolvers}
+        if extras:
+            self.names.update(extras)
 
     def check_kwargs(self, func: Callable, kwargs: OptionalKwargs = None) -> bool:
         """Check the appropriate of the kwargs with a given function.
@@ -79,16 +112,22 @@ class Metaresolver:
         if kwargs is None:
             kwargs = {}
         for key, parameter, related_key in _iter_params(func):
+            if key == "kwargs":
+                continue
             annotation = parameter.annotation
             next_resolver = self.names.get(key)
             value = kwargs.get(key)
             if next_resolver is not None:
+                if isinstance(next_resolver, FunctionResolver):
+                    continue
                 if not is_hint(annotation, next_resolver.base):
                     raise ArgumentError(
-                        f"{key} has bad annotation {annotation} wrt resolver {next_resolver}"
+                        func,
+                        key,
+                        f"has bad annotation {annotation} wrt resolver {next_resolver}",
                     )
                 if value is None:
-                    raise ArgumentError(f"{key} is missing from the arguments")
+                    raise ArgumentError(func, key, f"is missing from the arguments")
                 self.check_kwargs(
                     next_resolver.lookup(value),
                     kwargs.get(related_key),
@@ -96,25 +135,45 @@ class Metaresolver:
             else:
                 if value is None:
                     if parameter.default is parameter.empty:
-                        raise ArgumentError(f"{key} without default not given")
+                        raise ArgumentError(
+                            func,
+                            key,
+                            f"no default, value not given. Signature: {inspect.signature(func)}",
+                        )
                 else:
                     origin = get_origin(annotation)
                     if origin is Union:
-                        args = get_args(annotation)
-                        if all(arg in SIMPLE_TYPES for arg in args):
+                        if not _is_simple_union(annotation):
+                            raise ArgumentError(
+                                func, key, f"has inappropriate annotation: {annotation}"
+                            )
+                        else:
+                            args = get_args(annotation)
                             if isinstance(value, args):
                                 pass
                             else:
-                                raise ArgumentError
-                        else:
-                            raise ArgumentError
+                                raise ArgumentError(
+                                    func,
+                                    key,
+                                    f"value {value} does not match annotation {annotation}",
+                                )
                     elif origin is None:
-                        if isinstance(value, annotation):
+                        try:
+                            instance_check = isinstance(value, annotation)
+                        except TypeError:
+                            raise ArgumentError(
+                                func, key, f"invalid annotation {annotation} ({type(annotation)})"
+                            ) from None
+                        if instance_check:
                             pass
+                        elif annotation == float and isinstance(value, int):
+                            pass  # log a warning?
                         else:
-                            raise ArgumentError
+                            raise ArgumentError(
+                                func, key, f"{value} mismatched annotation {annotation}"
+                            )
                     else:
-                        raise ArgumentError(f"origin: {origin}")
+                        raise ArgumentError(func, key, f"unhandled origin {origin}")
         return True
 
 
@@ -131,3 +190,45 @@ def _iter_params(
         if key in kwarg_map:
             continue
         yield key, parameters[key], f"{key}_kwargs"
+
+
+def _main():
+    import json
+
+    from pykeen.datasets import dataset_resolver
+    from pykeen.experiments.cli import HERE
+    from pykeen.losses import loss_resolver
+    from pykeen.models import model_resolver
+    from pykeen.nn.emb import constrainer_resolver, normalizer_resolver
+    from pykeen.nn.init import initializer_resolver
+    from pykeen.pipeline import pipeline
+    from pykeen.regularizers import regularizer_resolver
+
+    print(HERE)
+    r = Metaresolver(
+        [
+            model_resolver,
+            regularizer_resolver,
+            loss_resolver,
+            dataset_resolver,
+            constrainer_resolver,
+            normalizer_resolver,
+            initializer_resolver,
+        ],
+        extras={
+            "entity_initializer": initializer_resolver,
+            "entity_normalizer": normalizer_resolver,
+            "entity_constrainer": constrainer_resolver,
+            "relation_initializer": initializer_resolver,
+            "relation_normalizer": normalizer_resolver,
+            "relation_constrainer": constrainer_resolver,
+        },
+    )
+    for path in HERE.glob("*/*.json"):
+        data = json.loads(path.read_text())
+        kwargs = data["pipeline"]
+        r.check_kwargs(pipeline, kwargs)
+
+
+if __name__ == "__main__":
+    _main()
