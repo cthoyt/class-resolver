@@ -3,18 +3,7 @@
 """Utilities for the resolver."""
 
 import collections.abc
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Iterable,
-    Mapping,
-    Optional,
-    Sequence,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import (Any, Callable, Iterable, Mapping, Optional, Sequence, TYPE_CHECKING, Type, TypeVar, Union)
 
 if TYPE_CHECKING:
     import click  # pragma: no cover
@@ -30,6 +19,8 @@ __all__ = [
     "LookupOrType",
     "LookupType",
     "OptionalKwargs",
+    "OneOrManyHintOrType",
+    "OneOrManyOptionalKwargs",
     # Functions
     "get_subclasses",
     "normalize_string",
@@ -53,6 +44,8 @@ HintType = Hint[Type[X]]
 HintOrType = Hint[InstOrType[X]]
 OptionalKwargs = Optional[Mapping[str, Any]]
 OneOrSequence = Union[X, Sequence[X]]
+OneOrManyHintOrType = Optional[OneOrSequence[HintOrType[X]]]
+OneOrManyOptionalKwargs = Optional[OneOrSequence[OptionalKwargs]]
 
 
 def get_subclasses(

@@ -10,9 +10,9 @@ from typing import Any, Collection, List, Mapping, MutableMapping, Optional, Seq
 from .base import BaseResolver
 from .utils import (
     HintOrType,
+    OneOrManyHintOrType,
     HintType,
-    OneOrSequence,
-    OptionalKwargs,
+    OneOrManyOptionalKwargs,
     get_subclasses,
     normalize_string,
     upgrade_to_sequence,
@@ -155,8 +155,8 @@ class ClassResolver(BaseResolver[Type[X], X]):
             {
                 subcls
                 for subcls in get_subclasses(
-                    base, exclude_private=exclude_private, exclude_external=exclude_external
-                )
+                base, exclude_private=exclude_private, exclude_external=exclude_external
+            )
                 if subcls not in skip
             },
             base=base,
@@ -301,8 +301,8 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
     def make_many(
         self,
-        queries: Optional[OneOrSequence[HintType[X]]] = None,
-        kwargs: Optional[OneOrSequence[OptionalKwargs]] = None,
+        queries: OneOrManyHintOrType = None,
+        kwargs: OneOrManyOptionalKwargs = None,
         **common_kwargs,
     ) -> List[X]:
         """Resolve and compose several queries together.
