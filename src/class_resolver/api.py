@@ -5,13 +5,13 @@
 import inspect
 import logging
 from textwrap import dedent
-from typing import Any, Collection, List, Mapping, MutableMapping, Optional, Sequence, Type, TypeVar
+from typing import Any, Collection, List, Mapping, Optional, Sequence, Type, TypeVar
 
 from .base import BaseResolver
 from .utils import (
     HintOrType,
-    OneOrManyHintOrType,
     HintType,
+    OneOrManyHintOrType,
     OneOrManyOptionalKwargs,
     get_subclasses,
     normalize_string,
