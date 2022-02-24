@@ -5,7 +5,7 @@
 import inspect
 import logging
 from textwrap import dedent
-from typing import Any, Collection, List, Mapping, Optional, Sequence, Type, TypeVar
+from typing import Any, Collection, List, Mapping, MutableMapping, Optional, Sequence, Type, TypeVar
 
 from .base import BaseResolver
 from .utils import (
@@ -303,6 +303,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         self,
         queries: Optional[OneOrSequence[HintType[X]]] = None,
         kwargs: Optional[OneOrSequence[OptionalKwargs]] = None,
+        **common_kwargs,
     ) -> List[X]:
         """Resolve and compose several queries together.
 
@@ -312,11 +313,12 @@ class ClassResolver(BaseResolver[Type[X], X]):
         :param kwargs: Either none (will use all defaults), a single dictionary
             (will be used for all instances), or a list of dictionaries with the same length
             as ``queries``
+        :param common_kwargs: additional keyword-based parameters passed to all instantiated instances.
         :raises ValueError: If the number of queries and kwargs has a mismatch
         :returns: A list of X instances
         """
         _query_list: Sequence[HintType[X]]
-        _kwargs_list: Sequence[Optional[Mapping[str, Any]]]
+        _kwargs_list: Sequence[MutableMapping[str, Any]]
 
         # Prepare the query list
         if queries is not None:
@@ -328,9 +330,13 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
         # Prepare the keyword arguments list
         if kwargs is None:
-            _kwargs_list = [None] * len(_query_list)
+            _kwargs_list = [{} for _ in _query_list]
         else:
             _kwargs_list = upgrade_to_sequence(kwargs)
+        _kwargs_list = [dict(kw or {}) for kw in _kwargs_list]
+        # add shared kwargs
+        for kw in _kwargs_list:
+            kw.update(common_kwargs)
 
         if 1 == len(_query_list) and 1 < len(_kwargs_list):
             _query_list = list(_query_list) * len(_kwargs_list)
