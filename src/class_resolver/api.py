@@ -155,8 +155,8 @@ class ClassResolver(BaseResolver[Type[X], X]):
             {
                 subcls
                 for subcls in get_subclasses(
-                base, exclude_private=exclude_private, exclude_external=exclude_external
-            )
+                    base, exclude_private=exclude_private, exclude_external=exclude_external
+                )
                 if subcls not in skip
             },
             base=base,
