@@ -318,7 +318,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         :returns: A list of X instances
         """
         _query_list: Sequence[HintType[X]]
-        _kwargs_list: Sequence[MutableMapping[str, Any]]
+        _kwargs_list: Sequence[Optional[Mapping[str, Any]]]
 
         # Prepare the query list
         if queries is not None:
@@ -330,13 +330,9 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
         # Prepare the keyword arguments list
         if kwargs is None:
-            _kwargs_list = [{} for _ in _query_list]
+            _kwargs_list = [None] * len(_query_list)
         else:
             _kwargs_list = upgrade_to_sequence(kwargs)
-        _kwargs_list = [dict(kw or {}) for kw in _kwargs_list]
-        # add shared kwargs
-        for kw in _kwargs_list:
-            kw.update(common_kwargs)
 
         if 1 == len(_query_list) and 1 < len(_kwargs_list):
             _query_list = list(_query_list) * len(_kwargs_list)
@@ -347,7 +343,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         elif len(_kwargs_list) != len(_query_list):
             raise ValueError("Mismatch in number number of queries and kwargs")
         return [
-            self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs)
+            self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs, **common_kwargs)
             for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
         ]
 
