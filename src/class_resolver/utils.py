@@ -30,6 +30,8 @@ __all__ = [
     "LookupOrType",
     "LookupType",
     "OptionalKwargs",
+    "OneOrManyHintOrType",
+    "OneOrManyOptionalKwargs",
     # Functions
     "get_subclasses",
     "normalize_string",
@@ -53,6 +55,8 @@ HintType = Hint[Type[X]]
 HintOrType = Hint[InstOrType[X]]
 OptionalKwargs = Optional[Mapping[str, Any]]
 OneOrSequence = Union[X, Sequence[X]]
+OneOrManyHintOrType = Optional[OneOrSequence[HintOrType[X]]]
+OneOrManyOptionalKwargs = Optional[OneOrSequence[OptionalKwargs]]
 
 
 def get_subclasses(
