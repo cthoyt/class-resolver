@@ -172,6 +172,24 @@ class BaseResolver(ABC, Generic[X, Y]):
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup an element."""
 
+    def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None):
+        """Get docdata for the looked up element using :func:`docdata.get_docdata`
+
+        :param query: The hint for looking something up in the resolver
+            passed to :func:`lookup`
+        :param path: An optional path for traversing the resulting docdata
+            dictionary
+        :param default: The default value to pass to :func:`lookup`
+        :returns: The optional docdata
+        """
+        from docdata import get_docdata
+
+        x = self.lookup(query=query, default=default)
+        rv = get_docdata(x)
+        for part in path:
+            rv = rv[part]
+        return rv
+
     @abstractmethod
     def make(
         self,

@@ -8,6 +8,7 @@ from typing import ClassVar, Collection, Optional, Sequence
 
 import click
 from click.testing import CliRunner, Result
+from docdata import parse_docdata
 
 from class_resolver import (
     RegistrationNameConflict,
@@ -34,8 +35,15 @@ class Base:
         return type(self) == type(other) and self.name == other.name
 
 
+@parse_docdata
 class A(Base):
-    """A base class."""
+    """A base class.
+
+    ---
+    k1: v1
+    k2:
+        k21: v21
+    """
 
     synonyms: ClassVar[Collection[str]] = {"a_synonym_1", "a_synonym_2"}
 
@@ -96,6 +104,17 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.resolver.lookup(3)
         self.assertEqual(self.resolver.lookup(A(name="max")), A)
+
+    def test_docdata(self):
+        """Test docdata."""
+        full = {
+            "k1": "v1",
+            "k2": {"k21": "v21"},
+        }
+        self.assertEqual(full, self.resolver.docdata("a"))
+        self.assertEqual("v1", self.resolver.docdata("a", "k1"))
+        self.assertEqual({"k21": "v21"}, self.resolver.docdata("a", "k2"))
+        self.assertEqual("v21", self.resolver.docdata("a", "k2", "k21"))
 
     def test_lookup_no_synonyms(self):
         """Test looking up classes without auto-synonym."""
