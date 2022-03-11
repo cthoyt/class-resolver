@@ -46,7 +46,9 @@ jobs:
       - name: Check docstring coverage
         run: tox -e docstr-coverage
       - name: Check documentation build with Sphinx
-        run: tox -e docs-test
+        run: |
+          sudo apt-get install graphviz
+          tox -e docs-test
   tests:
     name: Tests
     runs-on: ${{ matrix.os }}
