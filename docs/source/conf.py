@@ -69,6 +69,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
+    'sphinx_automodapi.automodapi',
 ]
 
 # generate autosummary pages
