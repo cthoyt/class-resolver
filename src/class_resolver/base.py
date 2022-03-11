@@ -173,14 +173,14 @@ class BaseResolver(ABC, Generic[X, Y]):
         """Lookup an element."""
 
     def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None):
-        """Get docdata for the looked up element using :func:`docdata.get_docdata`
+        """Lookup an element and get its docdata.
 
         :param query: The hint for looking something up in the resolver
             passed to :func:`lookup`
         :param path: An optional path for traversing the resulting docdata
             dictionary
         :param default: The default value to pass to :func:`lookup`
-        :returns: The optional docdata
+        :returns: The optional docdata retrieved with :func:`docdata.get_docdata`
         """
         from docdata import get_docdata
 
