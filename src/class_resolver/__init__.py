@@ -53,6 +53,7 @@ from .api import (
     get_cls,
 )
 from .base import (
+    BaseResolver,
     RegistrationError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
@@ -82,6 +83,7 @@ __all__ = [
     "HintOrType",
     "OptionalKwargs",
     # Classes
+    "BaseResolver",
     "Resolver",
     "ClassResolver",
     "FunctionResolver",
