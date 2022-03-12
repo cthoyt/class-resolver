@@ -234,6 +234,11 @@ class BaseResolver(ABC, Generic[X, Y]):
             **kwargs,
         )
 
+    def register_entrypoint(self, group: str) -> None:
+        """Register additional entries from an entrypoint."""
+        for element in self._from_entrypoint(group).difference(self.lookup_dict.values()):
+            self.register(element)
+
     @staticmethod
     def _from_entrypoint(group: str) -> Set[X]:
         elements = set()
