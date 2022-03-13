@@ -212,15 +212,24 @@ following:
 
 .. code-block:: python
 
+    import torch
     from class_resolver.contrib.torch import aggregation_resolver
 
     # Lookup with string
     func = aggregation_resolver.lookup("max")
-    arr = [1, 2, 3, 10]
-    assert 10 == func(arr)
+    arr = torch.tensor([1, 2, 3, 10], dtype=torch.float)
+    assert 10.0 == func(arr).item()
 
     # Default lookup gives mean
     func = aggregation_resolver.lookup(None)
-    arr = [1, 2, 3, 10]
-    assert 8 == func(arr)
+    arr = torch.tensor([1.0, 2.0, 3.0, 10.0], dtype=torch.float)
+    assert 4.0 == func(arr).item()
+
+    def first(x):
+        return x[0]
+
+    # Custom functions pass through
+    func = aggregation_resolver.lookup(first)
+    arr = torch.tensor([1.0, 2.0, 3.0, 10.0], dtype=torch.float)
+    assert 1.0 == func(arr).item()
 """

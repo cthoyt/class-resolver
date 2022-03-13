@@ -13,6 +13,10 @@ __all__ = [
 aggregation_resolver = FunctionResolver(
     [np.sum, np.max, np.min, np.mean, np.median],
     default=np.mean,
+    synonyms={
+        "max": np.max,
+        "min": np.min,
+    },
 )
 """A resolver for common aggregation functions in NumPy including the following functions:
 
@@ -32,10 +36,18 @@ following:
     # Lookup with string
     func = aggregation_resolver.lookup("max")
     arr = [1, 2, 3, 10]
-    assert 10 == func(arr)
+    assert 10 == func(arr).item()
 
     # Default lookup gives mean
     func = aggregation_resolver.lookup(None)
     arr = [1, 2, 3, 10]
-    assert 8 == func(arr)
+    assert 4.0 == func(arr).item()
+
+    def first(x):
+        return x[0]
+
+    # Custom functions pass through
+    func = aggregation_resolver.lookup(first)
+    arr = [1, 2, 3, 10]
+    assert 1 == func(arr)
 """
