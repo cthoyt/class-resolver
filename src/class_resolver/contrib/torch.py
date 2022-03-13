@@ -6,6 +6,7 @@ The ``class-resolver`` provides several class resolvers and function resolvers
 to make it possible to more easily parametrize models and training loops.
 """  # noqa:D205,D400
 
+import torch
 from torch import nn
 from torch.nn import init
 from torch.nn.modules import activation
@@ -21,6 +22,7 @@ __all__ = [
     "margin_activation_resolver",
     "initializer_resolver",
     "lr_scheduler_resolver",
+    "aggregation_resolver",
 ]
 
 optimizer_resolver = ClassResolver.from_subclasses(
@@ -191,3 +193,34 @@ then parametrized to accept a LRScheduler hint.
 """
 
 lr_scheduler_resolver.register(ReduceLROnPlateau)
+
+aggregation_resolver = FunctionResolver(
+    [torch.sum, torch.max, torch.min, torch.mean, torch.logsumexp, torch.median],
+    default=torch.mean,
+)
+"""A resolver for common aggregation functions in PyTorch including the following functions:
+
+- :func:`torch.sum`
+- :func:`torch.max`
+- :func:`torch.min`
+- :func:`torch.mean`
+- :func:`torch.median`
+- :func:`torch.logsumexp`
+
+The default value is :func:`torch.mean`. This resolver can be used like in the
+following:
+
+.. code-block:: python
+
+    from class_resolver.contrib.torch import aggregation_resolver
+
+    # Lookup with string
+    func = aggregation_resolver.lookup("max")
+    arr = [1, 2, 3, 10]
+    assert 10 == func(arr)
+
+    # Default lookup gives mean
+    func = aggregation_resolver.lookup(None)
+    arr = [1, 2, 3, 10]
+    assert 8 == func(arr)
+"""
