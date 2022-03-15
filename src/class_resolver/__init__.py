@@ -67,6 +67,8 @@ from .utils import (
     Lookup,
     LookupOrType,
     LookupType,
+    OneOrManyHintOrType,
+    OneOrManyOptionalKwargs,
     OptionalKwargs,
     get_subclasses,
     normalize_string,
@@ -82,6 +84,8 @@ __all__ = [
     "HintType",
     "HintOrType",
     "OptionalKwargs",
+    "OneOrManyHintOrType",
+    "OneOrManyOptionalKwargs",
     # Classes
     "BaseResolver",
     "Resolver",
