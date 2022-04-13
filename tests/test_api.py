@@ -227,6 +227,10 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.resolver.get_option("--opt")  # no default given
 
+    def test_required_click_option(self):
+        """Test non-failure to get a required click option without default."""
+        self.resolver.get_option("--opt", as_string=True, required=True)
+
     def test_click_option(self):
         """Test the click option."""
 
