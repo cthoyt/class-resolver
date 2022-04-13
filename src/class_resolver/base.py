@@ -218,10 +218,14 @@ class BaseResolver(ABC, Generic[X, Y]):
         *flags: str,
         default: Hint[X] = None,
         as_string: bool = False,
+        required: bool = False,
         **kwargs,
     ):
         """Get a click option for this resolver."""
-        key = self.normalize(self.extract_name(self.lookup(self._default(default))))
+        if not required:
+            key = self.normalize(self.extract_name(self.lookup(self._default(default))))
+        else:
+            key = None
 
         import click
 
@@ -231,6 +235,7 @@ class BaseResolver(ABC, Generic[X, Y]):
             default=[key] if kwargs.get("multiple") else key,
             show_default=True,
             callback=None if as_string else make_callback(self.lookup),
+            required=required,
             **kwargs,
         )
 
