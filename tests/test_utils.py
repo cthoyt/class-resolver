@@ -6,7 +6,7 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver.utils import get_subclasses, same_module
+from class_resolver.utils import get_subclasses, same_module, normalize_with_default
 from tests._private_extras import PrivateDict
 
 
@@ -50,3 +50,27 @@ class TestUtilities(unittest.TestCase):
         self.assertNotIn(
             enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True))
         )
+
+    def test_normalize_with_defaults(self):
+        """Tests for normalize with defaults."""
+        # choice and default are None -> error
+        with self.assertRaises(ValueError):
+            normalize_with_default(choice=None, default=None)
+
+        # choice is None -> use default *and* default_kwargs irrespective of kwargs
+        default_kwargs = dict(b=3)
+        for choice_kwargs in (None, dict(a=5)):
+            cls, kwargs = normalize_with_default(
+                choice=None, kwargs=choice_kwargs, default=Counter, default_kwargs=default_kwargs
+            )
+            self.assertIs(cls, Counter)
+            self.assertIs(kwargs, default_kwargs)
+
+        # choice is not None -> return choice and kwargs
+        choice_kwargs = dict(a=5)
+        for default_kwargs in (None, dict(b=3)):
+            cls, kwargs = normalize_with_default(
+                choice=dict, kwargs=choice_kwargs, default=Counter, default_kwargs=default_kwargs
+            )
+            self.assertIs(cls, dict)
+            self.assertIs(kwargs, choice_kwargs)
