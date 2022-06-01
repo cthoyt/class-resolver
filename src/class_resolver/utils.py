@@ -170,5 +170,5 @@ def normalize_with_default(
                 f"with its default_kwargs={default_kwargs}. If you want the explicitly provided kwargs to be used,"
                 f" explicitly provide choice={default} instead of None."
             )
-            kwargs = default_kwargs
+        kwargs = default_kwargs
     return choice, kwargs
