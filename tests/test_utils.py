@@ -6,7 +6,7 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver.utils import get_subclasses, same_module, normalize_with_default
+from class_resolver.utils import get_subclasses, normalize_with_default, same_module
 from tests._private_extras import PrivateDict
 
 
