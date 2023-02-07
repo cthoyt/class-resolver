@@ -106,12 +106,18 @@ class TestResolver(unittest.TestCase):
         self.assertEqual(A, self.resolver.lookup("A"))
         self.assertEqual(A, self.resolver.lookup("a_synonym_1"))
         self.assertEqual(A, self.resolver.lookup("a_synonym_2"))
+        self.assertEqual(A, self.resolver.lookup(None, default=A))
         with self.assertRaises(ValueError):
             self.resolver.lookup(None)
         with self.assertRaises(KeyError):
             self.resolver.lookup("missing")
         with self.assertRaises(TypeError):
             self.resolver.lookup(3)
+        with self.assertRaises(TypeError) as e:
+            self.resolver.lookup(AAltBase)
+        self.assertEqual(
+            f"Not subclass of {self.resolver.base.__name__}: {AAltBase}", str(e.exception)
+        )
         self.assertEqual(self.resolver.lookup(A(name="max")), A)
 
     def test_docdata(self):
