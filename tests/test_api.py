@@ -405,6 +405,7 @@ class TestResolver(unittest.TestCase):
             """Another alternative base class."""
 
             def __init__(self, *, kwarg):
+                """Initialize the class."""
                 self.kwarg = kwarg
 
         class AAlt2Base(Alt2Base):
@@ -420,6 +421,7 @@ class TestResolver(unittest.TestCase):
             """Another alternative base class."""
 
             def __init__(self):
+                """Initialize the class."""
                 raise TypeError("surprise!")
 
         class AAlt3Base(Alt3Base):
