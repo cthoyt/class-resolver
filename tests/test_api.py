@@ -11,6 +11,7 @@ from click.testing import CliRunner, Result
 from docdata import parse_docdata
 
 from class_resolver import (
+    VERSION,
     KeywordArgumentError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
@@ -83,6 +84,10 @@ class TestResolver(unittest.TestCase):
     def setUp(self) -> None:
         """Set up the resolver class."""
         self.resolver = Resolver([A, B, C, E], base=Base)
+
+    def test_version(self):
+        """Test version."""
+        self.assertIsInstance(VERSION, str)
 
     def test_contents(self):
         """Test the functions."""
