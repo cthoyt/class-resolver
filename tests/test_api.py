@@ -417,6 +417,8 @@ class TestResolver(unittest.TestCase):
         self.assertIn("required keyword-only", str(e.exception))
 
     def test_unexpected_error(self):
+        """Test an arbitrary type error thrown during making a class."""
+
         class Alt3Base:
             """Another alternative base class."""
 
