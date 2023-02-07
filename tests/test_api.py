@@ -11,6 +11,7 @@ from click.testing import CliRunner, Result
 from docdata import parse_docdata
 
 from class_resolver import (
+    KeywordArgumentError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
     Resolver,
@@ -90,6 +91,14 @@ class TestResolver(unittest.TestCase):
     def test_iterator(self):
         """Test iterating over classes."""
         self.assertEqual([A, B, C, E], list(self.resolver))
+
+    def test_normalize(self):
+        """Test normalize functions."""
+        self.assertEqual("e", self.resolver.normalize_cls(E))
+        self.assertEqual("e", self.resolver.normalize_cls(E))
+
+        instance = E()
+        self.assertEqual("e", self.resolver.normalize_inst(instance))
 
     def test_lookup(self):
         """Test looking up classes."""
@@ -307,7 +316,7 @@ class TestResolver(unittest.TestCase):
         resolver = Resolver.from_subclasses(AltBase)
         with self.assertRaises(UnexpectedKeywordError) as e:
             resolver.make("A", nope="nopppeeee")
-            self.assertEqual("AAltBase did not expect any keyword arguments", str(e))
+        self.assertEqual("AAltBase did not expect any keyword arguments", str(e.exception))
 
     def test_base_suffix(self):
         """Check that the unexpected keyword error is thrown properly."""
@@ -388,3 +397,39 @@ class TestResolver(unittest.TestCase):
         resolver = Resolver.from_subclasses(Base, default=A)
         instances = resolver.make_many(None, dict(name="name"))
         self.assertEqual([A(name="name")], instances)
+
+    def test_missing_kwarg(self):
+        """Test error on missing kwarg."""
+
+        class Alt2Base:
+            """Another alternative base class."""
+
+            def __init__(self, *, kwarg):
+                """Initialize the class."""
+                self.kwarg = kwarg
+
+        class AAlt2Base(Alt2Base):
+            """Another base class."""
+
+        resolver = Resolver.from_subclasses(Alt2Base)
+        with self.assertRaises(KeywordArgumentError) as e:
+            resolver.make("a")
+        self.assertIn("required keyword-only", str(e.exception))
+
+    def test_unexpected_error(self):
+        """Test an arbitrary type error thrown during making a class."""
+
+        class Alt3Base:
+            """Another alternative base class."""
+
+            def __init__(self):
+                """Initialize the class."""
+                raise TypeError("surprise!")
+
+        class AAlt3Base(Alt3Base):
+            """Another base class."""
+
+        resolver = Resolver.from_subclasses(Alt3Base)
+        with self.assertRaises(TypeError) as e:
+            resolver.make("a")
+        self.assertEqual("surprise!", str(e.exception))
