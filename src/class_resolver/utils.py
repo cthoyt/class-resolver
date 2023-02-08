@@ -64,6 +64,30 @@ OneOrManyHintOrType = Optional[OneOrSequence[HintOrType[X]]]
 OneOrManyOptionalKwargs = Optional[OneOrSequence[OptionalKwargs]]
 
 
+def is_private(class_name: str, module_name: str, main_is_private: bool = True) -> bool:
+    """
+    Decide whether a class in a module is considered private.
+
+    :param class_name:
+        the class name, i.e., `cls.__name__`
+    :param module_name:
+        the module name, i.e., `cls.__module__`
+    :param main_is_private:
+        whether the `__main__` module is considered private
+
+    :return:
+        whether the class should be considered private
+    """
+    # note: this method has been separated for better testability
+    if not main_is_private and module_name.startswith("__main__"):
+        return False
+    if any(part.startswith("_") for part in module_name.split(".")):
+        return True
+    if class_name.startswith("_"):
+        return True
+    return False
+
+
 def get_subclasses(
     cls: Type[X],
     exclude_private: bool = True,
@@ -84,14 +108,12 @@ def get_subclasses(
     """
     for subclass in cls.__subclasses__():
         yield from get_subclasses(subclass)
-        if exclude_private:
-            # make sure to yield subclass *before* any skipping by continue
-            if include_main and subclass.__name__.startswith("__main__"):
-                yield subclass
-            if any(part.startswith("_") for part in subclass.__module__.split(".")):
-                continue
-            if subclass.__name__.startswith("_"):
-                continue
+        if exclude_private and is_private(
+            class_name=subclass.__name__,
+            module_name=subclass.__module__,
+            main_is_private=not include_main,
+        ):
+            continue
         if exclude_external and not same_module(cls, subclass):
             continue
         yield subclass
