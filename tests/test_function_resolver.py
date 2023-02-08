@@ -2,6 +2,7 @@
 
 """Tests for the function resolver."""
 
+import operator
 import unittest
 
 from class_resolver import FunctionResolver
@@ -99,6 +100,15 @@ class TestFunctionResolver(unittest.TestCase):
     def test_entrypoints(self):
         """Test loading from entrypoints."""
         resolver = FunctionResolver.from_entrypoint("class_resolver_demo")
+        self.assertEqual({"add", "sub", "mul"}, set(resolver.lookup_dict))
+        self.assertEqual(set(), set(resolver.synonyms))
+        self.assertNotIn("expected_failure", resolver.lookup_dict)
+
+    def test_late_entrypoints(self):
+        """Test loading late entrypoints."""
+        resolver = FunctionResolver([operator.add, operator.sub])
+        self.assertEqual({"add", "sub"}, set(resolver.lookup_dict))
+        resolver.register_entrypoint("class_resolver_demo")
         self.assertEqual({"add", "sub", "mul"}, set(resolver.lookup_dict))
         self.assertEqual(set(), set(resolver.synonyms))
         self.assertNotIn("expected_failure", resolver.lookup_dict)

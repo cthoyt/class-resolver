@@ -7,4 +7,5 @@ External Package Integrations
    :name: contrib
 
    torch
+   numpy
    optuna

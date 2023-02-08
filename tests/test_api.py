@@ -8,8 +8,11 @@ from typing import ClassVar, Collection, Optional, Sequence
 
 import click
 from click.testing import CliRunner, Result
+from docdata import parse_docdata
 
 from class_resolver import (
+    VERSION,
+    KeywordArgumentError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
     Resolver,
@@ -34,8 +37,15 @@ class Base:
         return type(self) == type(other) and self.name == other.name
 
 
+@parse_docdata
 class A(Base):
-    """A base class."""
+    """A base class.
+
+    ---
+    k1: v1
+    k2:
+        k21: v21
+    """
 
     synonyms: ClassVar[Collection[str]] = {"a_synonym_1", "a_synonym_2"}
 
@@ -75,6 +85,10 @@ class TestResolver(unittest.TestCase):
         """Set up the resolver class."""
         self.resolver = Resolver([A, B, C, E], base=Base)
 
+    def test_version(self):
+        """Test version."""
+        self.assertIsInstance(VERSION, str)
+
     def test_contents(self):
         """Test the functions."""
         self.assertIn(A, set(self.resolver))
@@ -83,19 +97,44 @@ class TestResolver(unittest.TestCase):
         """Test iterating over classes."""
         self.assertEqual([A, B, C, E], list(self.resolver))
 
+    def test_normalize(self):
+        """Test normalize functions."""
+        self.assertEqual("e", self.resolver.normalize_cls(E))
+        self.assertEqual("e", self.resolver.normalize_cls(E))
+
+        instance = E()
+        self.assertEqual("e", self.resolver.normalize_inst(instance))
+
     def test_lookup(self):
         """Test looking up classes."""
         self.assertEqual(A, self.resolver.lookup("a"))
         self.assertEqual(A, self.resolver.lookup("A"))
         self.assertEqual(A, self.resolver.lookup("a_synonym_1"))
         self.assertEqual(A, self.resolver.lookup("a_synonym_2"))
+        self.assertEqual(A, self.resolver.lookup(None, default=A))
         with self.assertRaises(ValueError):
             self.resolver.lookup(None)
         with self.assertRaises(KeyError):
             self.resolver.lookup("missing")
         with self.assertRaises(TypeError):
             self.resolver.lookup(3)
+        with self.assertRaises(TypeError) as e:
+            self.resolver.lookup(AAltBase)
+        self.assertEqual(
+            f"Not subclass of {self.resolver.base.__name__}: {AAltBase}", str(e.exception)
+        )
         self.assertEqual(self.resolver.lookup(A(name="max")), A)
+
+    def test_docdata(self):
+        """Test docdata."""
+        full = {
+            "k1": "v1",
+            "k2": {"k21": "v21"},
+        }
+        self.assertEqual(full, self.resolver.docdata("a"))
+        self.assertEqual("v1", self.resolver.docdata("a", "k1"))
+        self.assertEqual({"k21": "v21"}, self.resolver.docdata("a", "k2"))
+        self.assertEqual("v21", self.resolver.docdata("a", "k2", "k21"))
 
     def test_lookup_no_synonyms(self):
         """Test looking up classes without auto-synonym."""
@@ -208,6 +247,10 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.resolver.get_option("--opt")  # no default given
 
+    def test_required_click_option(self):
+        """Test non-failure to get a required click option without default."""
+        self.resolver.get_option("--opt", as_string=True, required=True)
+
     def test_click_option(self):
         """Test the click option."""
 
@@ -284,7 +327,7 @@ class TestResolver(unittest.TestCase):
         resolver = Resolver.from_subclasses(AltBase)
         with self.assertRaises(UnexpectedKeywordError) as e:
             resolver.make("A", nope="nopppeeee")
-            self.assertEqual("AAltBase did not expect any keyword arguments", str(e))
+        self.assertEqual("AAltBase did not expect any keyword arguments", str(e.exception))
 
     def test_base_suffix(self):
         """Check that the unexpected keyword error is thrown properly."""
@@ -365,3 +408,39 @@ class TestResolver(unittest.TestCase):
         resolver = Resolver.from_subclasses(Base, default=A)
         instances = resolver.make_many(None, dict(name="name"))
         self.assertEqual([A(name="name")], instances)
+
+    def test_missing_kwarg(self):
+        """Test error on missing kwarg."""
+
+        class Alt2Base:
+            """Another alternative base class."""
+
+            def __init__(self, *, kwarg):
+                """Initialize the class."""
+                self.kwarg = kwarg
+
+        class AAlt2Base(Alt2Base):
+            """Another base class."""
+
+        resolver = Resolver.from_subclasses(Alt2Base)
+        with self.assertRaises(KeywordArgumentError) as e:
+            resolver.make("a")
+        self.assertIn("required keyword-only", str(e.exception))
+
+    def test_unexpected_error(self):
+        """Test an arbitrary type error thrown during making a class."""
+
+        class Alt3Base:
+            """Another alternative base class."""
+
+            def __init__(self):
+                """Initialize the class."""
+                raise TypeError("surprise!")
+
+        class AAlt3Base(Alt3Base):
+            """Another base class."""
+
+        resolver = Resolver.from_subclasses(Alt3Base)
+        with self.assertRaises(TypeError) as e:
+            resolver.make("a")
+        self.assertEqual("surprise!", str(e.exception))

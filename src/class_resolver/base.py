@@ -172,6 +172,24 @@ class BaseResolver(ABC, Generic[X, Y]):
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup an element."""
 
+    def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None):
+        """Lookup an element and get its docdata.
+
+        :param query: The hint for looking something up in the resolver
+            passed to :func:`lookup`
+        :param path: An optional path for traversing the resulting docdata
+            dictionary
+        :param default: The default value to pass to :func:`lookup`
+        :returns: The optional docdata retrieved with :func:`docdata.get_docdata`
+        """
+        from docdata import get_docdata
+
+        x = self.lookup(query=query, default=default)
+        rv = get_docdata(x)
+        for part in path:
+            rv = rv[part]
+        return rv
+
     @abstractmethod
     def make(
         self,
@@ -200,10 +218,14 @@ class BaseResolver(ABC, Generic[X, Y]):
         *flags: str,
         default: Hint[X] = None,
         as_string: bool = False,
+        required: bool = False,
         **kwargs,
     ):
         """Get a click option for this resolver."""
-        key = self.normalize(self.extract_name(self.lookup(self._default(default))))
+        if not required:
+            key = self.normalize(self.extract_name(self.lookup(self._default(default))))
+        else:
+            key = None
 
         import click
 
@@ -213,8 +235,14 @@ class BaseResolver(ABC, Generic[X, Y]):
             default=[key] if kwargs.get("multiple") else key,
             show_default=True,
             callback=None if as_string else make_callback(self.lookup),
+            required=required,
             **kwargs,
         )
+
+    def register_entrypoint(self, group: str) -> None:
+        """Register additional entries from an entrypoint."""
+        for element in self._from_entrypoint(group).difference(self.lookup_dict.values()):
+            self.register(element)
 
     @staticmethod
     def _from_entrypoint(group: str) -> Set[X]:

@@ -53,6 +53,7 @@ from .api import (
     get_cls,
 )
 from .base import (
+    BaseResolver,
     RegistrationError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
@@ -66,12 +67,16 @@ from .utils import (
     Lookup,
     LookupOrType,
     LookupType,
+    OneOrManyHintOrType,
+    OneOrManyOptionalKwargs,
     OptionalKwargs,
     get_subclasses,
     normalize_string,
 )
+from .version import VERSION
 
 __all__ = [
+    "VERSION",
     # Type Hints
     "InstOrType",
     "Lookup",
@@ -81,7 +86,10 @@ __all__ = [
     "HintType",
     "HintOrType",
     "OptionalKwargs",
+    "OneOrManyHintOrType",
+    "OneOrManyOptionalKwargs",
     # Classes
+    "BaseResolver",
     "Resolver",
     "ClassResolver",
     "FunctionResolver",

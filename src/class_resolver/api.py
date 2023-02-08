@@ -11,8 +11,8 @@ from .base import BaseResolver
 from .utils import (
     HintOrType,
     HintType,
-    OneOrSequence,
-    OptionalKwargs,
+    OneOrManyHintOrType,
+    OneOrManyOptionalKwargs,
     get_subclasses,
     normalize_string,
     upgrade_to_sequence,
@@ -301,8 +301,9 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
     def make_many(
         self,
-        queries: Optional[OneOrSequence[HintType[X]]] = None,
-        kwargs: Optional[OneOrSequence[OptionalKwargs]] = None,
+        queries: OneOrManyHintOrType = None,
+        kwargs: OneOrManyOptionalKwargs = None,
+        **common_kwargs,
     ) -> List[X]:
         """Resolve and compose several queries together.
 
@@ -312,6 +313,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         :param kwargs: Either none (will use all defaults), a single dictionary
             (will be used for all instances), or a list of dictionaries with the same length
             as ``queries``
+        :param common_kwargs: additional keyword-based parameters passed to all instantiated instances.
         :raises ValueError: If the number of queries and kwargs has a mismatch
         :returns: A list of X instances
         """
@@ -341,7 +343,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         elif len(_kwargs_list) != len(_query_list):
             raise ValueError("Mismatch in number number of queries and kwargs")
         return [
-            self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs)
+            self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs, **common_kwargs)
             for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
         ]
 

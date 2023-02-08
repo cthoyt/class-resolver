@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "3.7", "3.10" ]
+        python-version: [ "3.7", "3.11" ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "3.7", "3.10" ]
+        python-version: [ "3.7", "3.11" ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -46,7 +46,9 @@ jobs:
       - name: Check docstring coverage
         run: tox -e docstr-coverage
       - name: Check documentation build with Sphinx
-        run: tox -e docs-test
+        run: |
+          sudo apt-get install graphviz
+          tox -e docs-test
   tests:
     name: Tests
     runs-on: ${{ matrix.os }}
