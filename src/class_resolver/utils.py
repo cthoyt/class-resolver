@@ -92,7 +92,7 @@ def get_subclasses(
     cls: Type[X],
     exclude_private: bool = True,
     exclude_external: bool = True,
-    include_main: bool = False,
+    main_is_private: bool = True,
 ) -> Iterable[Type[X]]:
     """Get all subclasses.
 
@@ -102,8 +102,7 @@ def get_subclasses(
         done when having shadow duplicate classes implemented in C
     :param exclude_external: If true, will exclude any class that does not originate
         from the same package as the base class.
-    :param include_main: If true, will include classes from the __main__ module even
-        if exclude_private
+    :param main_is_private: If true, __main__ is considered a private module.
     :yields: Descendant classes of the ancestor class
     """
     for subclass in cls.__subclasses__():
@@ -111,7 +110,7 @@ def get_subclasses(
         if exclude_private and is_private(
             class_name=subclass.__name__,
             module_name=subclass.__module__,
-            main_is_private=not include_main,
+            main_is_private=main_is_private,
         ):
             continue
         if exclude_external and not same_module(cls, subclass):
