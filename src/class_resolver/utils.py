@@ -64,10 +64,35 @@ OneOrManyHintOrType = Optional[OneOrSequence[HintOrType[X]]]
 OneOrManyOptionalKwargs = Optional[OneOrSequence[OptionalKwargs]]
 
 
+def is_private(class_name: str, module_name: str, main_is_private: bool = True) -> bool:
+    """
+    Decide whether a class in a module is considered private.
+
+    :param class_name:
+        the class name, i.e., `cls.__name__`
+    :param module_name:
+        the module name, i.e., `cls.__module__`
+    :param main_is_private:
+        whether the `__main__` module is considered private
+
+    :return:
+        whether the class should be considered private
+    """
+    # note: this method has been separated for better testability
+    if class_name.startswith("_"):
+        return True
+    if not main_is_private and module_name.startswith("__main__"):
+        return False
+    if any(part.startswith("_") for part in module_name.split(".")):
+        return True
+    return False
+
+
 def get_subclasses(
     cls: Type[X],
     exclude_private: bool = True,
     exclude_external: bool = True,
+    main_is_private: bool = True,
 ) -> Iterable[Type[X]]:
     """Get all subclasses.
 
@@ -77,15 +102,17 @@ def get_subclasses(
         done when having shadow duplicate classes implemented in C
     :param exclude_external: If true, will exclude any class that does not originate
         from the same package as the base class.
+    :param main_is_private: If true, __main__ is considered a private module.
     :yields: Descendant classes of the ancestor class
     """
     for subclass in cls.__subclasses__():
         yield from get_subclasses(subclass)
-        if exclude_private:
-            if any(part.startswith("_") for part in subclass.__module__.split(".")):
-                continue
-            if subclass.__name__.startswith("_"):
-                continue
+        if exclude_private and is_private(
+            class_name=subclass.__name__,
+            module_name=subclass.__module__,
+            main_is_private=main_is_private,
+        ):
+            continue
         if exclude_external and not same_module(cls, subclass):
             continue
         yield subclass

@@ -6,12 +6,29 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver.utils import get_subclasses, normalize_with_default, same_module
+from class_resolver.utils import (
+    get_subclasses,
+    is_private,
+    normalize_with_default,
+    same_module,
+)
 from tests._private_extras import PrivateDict
 
 
 class TestUtilities(unittest.TestCase):
     """Test utilities."""
+
+    def test_is_private(self):
+        """Test whether a module should be considered private."""
+        self.assertFalse(is_private("A", "", main_is_private=False))
+        self.assertFalse(is_private("A", "", main_is_private=True))
+        self.assertTrue(is_private("_module", "", main_is_private=True))
+        self.assertTrue(is_private("_module", "", main_is_private=True))
+        self.assertTrue(is_private("A", "B._module", main_is_private=True))
+        self.assertTrue(is_private("A", "__main__", main_is_private=True))
+        self.assertFalse(is_private("A", "__main__", main_is_private=False))
+        self.assertTrue(is_private("_A", "__main__", main_is_private=True))
+        self.assertTrue(is_private("_A", "__main__", main_is_private=False))
 
     def test_same_module(self):
         """Test getting subclasses."""
