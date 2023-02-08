@@ -73,8 +73,10 @@ from .utils import (
     get_subclasses,
     normalize_string,
 )
+from .version import VERSION
 
 __all__ = [
+    "VERSION",
     # Type Hints
     "InstOrType",
     "Lookup",

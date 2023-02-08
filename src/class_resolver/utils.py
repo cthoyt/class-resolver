@@ -3,6 +3,7 @@
 """Utilities for the resolver."""
 
 import collections.abc
+import logging
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -11,6 +12,7 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -38,7 +40,10 @@ __all__ = [
     "upgrade_to_sequence",
     "make_callback",
     "same_module",
+    "normalize_with_default",
 ]
+
+logger = logging.getLogger(__name__)
 
 X = TypeVar("X")
 Y = TypeVar("Y")
@@ -59,10 +64,35 @@ OneOrManyHintOrType = Optional[OneOrSequence[HintOrType[X]]]
 OneOrManyOptionalKwargs = Optional[OneOrSequence[OptionalKwargs]]
 
 
+def is_private(class_name: str, module_name: str, main_is_private: bool = True) -> bool:
+    """
+    Decide whether a class in a module is considered private.
+
+    :param class_name:
+        the class name, i.e., `cls.__name__`
+    :param module_name:
+        the module name, i.e., `cls.__module__`
+    :param main_is_private:
+        whether the `__main__` module is considered private
+
+    :return:
+        whether the class should be considered private
+    """
+    # note: this method has been separated for better testability
+    if class_name.startswith("_"):
+        return True
+    if not main_is_private and module_name.startswith("__main__"):
+        return False
+    if any(part.startswith("_") for part in module_name.split(".")):
+        return True
+    return False
+
+
 def get_subclasses(
     cls: Type[X],
     exclude_private: bool = True,
     exclude_external: bool = True,
+    main_is_private: bool = True,
 ) -> Iterable[Type[X]]:
     """Get all subclasses.
 
@@ -72,15 +102,17 @@ def get_subclasses(
         done when having shadow duplicate classes implemented in C
     :param exclude_external: If true, will exclude any class that does not originate
         from the same package as the base class.
+    :param main_is_private: If true, __main__ is considered a private module.
     :yields: Descendant classes of the ancestor class
     """
     for subclass in cls.__subclasses__():
         yield from get_subclasses(subclass)
-        if exclude_private:
-            if any(part.startswith("_") for part in subclass.__module__.split(".")):
-                continue
-            if subclass.__name__.startswith("_"):
-                continue
+        if exclude_private and is_private(
+            class_name=subclass.__name__,
+            module_name=subclass.__module__,
+            main_is_private=main_is_private,
+        ):
+            continue
         if exclude_external and not same_module(cls, subclass):
             continue
         yield subclass
@@ -129,3 +161,41 @@ def make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Para
         return f(value)
 
     return _callback
+
+
+def normalize_with_default(
+    choice: HintOrType[X],
+    kwargs: OptionalKwargs = None,
+    default: HintOrType[X] = None,
+    default_kwargs: OptionalKwargs = None,
+) -> Tuple[HintOrType[X], OptionalKwargs]:
+    """
+    Normalize a choice for class resolver, with default options.
+
+    :param choice:
+        the choice. If None, use the default instead.
+    :param kwargs:
+        the keyword-based parameters for instantiation. Will only be used if choice is *not* None.
+    :param default:
+        the default choice. Used of choice=None.
+    :param default_kwargs:
+        the default keyword-based parameters
+
+    :raises ValueError:
+        if choice and default both are None
+
+    :return:
+        a pair (hint, optional kwargs).
+    """
+    if choice is None:
+        if default is None:
+            raise ValueError("If choice is None, a default has to be provided.")
+        choice = default
+        if kwargs is not None:
+            logger.warning(
+                f"No choice was provided, but kwargs={kwargs} is not None. Will use the default choice={default} "
+                f"with its default_kwargs={default_kwargs}. If you want the explicitly provided kwargs to be used,"
+                f" explicitly provide choice={default} instead of None."
+            )
+        kwargs = default_kwargs
+    return choice, kwargs
