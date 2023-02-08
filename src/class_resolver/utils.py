@@ -79,11 +79,11 @@ def is_private(class_name: str, module_name: str, main_is_private: bool = True) 
         whether the class should be considered private
     """
     # note: this method has been separated for better testability
+    if class_name.startswith("_"):
+        return True
     if not main_is_private and module_name.startswith("__main__"):
         return False
     if any(part.startswith("_") for part in module_name.split(".")):
-        return True
-    if class_name.startswith("_"):
         return True
     return False
 
