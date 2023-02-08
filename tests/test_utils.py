@@ -27,6 +27,8 @@ class TestUtilities(unittest.TestCase):
         self.assertTrue(is_private("A", "B._module", main_is_private=True))
         self.assertTrue(is_private("A", "__main__", main_is_private=True))
         self.assertFalse(is_private("A", "__main__", main_is_private=False))
+        self.assertTrue(is_private("_A", "__main__", main_is_private=True))
+        self.assertTrue(is_private("_A", "__main__", main_is_private=False))
 
     def test_same_module(self):
         """Test getting subclasses."""
