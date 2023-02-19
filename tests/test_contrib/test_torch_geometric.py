@@ -18,7 +18,7 @@ class TestTorch(unittest.TestCase):
 
     def test_message_passing(self):
         """Tests for the message passing resolver."""
-        from torch_geometric.nn.conv import MessagePassing, SimpleConv
+        from torch_geometric.nn.conv import SimpleConv
 
         from class_resolver.contrib.torch_geometric import message_passing_resolver
 
