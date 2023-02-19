@@ -9,3 +9,4 @@ External Package Integrations
    torch
    numpy
    optuna
+   sklearn
