@@ -36,10 +36,10 @@ aggregation_resolver = ClassResolver.from_subclasses(
 
 This includes the following:
 
-- :class:`torch_geometric.nn.aggr.MeanAggregation` 
-- :class:`torch_geometric.nn.aggr.MaxAggregation` 
-- :class:`torch_geometric.nn.aggr.MinAggregation` 
-- :class:`torch_geometric.nn.aggr.SumAggregation` 
+- :class:`torch_geometric.nn.aggr.MeanAggregation`
+- :class:`torch_geometric.nn.aggr.MaxAggregation`
+- :class:`torch_geometric.nn.aggr.MinAggregation`
+- :class:`torch_geometric.nn.aggr.SumAggregation`
 - :class:`torch_geometric.nn.aggr.MedianAggregation`
 - :class:`torch_geometric.nn.aggr.SoftmaxAggregation` (learnable)
 - :class:`torch_geometric.nn.aggr.PowerMeanAggregation` (learnable)
@@ -57,13 +57,13 @@ Some example usage (based on the torch-geometric docs):
     from class_resolver.contrib.torch_geometric import aggregation_resolver
 
     mean_aggr = aggregation_resolver.make("mean")
-    
+
     # Feature matrix holding 1000 elements with 64 features each:
     x = torch.randn(1000, 64)
-    
+
     # Randomly assign elements to 100 sets:
     index = torch.randint(0, 100, (1000, ))
-    
+
     output = mean_aggr(x, index)  #  Output shape: [100, 64]
 
 .. seealso:: https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#aggregation-operators
