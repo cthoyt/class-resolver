@@ -12,6 +12,7 @@ from docdata import parse_docdata
 
 from class_resolver import (
     VERSION,
+    ClassResolver,
     KeywordArgumentError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
@@ -23,6 +24,16 @@ try:
     import ray.tune as tune
 except ImportError:
     tune = None
+
+try:
+    import optuna
+except ImportError:
+    optuna = None
+
+try:
+    import sklearn
+except ImportError:
+    sklearn = None
 
 
 class Base:
@@ -241,6 +252,40 @@ class TestResolver(unittest.TestCase):
             query = config.pop("query")
             instance = self.resolver.make(query=query, pos_kwargs=config)
             self.assertIsInstance(instance, Base)
+
+    @unittest.skipIf(optuna is None, "optuna is not installed")
+    @unittest.skipIf(sklearn is None, "sklearn is not installed")
+    def test_optuna_suggest(self):
+        """Test suggesting categoric for optuna."""
+        import optuna
+        from sklearn import datasets
+        from sklearn.base import BaseEstimator
+        from sklearn.ensemble import RandomForestClassifier
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.model_selection import train_test_split
+
+        resolver = ClassResolver(
+            [
+                LogisticRegression,
+                RandomForestClassifier,
+            ],
+            base=BaseEstimator,
+            base_as_suffix=False,
+            default=LogisticRegression,
+        )
+
+        def objective(trial: optuna.Trial) -> float:
+            x, y = datasets.load_iris(return_X_y=True)
+            x_train, x_test, y_train, y_test = train_test_split(
+                x, y, test_size=0.33, random_state=42
+            )
+            clf_cls = resolver.optuna_lookup(trial, "model")
+            clf = clf_cls()
+            clf.fit(x_train, y_train)
+            return clf.score(x_test, y_test)
+
+        study = optuna.create_study(direction="maximize")
+        study.optimize(objective, n_trials=100)
 
     def test_bad_click_option(self):
         """Test failure to get a click option."""
