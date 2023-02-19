@@ -4,11 +4,24 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Collection, Dict, Generic, Iterable, Iterator, Mapping, Optional, Set
+from typing import (
+    TYPE_CHECKING,
+    Collection,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    Mapping,
+    Optional,
+    Set,
+)
 
 from pkg_resources import iter_entry_points
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
+
+if TYPE_CHECKING:
+    import optuna
 
 __all__ = [
     "BaseResolver",
@@ -261,3 +274,8 @@ class BaseResolver(ABC, Generic[X, Y]):
         """Make a resolver from the elements registered at the given entrypoint."""
         elements = cls._from_entrypoint(group)
         return cls(elements, **kwargs)
+
+    def optuna_lookup(self, trial: "optuna.Trial", name: str) -> X:
+        """Suggest an element from this resolver for hyper-parameter optimization in Optuna."""
+        key = trial.suggest_categorical(name, sorted(self.lookup_dict))
+        return self.lookup(key)
