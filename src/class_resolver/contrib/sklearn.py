@@ -8,6 +8,7 @@ implementations, such as those of linear models.
 """  # noqa:D205,D400
 
 from sklearn.base import BaseEstimator
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import (
     LogisticRegression,
     LogisticRegressionCV,
@@ -17,14 +18,15 @@ from sklearn.linear_model import (
     RidgeClassifierCV,
     SGDClassifier,
 )
+from sklearn.tree import DecisionTreeClassifier
 
 from ..api import ClassResolver
 
 __all__ = [
-    "linear_model_resolver",
+    "classifier_resolver",
 ]
 
-linear_model_resolver: ClassResolver[BaseEstimator] = ClassResolver(
+classifier_resolver: ClassResolver[BaseEstimator] = ClassResolver(
     [
         LogisticRegression,
         LogisticRegressionCV,
@@ -33,15 +35,17 @@ linear_model_resolver: ClassResolver[BaseEstimator] = ClassResolver(
         RidgeClassifier,
         RidgeClassifierCV,
         SGDClassifier,
-        # SGDOneClassSVM,
+        DecisionTreeClassifier,
+        RandomForestClassifier,
+        GradientBoostingClassifier,
     ],
     base=BaseEstimator,
     base_as_suffix=False,
     default=LogisticRegression,
 )
-"""A resolver for linear model classifiers including:
+"""A resolver for classifiers.
 
-The default value is the class for logistic regressions.
+The default value is :class:`sklearn.linear_model.LogisticRegression`.
 This resolver can be used like in the following:
 
 .. code-block:: python
@@ -49,19 +53,19 @@ This resolver can be used like in the following:
     from sklearn import datasets
     from sklearn.model_selection import train_test_split
 
-    from class_resolver.contrib.sklearn import linear_model_resolver
+    from class_resolver.contrib.sklearn import classifier_resolver
 
     # Prepare a dataset
     x, y = datasets.load_iris(return_X_y=True)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
 
     # Lookup with a string
-    classifier = linear_model_resolver.make("LogisticRegression")
+    classifier = classifier_resolver.make("LogisticRegression")
     classifier.fit(x_train, y_train)
     assert 0.7 < classifier.score(x_test, y_test)
 
     # Default lookup gives logistic regression
-    classifier = linear_model_resolver.make(None)
+    classifier = classifier_resolver.make(None)
     classifier.fit(x_train, y_train)
     assert 0.7 < classifier.score(x_test, y_test)
 
