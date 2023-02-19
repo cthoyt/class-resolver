@@ -232,6 +232,7 @@ intersphinx_mapping = {
     'torch': ('https://pytorch.org/docs/stable', None),
     'numpy': ('https://numpy.org/doc/stable', None),
     'optuna': ('https://optuna.readthedocs.io/en/latest', None),
+    'sklearn': ('https://scikit-learn.org/stable', None),
 }
 
 autoclass_content = 'both'
