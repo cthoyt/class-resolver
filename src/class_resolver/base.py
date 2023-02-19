@@ -298,7 +298,9 @@ class BaseResolver(ABC, Generic[X, Y]):
 
             def objective(trial: optuna.Trial) -> float:
                 x, y = datasets.load_iris(return_X_y=True)
-                x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+                x_train, x_test, y_train, y_test = train_test_split(
+                    x, y, test_size=0.33, random_state=42,
+                )
                 clf_cls = classifier_resolver.optuna_lookup(trial, "model")
                 clf = clf_cls()
                 clf.fit(x_train, y_train)
