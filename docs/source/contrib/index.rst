@@ -7,6 +7,7 @@ External Package Integrations
    :name: contrib
 
    torch
+   torch_geometric
    numpy
    optuna
    sklearn
