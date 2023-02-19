@@ -256,7 +256,7 @@ class TestResolver(unittest.TestCase):
     @unittest.skipIf(optuna is None, "optuna is not installed")
     @unittest.skipIf(sklearn is None, "sklearn is not installed")
     def test_optuna_suggest(self):
-        """Test suggesting categoric for optuna."""
+        """Test suggesting categorical for optuna."""
         import optuna
         from sklearn import datasets
         from sklearn.base import BaseEstimator
@@ -275,6 +275,7 @@ class TestResolver(unittest.TestCase):
         )
 
         def objective(trial: optuna.Trial) -> float:
+            """Calculate the classification accuracy for the iris dataset."""
             x, y = datasets.load_iris(return_X_y=True)
             x_train, x_test, y_train, y_test = train_test_split(
                 x, y, test_size=0.33, random_state=42

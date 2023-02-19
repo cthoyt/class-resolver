@@ -280,8 +280,9 @@ class BaseResolver(ABC, Generic[X, Y]):
 
         :param trial: A trial object from :mod:`optuna`. Note that this object shouldn't be constructed
             by the developer, and should only get constructed inside the optuna framework when
-            using :meth:`optuna.Study.optimiz`.
+            using :meth:`optuna.Study.optimize`.
         :param name: The name of the `param` within an optuna study.
+        :returns: An element chosen by optuna, then run through :func:`lookup`.
 
         In the following example, Optuna is used to determine the best classification
         algorithm from scikit-learn when applied to the famous iris dataset.
