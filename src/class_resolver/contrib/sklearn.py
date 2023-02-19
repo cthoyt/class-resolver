@@ -1,6 +1,6 @@
 """
 Scikit-learn is a generic machine learning package with implementations of
-algorithms for classification, regression, dimensionality reduction, clustering, 
+algorithms for classification, regression, dimensionality reduction, clustering,
 as well as other generic tooling.
 
 The ``class-resolver`` provides several class resolvers for instantiating various
