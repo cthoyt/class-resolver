@@ -276,6 +276,36 @@ class BaseResolver(ABC, Generic[X, Y]):
         return cls(elements, **kwargs)
 
     def optuna_lookup(self, trial: "optuna.Trial", name: str) -> X:
-        """Suggest an element from this resolver for hyper-parameter optimization in Optuna."""
+        """Suggest an element from this resolver for hyper-parameter optimization in Optuna.
+
+        :param trial: A trial object from :mod:`optuna`. Note that this object shouldn't be constructed
+            by the developer, and should only get constructed inside the optuna framework when
+            using :meth:`optuna.Study.optimiz`.
+        :param name: The name of the `param` within an optuna study.
+
+        In the following example, Optuna is used to determine the best classification
+        algorithm from scikit-learn when applied to the famous iris dataset.
+
+        .. code-block::
+
+            import optuna
+            from sklearn import datasets
+            from sklearn.model_selection import train_test_split
+
+            from class_resolver.contrib.sklearn import classifier_resolver
+
+
+            def objective(trial: optuna.Trial) -> float:
+                x, y = datasets.load_iris(return_X_y=True)
+                x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+                clf_cls = classifier_resolver.optuna_lookup(trial, "model")
+                clf = clf_cls()
+                clf.fit(x_train, y_train)
+                return clf.score(x_test, y_test)
+
+
+            study = optuna.create_study(direction="maximize")
+            study.optimize(objective, n_trials=100)
+        """
         key = trial.suggest_categorical(name, sorted(self.lookup_dict))
         return self.lookup(key)
