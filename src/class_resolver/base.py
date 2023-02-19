@@ -111,10 +111,7 @@ class BaseResolver(ABC, Generic[X, Y]):
 
     def subresolver(self, keys: Iterable[str]) -> "BaseResolver[X, Y]":
         """Create a resolver that's a subset of this one."""
-        elements = [
-            self.lookup_str(key)
-            for key in keys
-        ]
+        elements = [self.lookup_str(key) for key in keys]
         return self.__class__(
             elements=elements,
             default=self.default,
