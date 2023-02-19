@@ -29,14 +29,7 @@ class FunctionResolver(BaseResolver[X, X]):
         elif callable(query):
             return query  # type: ignore
         elif isinstance(query, str):
-            key = self.normalize(query)
-            if key in self.lookup_dict:
-                return self.lookup_dict[key]
-            elif key in self.synonyms:
-                return self.synonyms[key]
-            else:
-                valid_choices = sorted(self.options)
-                raise KeyError(f"{query} is an invalid. Try one of: {valid_choices}")
+            return self.lookup_str(query)
         else:
             raise TypeError(f"Invalid function: {type(query)} - {query}")
 
