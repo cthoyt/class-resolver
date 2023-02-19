@@ -5,7 +5,17 @@
 import inspect
 import logging
 from textwrap import dedent
-from typing import Any, Collection, List, Mapping, Optional, Sequence, Type, TypeVar
+from typing import (
+    Any,
+    Collection,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Type,
+    TypeVar,
+)
 
 from .base import BaseResolver
 from .utils import (
@@ -116,6 +126,17 @@ class ClassResolver(BaseResolver[Type[X], X]):
             synonyms=synonyms,
             default=default,
             suffix=suffix,
+        )
+
+    def subresolver(self, keys: Iterable[str]) -> "ClassResolver[X]":
+        """Create a class resolver that's a subset of this one."""
+        elements = [self.lookup_str(key) for key in keys]
+        return self.__class__(
+            elements,
+            default=self.default,
+            synonyms=self.synonyms,
+            suffix=self.suffix,
+            base=self.base,
         )
 
     def extract_name(self, element: Type[X]) -> str:

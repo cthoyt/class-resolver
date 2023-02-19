@@ -113,7 +113,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         """Create a resolver that's a subset of this one."""
         elements = [self.lookup_str(key) for key in keys]
         return self.__class__(
-            elements=elements,
+            elements,
             default=self.default,
             synonyms=self.synonyms,
             suffix=self.suffix,
