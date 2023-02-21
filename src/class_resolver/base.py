@@ -4,11 +4,24 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Collection, Dict, Generic, Iterable, Iterator, Mapping, Optional, Set
+from typing import (
+    TYPE_CHECKING,
+    Collection,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    Mapping,
+    Optional,
+    Set,
+)
 
 from pkg_resources import iter_entry_points
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
+
+if TYPE_CHECKING:
+    import optuna
 
 __all__ = [
     "BaseResolver",
@@ -261,3 +274,41 @@ class BaseResolver(ABC, Generic[X, Y]):
         """Make a resolver from the elements registered at the given entrypoint."""
         elements = cls._from_entrypoint(group)
         return cls(elements, **kwargs)
+
+    def optuna_lookup(self, trial: "optuna.Trial", name: str) -> X:
+        """Suggest an element from this resolver for hyper-parameter optimization in Optuna.
+
+        :param trial: A trial object from :mod:`optuna`. Note that this object shouldn't be constructed
+            by the developer, and should only get constructed inside the optuna framework when
+            using :meth:`optuna.Study.optimize`.
+        :param name: The name of the `param` within an optuna study.
+        :returns: An element chosen by optuna, then run through :func:`lookup`.
+
+        In the following example, Optuna is used to determine the best classification
+        algorithm from scikit-learn when applied to the famous iris dataset.
+
+        .. code-block::
+
+            import optuna
+            from sklearn import datasets
+            from sklearn.model_selection import train_test_split
+
+            from class_resolver.contrib.sklearn import classifier_resolver
+
+
+            def objective(trial: optuna.Trial) -> float:
+                x, y = datasets.load_iris(return_X_y=True)
+                x_train, x_test, y_train, y_test = train_test_split(
+                    x, y, test_size=0.33, random_state=42,
+                )
+                clf_cls = classifier_resolver.optuna_lookup(trial, "model")
+                clf = clf_cls()
+                clf.fit(x_train, y_train)
+                return clf.score(x_test, y_test)
+
+
+            study = optuna.create_study(direction="maximize")
+            study.optimize(objective, n_trials=100)
+        """
+        key = trial.suggest_categorical(name, sorted(self.lookup_dict))
+        return self.lookup(key)
