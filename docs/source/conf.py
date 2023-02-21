@@ -230,6 +230,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     'https://docs.python.org/3/': None,
     'torch': ('https://pytorch.org/docs/stable', None),
+    'torch_geometric': ('https://pytorch-geometric.readthedocs.io/en/latest', None),
     'numpy': ('https://numpy.org/doc/stable', None),
     'optuna': ('https://optuna.readthedocs.io/en/latest', None),
     'sklearn': ('https://scikit-learn.org/stable', None),
