@@ -6,6 +6,7 @@ import inspect
 from typing import (
     Any,
     Callable,
+    Dict,
     Iterable,
     Mapping,
     Optional,
@@ -54,6 +55,7 @@ SIMPLE_TYPES = {float, int, bool, str, type(None)}
 
 
 def _is_simple_union(u) -> bool:
+    """Check if the arguments to type U are all simple."""
     return all(arg in SIMPLE_TYPES for arg in get_args(u))
 
 
@@ -76,17 +78,19 @@ def check_kwargs(
 class ArgumentError(TypeError):
     """A custom argument error."""
 
-    def __init__(self, func, key, text):
+    def __init__(self, func, parameter, text):
         self.func = func
-        self.key = key
+        self.parameter = parameter
         self.text = text
 
     def __str__(self):
-        return f"{self.func} {self.key}: {self.text}"
+        return f"{self.func} {self.parameter.name}: {self.text}"
 
 
 class Metaresolver:
     """A resolver of resolvers."""
+
+    parameter_name_to_resolver: Dict[str, BaseResolver]
 
     def __init__(
         self,
@@ -96,10 +100,107 @@ class Metaresolver:
         """Instantiate a meta-resolver.
 
         :param resolvers: A set of resolvers to index for checking kwargs
+        :param extras: A dictionary of additional resolvers, e.g. class resolvers
+            that don't have suffixes or function resolvers given explicitly with
+            parameter names
         """
-        self.names = {resolver.suffix: resolver for resolver in resolvers}
+        self.parameter_name_to_resolver = {resolver.suffix: resolver for resolver in resolvers}
         if extras:
-            self.names.update(extras)
+            self.parameter_name_to_resolver.update(extras)
+
+    def check_kwarg(self, func: Callable, parameter: inspect.Parameter, related_key: str, kwargs):
+        annotation = parameter.annotation
+        value_not_given = parameter.name not in kwargs
+        value = kwargs.get(parameter.name)
+
+        resolver = self.parameter_name_to_resolver.get(parameter.name)
+        if resolver is not None:
+            if isinstance(resolver, FunctionResolver):
+                # TODO more careful checks of functions' arguments
+                return True
+
+            # If the annotation for this parameter does not match the base
+            # class type inside the resolver, raise an exception
+            if not is_hint(annotation, resolver.base):
+                raise ArgumentError(
+                    func,
+                    parameter,
+                    f"has bad annotation {annotation} wrt resolver {resolver}",
+                )
+
+            # If there's no value given and the resolver does not have a default,
+            # raise an exception
+            if not value and not resolver.default:
+                raise ArgumentError(func, parameter, "is missing from the arguments")
+
+            # Look up the class. If value is None, we already checked the resolver
+            # should have a default and this will be okay
+            cls = resolver.lookup(value)
+
+            # Recur on the __init__() function of the class looked up by the resolver,
+            # optionally using the related keyword arguments, if available.
+            return self.check_kwargs(cls, kwargs.get(related_key))
+
+        # If there's no value given and there's no default, raise an exception
+        if value_not_given:
+            if parameter.default is not parameter.empty:
+                # We're going to go ahead and assume that the default value
+                # matches the type annotation and not do any further checking
+                return True
+            raise ArgumentError(
+                func,
+                parameter,
+                f"no default, value not given. Signature: {inspect.signature(func)}",
+            )
+
+        # Now comes the nitty-gritty part of checking - if
+
+        # get_origin() checks if the annotation is inside a Union, List, etc.
+        origin = get_origin(annotation)
+
+        if origin is Union:
+            # If the things inside the union are not all simple types,
+            # i.e., float, int, bool, str, or None, then raise an error.
+            # This is because anything other than these types can't live
+            # inside JSON.
+            if not _is_simple_union(annotation):
+                raise ArgumentError(func, parameter, f"has inappropriate annotation: {annotation}")
+
+            # Get the list of arguments inside the Union
+            args = get_args(annotation)
+
+            # if the value is one of the args, then we're done.
+            if isinstance(value, args):
+                return True
+            # otherwise, raise a type error
+            raise ArgumentError(
+                func,
+                parameter,
+                f"value {value} does not match annotation {annotation}",
+            )
+
+        # If the origin is None, this means that it's just a single type
+        if origin is None:
+            try:
+                instance_check = isinstance(value, annotation)
+            except TypeError:
+                # This type error gets thrown if there's some reason you can't
+                # type check on the given annotation (i.e., it's not a subclass of `type`)
+                raise ArgumentError(
+                    func, parameter, f"invalid annotation {annotation} ({type(annotation)})"
+                ) from None
+
+            if instance_check:
+                return True
+            elif annotation == float and isinstance(value, int):
+                # you can coerce an int into a float, so just say this is fine
+                return True
+            else:
+                raise ArgumentError(func, parameter, f"{value} mismatched annotation {annotation}")
+
+        # Unknown origin type
+        # TODO might need to extend to handle list/dict
+        raise ArgumentError(func, parameter, f"unhandled origin {origin}")
 
     def check_kwargs(self, func: Callable, kwargs: OptionalKwargs = None) -> bool:
         """Check the appropriate of the kwargs with a given function.
@@ -111,85 +212,29 @@ class Metaresolver:
         """
         if kwargs is None:
             kwargs = {}
-        for key, parameter, related_key in _iter_params(func):
-            if key == "kwargs":
-                continue
-            annotation = parameter.annotation
-            next_resolver = self.names.get(key)
-            value = kwargs.get(key)
-            if next_resolver is not None:
-                if isinstance(next_resolver, FunctionResolver):
-                    continue
-                if not is_hint(annotation, next_resolver.base):
-                    raise ArgumentError(
-                        func,
-                        key,
-                        f"has bad annotation {annotation} wrt resolver {next_resolver}",
-                    )
-                if value is None:
-                    raise ArgumentError(func, key, f"is missing from the arguments")
-                self.check_kwargs(
-                    next_resolver.lookup(value),
-                    kwargs.get(related_key),
-                )
-            else:
-                if value is None:
-                    if parameter.default is parameter.empty:
-                        raise ArgumentError(
-                            func,
-                            key,
-                            f"no default, value not given. Signature: {inspect.signature(func)}",
-                        )
-                else:
-                    origin = get_origin(annotation)
-                    if origin is Union:
-                        if not _is_simple_union(annotation):
-                            raise ArgumentError(
-                                func, key, f"has inappropriate annotation: {annotation}"
-                            )
-                        else:
-                            args = get_args(annotation)
-                            if isinstance(value, args):
-                                pass
-                            else:
-                                raise ArgumentError(
-                                    func,
-                                    key,
-                                    f"value {value} does not match annotation {annotation}",
-                                )
-                    elif origin is None:
-                        try:
-                            instance_check = isinstance(value, annotation)
-                        except TypeError:
-                            raise ArgumentError(
-                                func, key, f"invalid annotation {annotation} ({type(annotation)})"
-                            ) from None
-                        if instance_check:
-                            pass
-                        elif annotation == float and isinstance(value, int):
-                            pass  # log a warning?
-                        else:
-                            raise ArgumentError(
-                                func, key, f"{value} mismatched annotation {annotation}"
-                            )
-                    else:
-                        raise ArgumentError(func, key, f"unhandled origin {origin}")
+        for parameter_name, parameter, related_key in _iter_params(func):
+            self.check_kwarg(
+                func=func,
+                parameter=parameter,
+                related_key=related_key,
+                kwargs=kwargs,
+            )
         return True
 
 
-def _iter_params(
-    func,
-) -> Iterable[Tuple[str, inspect.Parameter, str]]:
-    parameters = inspect.signature(func).parameters
-    kwarg_map = {}
-    for key in parameters:
-        related_key = f"{key}_kwargs"
-        if related_key in parameters:
-            kwarg_map[related_key] = key
-    for key in parameters:
-        if key in kwarg_map:
+def _iter_params(func) -> Iterable[Tuple[str, inspect.Parameter, str]]:
+    parameter_names: Mapping[str, inspect.Parameter] = inspect.signature(func).parameters
+    parameter_name_to_kwargs = {}
+    for parameter_name in parameter_names:
+        kwargs_key = f"{parameter_name}_kwargs"
+        if kwargs_key in parameter_names:
+            parameter_name_to_kwargs[kwargs_key] = parameter_name
+    for parameter_name, parameter in parameter_names.items():
+        if parameter_name in parameter_name_to_kwargs:
             continue
-        yield key, parameters[key], f"{key}_kwargs"
+        if parameter_name == "kwargs":
+            continue
+        yield parameter_name, parameter, f"{parameter_name}_kwargs"
 
 
 def _main():
@@ -199,8 +244,9 @@ def _main():
     from pykeen.experiments.cli import HERE
     from pykeen.losses import loss_resolver
     from pykeen.models import model_resolver
-    from pykeen.nn.emb import constrainer_resolver, normalizer_resolver
     from pykeen.nn.init import initializer_resolver
+    from pykeen.nn.representation import constrainer_resolver, normalizer_resolver
+    from pykeen.optimizers import optimizer_resolver
     from pykeen.pipeline import pipeline
     from pykeen.regularizers import regularizer_resolver
 
@@ -222,12 +268,18 @@ def _main():
             "relation_initializer": initializer_resolver,
             "relation_normalizer": normalizer_resolver,
             "relation_constrainer": constrainer_resolver,
+            # skip optimizer since its instantiation is dynamic
+            # "optimizer": optimizer_resolver,
         },
     )
     for path in HERE.glob("*/*.json"):
         data = json.loads(path.read_text())
         kwargs = data["pipeline"]
-        r.check_kwargs(pipeline, kwargs)
+        try:
+            r.check_kwargs(pipeline, kwargs)
+        except Exception as e:
+            print(path)
+            raise e
 
 
 if __name__ == "__main__":
