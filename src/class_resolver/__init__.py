@@ -54,6 +54,7 @@ from .api import (
 )
 from .base import (
     BaseResolver,
+    SimpleResolver,
     RegistrationError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
@@ -93,6 +94,7 @@ __all__ = [
     "Resolver",
     "ClassResolver",
     "FunctionResolver",
+    "SimpleResolver",
     # Utilities
     "get_cls",
     "get_subclasses",
