@@ -3,6 +3,7 @@
 """A base resolver."""
 
 import logging
+import typing
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
@@ -11,12 +12,14 @@ from typing import (
     Generic,
     Iterable,
     Iterator,
+    Literal,
     Mapping,
     Optional,
     Set,
 )
 
 from pkg_resources import iter_entry_points
+from typing_extensions import Self
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
@@ -337,7 +340,7 @@ class SimpleResolver(BaseResolver[X, X]):
 
     # docstr-coverage: inherited
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:  # noqa: D102
-        str_query = str(query)
+        str_query = self.normalize(str(query))
         if str_query in self.lookup_dict:
             return self.lookup_dict[str_query]
         if query is not None:
@@ -355,3 +358,18 @@ class SimpleResolver(BaseResolver[X, X]):
         if pos_kwargs is not None:
             raise ValueError(f"{self.__class__.__name__} does not support positional arguments.")
         return self.lookup(query=query, **kwargs)
+
+    @classmethod
+    def from_literal(cls, literal: Literal, **kwargs) -> Self:
+        """
+        Construct a simple resolver for the given `typing.Literal`.
+
+        :param literal:
+            the type annotation for literals.
+        :param kwargs:
+            additional keyword-based parameters passed to :meth:`__init__`
+
+        :return:
+            a simple resolver for the literal values.
+        """
+        return cls(elements=typing.get_args(literal), **kwargs)
