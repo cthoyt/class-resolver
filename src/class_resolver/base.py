@@ -7,12 +7,12 @@ import typing
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
+    Any,
     Collection,
     Dict,
     Generic,
     Iterable,
     Iterator,
-    Literal,
     Mapping,
     Optional,
     Set,
@@ -360,7 +360,7 @@ class SimpleResolver(BaseResolver[X, X]):
         return self.lookup(query=query, **kwargs)
 
     @classmethod
-    def from_literal(cls, literal: Literal, **kwargs) -> Self:
+    def from_literal(cls, literal: Any, **kwargs) -> Self:
         """
         Construct a simple resolver for the given `typing.Literal`.
 
@@ -372,4 +372,5 @@ class SimpleResolver(BaseResolver[X, X]):
         :return:
             a simple resolver for the literal values.
         """
+        # todo: how to annotate type annotations?
         return cls(elements=typing.get_args(literal), **kwargs)
