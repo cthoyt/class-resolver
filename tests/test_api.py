@@ -9,6 +9,7 @@ from typing import ClassVar, Collection, Optional, Sequence
 import click
 from click.testing import CliRunner, Result
 from docdata import parse_docdata
+import pytest
 
 from class_resolver import (
     VERSION,
@@ -17,6 +18,7 @@ from class_resolver import (
     RegistrationNameConflict,
     RegistrationSynonymConflict,
     Resolver,
+    SimpleResolver,
     UnexpectedKeywordError,
 )
 
@@ -490,3 +492,18 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(TypeError) as e:
             resolver.make("a")
         self.assertEqual("surprise!", str(e.exception))
+
+
+def test_simple_resolver():
+    """Test simple resolver."""
+    sr = SimpleResolver([0, 1, 2, 3])
+    for i in range(4):
+        assert sr.make(i) == i
+        assert sr.make(str(i)) == i
+    with pytest.raises(ValueError):
+        sr.make(-1)
+    with pytest.raises(ValueError):
+        sr.make(4)
+    with pytest.raises(ValueError):
+        sr.make(None)
+    assert sr.make(None, default=2) == 2
