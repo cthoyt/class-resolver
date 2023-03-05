@@ -312,3 +312,46 @@ class BaseResolver(ABC, Generic[X, Y]):
         """
         key = trial.suggest_categorical(name, sorted(self.lookup_dict))
         return self.lookup(key)
+
+
+class SimpleResolver(BaseResolver[X, X]):
+    """
+    A simple resolver which uses the string representations as key.
+
+    While very minimalistic, it can be quite handy when dealing with simple objects, e.g.,
+
+    >>> r = SimpleResolver([0, 1, 2, 3], default=0)
+    >>> r.make(None)
+    0
+    >>> r.make(3)
+    3
+    >>> r.make(7)
+    Traceback (most recent call last):
+        ...
+    ValueError: Invalid query=7. Possible queries are {0, 1, 2, 3}.
+    """
+
+    # docstr-coverage: inherited
+    def extract_name(self, element: X) -> str:  # noqa: D102
+        return str(element)
+
+    # docstr-coverage: inherited
+    def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:  # noqa: D102
+        str_query = str(query)
+        if str_query in self.lookup_dict:
+            return self.lookup_dict[str_query]
+        if query is not None:
+            raise ValueError(f"Invalid query={query}. Possible queries are {self.options}.")
+        if default is not None:
+            return default
+        if self.default is not None:
+            return self.default
+        raise ValueError(
+            f"If query and default are None, a default must be set in the resolver, but it is None, too."
+        )
+
+    # docstr-coverage: inherited
+    def make(self, query, pos_kwargs: OptionalKwargs = None, **kwargs) -> X:  # noqa: D102
+        if pos_kwargs is not None:
+            raise ValueError(f"{self.__class__.__name__} does not support positional arguments.")
+        return self.lookup(query=query, **kwargs)
