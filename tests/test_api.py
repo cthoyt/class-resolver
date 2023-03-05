@@ -3,13 +3,15 @@
 """Tests for the class resolver."""
 
 import itertools
+import typing
 import unittest
 from typing import ClassVar, Collection, Optional, Sequence
 
 import click
+import pytest
 from click.testing import CliRunner, Result
 from docdata import parse_docdata
-import pytest
+from typing_extensions import Literal
 
 from class_resolver import (
     VERSION,
@@ -507,3 +509,12 @@ def test_simple_resolver():
     with pytest.raises(ValueError):
         sr.make(None)
     assert sr.make(None, default=2) == 2
+
+
+LiteralType = Literal[0, 1, 2]
+
+
+def test_simple_resolver_for_literal():
+    """Test creating a simple resolver for a literal type annotation."""
+    sr = SimpleResolver.from_literal(LiteralType)
+    assert set(map(str, typing.get_args(LiteralType))).issubset(sr.options)
