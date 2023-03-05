@@ -319,9 +319,6 @@ class BaseResolver(ABC, Generic[X, Y]):
         return self.lookup(key)
 
 
-L = TypeVar("L", bound=Literal)
-
-
 class SimpleResolver(BaseResolver[X, X], Generic[X]):
     """
     A simple resolver which uses the string representations as key.
@@ -363,18 +360,3 @@ class SimpleResolver(BaseResolver[X, X], Generic[X]):
         if pos_kwargs is not None:
             raise ValueError(f"{self.__class__.__name__} does not support positional arguments.")
         return self.lookup(query=query, **kwargs)
-
-    @classmethod
-    def from_literal(cls: Type[BaseResolver[L, L]], literal: L, **kwargs) -> BaseResolver[L, L]:
-        """
-        Construct a simple resolver for the given `typing.Literal`.
-
-        :param literal:
-            the type annotation for literals.
-        :param kwargs:
-            additional keyword-based parameters passed to :meth:`__init__`
-
-        :return:
-            a simple resolver for the literal values.
-        """
-        return cls(elements=typing.get_args(literal), **kwargs)
