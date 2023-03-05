@@ -3,22 +3,17 @@
 """A base resolver."""
 
 import logging
-import typing
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
-    Any,
     Collection,
     Dict,
     Generic,
     Iterable,
     Iterator,
-    Literal,
     Mapping,
     Optional,
     Set,
-    Type,
-    TypeVar,
 )
 
 from pkg_resources import iter_entry_points

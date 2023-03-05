@@ -3,7 +3,6 @@
 """Tests for the class resolver."""
 
 import itertools
-import typing
 import unittest
 from typing import ClassVar, Collection, Optional, Sequence
 
@@ -11,7 +10,6 @@ import click
 import pytest
 from click.testing import CliRunner, Result
 from docdata import parse_docdata
-from typing_extensions import Literal
 
 from class_resolver import (
     VERSION,
