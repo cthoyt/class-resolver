@@ -13,13 +13,15 @@ from typing import (
     Generic,
     Iterable,
     Iterator,
+    Literal,
     Mapping,
     Optional,
     Set,
+    Type,
+    TypeVar,
 )
 
 from pkg_resources import iter_entry_points
-from typing_extensions import Self
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
@@ -317,7 +319,10 @@ class BaseResolver(ABC, Generic[X, Y]):
         return self.lookup(key)
 
 
-class SimpleResolver(BaseResolver[X, X]):
+L = TypeVar("L", bound=Literal)
+
+
+class SimpleResolver(BaseResolver[X, X], Generic[X]):
     """
     A simple resolver which uses the string representations as key.
 
@@ -360,7 +365,7 @@ class SimpleResolver(BaseResolver[X, X]):
         return self.lookup(query=query, **kwargs)
 
     @classmethod
-    def from_literal(cls, literal: Any, **kwargs) -> Self:
+    def from_literal(cls: Type[BaseResolver[L, L]], literal: L, **kwargs) -> BaseResolver[L, L]:
         """
         Construct a simple resolver for the given `typing.Literal`.
 
@@ -372,5 +377,4 @@ class SimpleResolver(BaseResolver[X, X]):
         :return:
             a simple resolver for the literal values.
         """
-        # todo: how to annotate type annotations?
         return cls(elements=typing.get_args(literal), **kwargs)
