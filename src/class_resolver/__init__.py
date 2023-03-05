@@ -54,10 +54,10 @@ from .api import (
 )
 from .base import (
     BaseResolver,
-    SimpleResolver,
     RegistrationError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
+    SimpleResolver,
 )
 from .func import FunctionResolver
 from .utils import (
