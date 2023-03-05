@@ -347,7 +347,7 @@ class SimpleResolver(BaseResolver[X, X]):
         if self.default is not None:
             return self.default
         raise ValueError(
-            f"If query and default are None, a default must be set in the resolver, but it is None, too."
+            "If query and default are None, a default must be set in the resolver, but it is None, too."
         )
 
     # docstr-coverage: inherited
