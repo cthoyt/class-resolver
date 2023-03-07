@@ -320,15 +320,25 @@ class SimpleResolver(BaseResolver[X, X], Generic[X]):
 
     While very minimalistic, it can be quite handy when dealing with simple objects, e.g.,
 
-    >>> r = SimpleResolver([0, 1, 2, 3], default=0)
-    >>> r.make(None)
-    0
-    >>> r.make(3)
-    3
-    >>> r.make(7)
+    >>> log_level_resolver = SimpleResolver(["debug", "info", "warning", "error"], default="info")
+    >>> log_level_resolver.make(None)
+    "info"
+    >>> r.make("WARNING")
+    "warning"
+    >>> r.make("fatal")
     Traceback (most recent call last):
         ...
-    ValueError: Invalid query=7. Possible queries are {0, 1, 2, 3}.
+    ValueError: Invalid query=fatal. Possible queries are {"debug", "info", "warning", "error"}.
+    
+    We can also benefit from, e.g., creation of command-line options for click
+    
+    >>> log_level_option = log_level_resolver.get_option("--log-level")
+    
+    Or use the resolver to ensure a type-safe normalization
+    
+    >>> import typing
+    >>> LogLevel = typing.Literal["debug", "info", "warning", "error"]
+    >>> r: SimpleResolver[LogLevel] = SimpleResolver(["debug", "info", "warning", "error"], default="info")
     """
 
     # docstr-coverage: inherited
