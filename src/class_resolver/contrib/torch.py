@@ -72,8 +72,8 @@ activation_resolver = ClassResolver(
         module
         for module in vars(activation).values()
         if isinstance(module, type)
-           and issubclass(module, nn.Module)
-           and module not in ACTIVATION_SKIP
+        and issubclass(module, nn.Module)
+        and module not in ACTIVATION_SKIP
     ],
     base=nn.Module,
     default=activation.ReLU,
