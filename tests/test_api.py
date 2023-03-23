@@ -7,7 +7,6 @@ import unittest
 from typing import ClassVar, Collection, Optional, Sequence
 
 import click
-import pytest
 from click.testing import CliRunner, Result
 from docdata import parse_docdata
 
