@@ -248,7 +248,7 @@ class TestResolver(unittest.TestCase):
             ),
         )
         for spec in itertools.islice(
-                tune.suggest.variant_generator.generate_variants(search_space), 2
+            tune.suggest.variant_generator.generate_variants(search_space), 2
         ):
             config = {k[0]: v for k, v in spec[0].items()}
             query = config.pop("query")
