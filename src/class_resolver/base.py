@@ -329,13 +329,13 @@ class SimpleResolver(BaseResolver[X, X], Generic[X]):
     Traceback (most recent call last):
         ...
     ValueError: Invalid query=fatal. Possible queries are {"debug", "info", "warning", "error"}.
-    
+
     We can also benefit from, e.g., creation of command-line options for click
-    
+
     >>> log_level_option = log_level_resolver.get_option("--log-level")
-    
+
     Or use the resolver to ensure a type-safe normalization
-    
+
     >>> import typing
     >>> LogLevel = typing.Literal["debug", "info", "warning", "error"]
     >>> r: SimpleResolver[LogLevel] = SimpleResolver(["debug", "info", "warning", "error"], default="info")
