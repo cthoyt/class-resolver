@@ -494,16 +494,28 @@ class TestResolver(unittest.TestCase):
         self.assertEqual("surprise!", str(e.exception))
 
 
-def test_simple_resolver():
-    """Test simple resolver."""
-    sr = SimpleResolver([0, 1, 2, 3])
-    for i in range(4):
-        assert sr.make(i) == i
-        assert sr.make(str(i)) == i
-    with pytest.raises(ValueError):
-        sr.make(-1)
-    with pytest.raises(ValueError):
-        sr.make(4)
-    with pytest.raises(ValueError):
-        sr.make(None)
-    assert sr.make(None, default=2) == 2
+class TestSimpleResolver(unittest.TestCase):
+    """Tests for the simple resolver."""
+
+    def setUp(self) -> None:
+        """Create test instance."""
+        self.instance = SimpleResolver([0, 1, 2, 3])
+
+    def test_make(self):
+        """Test making valid objects."""
+        for i in range(4):
+            assert self.instance.make(i) == i
+            assert self.instance.make(str(i)) == i
+
+    def test_make_invalid(self):
+        """Test making invalid choices."""
+        with pytest.raises(ValueError):
+            self.instance.make(-1)
+        with pytest.raises(ValueError):
+            self.instance.make(4)
+
+    def test_default(self):
+        """Test make's interaction with default."""
+        with pytest.raises(ValueError):
+            self.instance.make(None)
+        assert self.instance.make(None, default=2) == 2
