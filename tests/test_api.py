@@ -248,7 +248,7 @@ class TestResolver(unittest.TestCase):
             ),
         )
         for spec in itertools.islice(
-            tune.suggest.variant_generator.generate_variants(search_space), 2
+                tune.suggest.variant_generator.generate_variants(search_space), 2
         ):
             config = {k[0]: v for k, v in spec[0].items()}
             query = config.pop("query")
@@ -504,18 +504,18 @@ class TestSimpleResolver(unittest.TestCase):
     def test_make(self):
         """Test making valid objects."""
         for i in range(4):
-            assert self.instance.make(i) == i
-            assert self.instance.make(str(i)) == i
+            self.assertEqual(self.instance.make(i), i)
+            self.assertEqual(self.instance.make(str(i)), i)
 
     def test_make_invalid(self):
         """Test making invalid choices."""
-        with pytest.raises(ValueError):
+        with self.assertRaises(ValueError):
             self.instance.make(-1)
-        with pytest.raises(ValueError):
+        with self.assertRaises(ValueError):
             self.instance.make(4)
 
     def test_default(self):
         """Test make's interaction with default."""
-        with pytest.raises(ValueError):
+        with self.assertRaises(ValueError):
             self.instance.make(None)
-        assert self.instance.make(None, default=2) == 2
+        self.assertEqual(self.instance.make(None, default=2), 2)
