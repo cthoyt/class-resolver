@@ -376,7 +376,7 @@ def get_cls(
         else:
             valid_choices = sorted(set(lookup_dict.keys()).union(lookup_dict_synonyms or []))
             raise KeyError(
-                f"Invalid {base.__name__} name: {query}. Valid choices are: {valid_choices}"
+                f"Invalid {base.__name__} name: {query} (normalized to: {key}). Valid choices are: {valid_choices}"
             )
     elif isinstance(query, base):
         return query.__class__
