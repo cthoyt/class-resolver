@@ -66,7 +66,6 @@ optimizer_resolver = ClassResolver.from_subclasses(
                 optimizer.step()
 
         return model
-
 """
 
 ACTIVATION_SKIP = {
