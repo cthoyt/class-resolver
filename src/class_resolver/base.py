@@ -3,7 +3,6 @@
 """A base resolver."""
 
 import logging
-import sys
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
@@ -19,11 +18,13 @@ from typing import (
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
-if sys.version_info < (3, 8, 0):
+try:
+    # For python 3.8 and later
+    from importlib.metadata import entry_points as ep
+except ImportError:
     from importlib_metadata import entry_points
 else:
-    # For python 3.8 and later
-    from importlib.metadata import entry_points
+    entry_points = ep
 
 if TYPE_CHECKING:
     import optuna
