@@ -4,7 +4,6 @@
 
 import logging
 from abc import ABC, abstractmethod
-from importlib.metadata import entry_points as iter_entry_points
 from typing import (
     TYPE_CHECKING,
     Collection,
@@ -18,6 +17,11 @@ from typing import (
 )
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
+
+try:
+    from importlib.metadata import entry_points
+except ImportError:
+    from importlib_metadata import entry_points
 
 if TYPE_CHECKING:
     import optuna
@@ -259,7 +263,7 @@ class BaseResolver(ABC, Generic[X, Y]):
     @staticmethod
     def _from_entrypoint(group: str) -> Set[X]:
         elements = set()
-        for entry in iter_entry_points(group=group):
+        for entry in entry_points().select(group=group):
             try:
                 element = entry.load()
             except (ImportError, AttributeError):
