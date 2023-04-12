@@ -3,6 +3,7 @@
 """A base resolver."""
 
 import logging
+import sys
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
@@ -16,7 +17,10 @@ from typing import (
     Set,
 )
 
-from pkg_resources import iter_entry_points
+if sys.version_info[:2] >= (3, 10):
+    from importlib.metadata import entry_points
+else:
+    from importlib_metadata import entry_points
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
@@ -259,11 +263,11 @@ class BaseResolver(ABC, Generic[X, Y]):
 
     @staticmethod
     def _from_entrypoint(group: str) -> Set[X]:
-        elements = set()
-        for entry in iter_entry_points(group=group):
+        elements: Set[X] = set()
+        for entry in entry_points(group=group):
             try:
                 element = entry.load()
-            except ImportError:
+            except AttributeError:
                 logger.warning("could not load %s", entry.name)
             else:
                 elements.add(element)
