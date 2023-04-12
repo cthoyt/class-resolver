@@ -267,7 +267,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         for entry in entry_points(group=group):
             try:
                 element = entry.load()
-            except AttributeError:
+            except (ImportError, AttributeError):
                 logger.warning("could not load %s", entry.name)
             else:
                 elements.add(element)
