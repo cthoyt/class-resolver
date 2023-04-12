@@ -20,9 +20,9 @@ from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
 try:
     # For python 3.8 and later
-    import importlib.metadata as importlib_metadata
+    from importlib.metadata import entry_points
 except ImportError:
-    import importlib_metadata
+    from importlib_metadata import entry_points
 
 if TYPE_CHECKING:
     import optuna
@@ -264,7 +264,16 @@ class BaseResolver(ABC, Generic[X, Y]):
     @staticmethod
     def _from_entrypoint(group: str) -> Set[X]:
         elements = set()
-        for entry in importlib_metadata.entry_points()[group]:
+        try:
+            # For python 3.7.
+            entry_point = entry_points().select(group=group)
+        except AttributeError:
+            # For python 3.8 and later
+            entry_point = entry_points()[group]
+        except Exception as e:
+            logging.exception(f"Exception: {e}")
+
+        for entry in entry_point:
             try:
                 element = entry.load()
             except (ImportError, AttributeError):
