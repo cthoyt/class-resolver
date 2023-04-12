@@ -4,6 +4,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from importlib.metadata import entry_points as iter_entry_points
 from typing import (
     TYPE_CHECKING,
     Collection,
@@ -15,8 +16,6 @@ from typing import (
     Optional,
     Set,
 )
-
-from pkg_resources import iter_entry_points
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
