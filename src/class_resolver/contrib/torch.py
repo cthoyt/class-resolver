@@ -49,8 +49,8 @@ optimizer_resolver = ClassResolver.from_subclasses(
     dataset = ...
 
     def train(
-        model: nn.Module, 
-        optimizer: Hint[Optimizer] = "adam", 
+        model: nn.Module,
+        optimizer: Hint[Optimizer] = "adam",
         optimizer_kwargs: OptionalKwargs = None,
     ):
         optimizer = optimizer_resolver.make(
@@ -191,8 +191,8 @@ then parametrized to accept a LRScheduler hint.
     dataset = ...
 
     def train(
-        model: nn.Module, 
-        scheduler: Hint[LRScheduler] = "exponential", 
+        model: nn.Module,
+        scheduler: Hint[LRScheduler] = "exponential",
         scheduler_kwargs: OptionalKwargs = None,
     ):
         optimizer = SGD(params=model.parameters(), lr=0.1)
