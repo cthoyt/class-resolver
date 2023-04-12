@@ -43,12 +43,19 @@ optimizer_resolver = ClassResolver.from_subclasses(
 
     from class_resolver import Hint, OptionalKwargs
     from class_resolver.contrib.torch import optimizer_resolver
-    from torch import Parameter
+    from torch import Parameter, nn
     from torch.optim import Optimizer
 
-    def train(optimizer: Hint[Optimizer] = "adam", optimizer_kwargs: OptionalKwargs = None):
-        model = [Parameter(torch.randn(2, 2, requires_grad=True))]
-        optimizer = optimizer_resolver.make(optimizer, optimizer_kwargs, model=model)
+    dataset = ...
+
+    def train(
+        model: nn.Module,
+        optimizer: Hint[Optimizer] = "adam",
+        optimizer_kwargs: OptionalKwargs = None,
+    ):
+        optimizer = optimizer_resolver.make(
+            optimizer, optimizer_kwargs, params=model.parameters(),
+        )
 
         for epoch in range(20):
             for input, target in dataset:
@@ -59,7 +66,6 @@ optimizer_resolver = ClassResolver.from_subclasses(
                 optimizer.step()
 
         return model
-
 """
 
 ACTIVATION_SKIP = {
@@ -178,13 +184,18 @@ then parametrized to accept a LRScheduler hint.
 
     from class_resolver import Hint, OptionalKwargs
     from class_resolver.contrib.torch import lr_scheduler_resolver
-    from torch import Parameter
+    from torch import Parameter, nn
     from torch.optim import SGD
     from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 
-    def train(scheduler: Hint[LRScheduler] = "exponential", scheduler_kwargs: OptionalKwargs = None):
-        model = [Parameter(torch.randn(2, 2, requires_grad=True))]
-        optimizer = SGD(model, 0.1)
+    dataset = ...
+
+    def train(
+        model: nn.Module,
+        scheduler: Hint[LRScheduler] = "exponential",
+        scheduler_kwargs: OptionalKwargs = None,
+    ):
+        optimizer = SGD(params=model.parameters(), lr=0.1)
         scheduler = lr_scheduler_resolver.make(scheduler, scheduler_kwargs, optimizer=optimizer)
 
         for epoch in range(20):
