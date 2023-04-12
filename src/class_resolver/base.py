@@ -263,20 +263,20 @@ class BaseResolver(ABC, Generic[X, Y]):
 
     @staticmethod
     def _from_entrypoint(group: str) -> Set[X]:
-        entry_points = importlib_metadata.entry_points()
+        entry_points_obj = importlib_metadata.entry_points()
         try:
-            # For python 3.7.
-            entry_point = entry_points.select(group=group)
+            # For python 3.7
+            entry_points = entry_points_obj.select(group=group)
         except AttributeError:
             # For python 3.8 and later
-            entry_point = entry_points[group]
+            entry_points = entry_points_obj[group]
 
         elements = set()
-        for entry in entry_point:
+        for entry_point in entry_points:
             try:
-                element = entry.load()
+                element = entry_point.load()
             except (ImportError, AttributeError):
-                logger.warning("could not load %s", entry.name)
+                logger.warning("could not load %s", entry_point.name)
             else:
                 elements.add(element)
         return elements
