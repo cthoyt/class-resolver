@@ -209,8 +209,8 @@ then parametrized to accept a LRScheduler hint.
 
         return model
 """
-
-lr_scheduler_resolver.register(ReduceLROnPlateau)
+# this is for torch<2.1 compat
+lr_scheduler_resolver.register(ReduceLROnPlateau, raise_on_conflict=False)
 
 aggregation_resolver = FunctionResolver(
     [torch.sum, torch.max, torch.min, torch.mean, torch.logsumexp, torch.median],
