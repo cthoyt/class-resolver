@@ -45,7 +45,7 @@ class Base:
 
     def __eq__(self, other) -> bool:
         """Check two instances are equal."""
-        return type(self) == type(other) and self.name == other.name
+        return type(self) is type(other) and self.name == other.name
 
 
 @parse_docdata
