@@ -11,12 +11,7 @@ __all__ = [
 ]
 
 aggregation_resolver = FunctionResolver(
-    [np.sum, np.max, np.min, np.mean, np.median],
-    default=np.mean,
-    synonyms={
-        "max": np.max,
-        "min": np.min,
-    },
+    [np.sum, np.max, np.min, np.mean, np.median], default=np.mean
 )
 """A resolver for common aggregation functions in NumPy including the following functions:
 
