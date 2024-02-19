@@ -13,6 +13,9 @@ __all__ = [
 aggregation_resolver = FunctionResolver(
     [np.sum, np.max, np.min, np.mean, np.median], default=np.mean
 )
+# compat with older numpy versions, where np.min points to np.amin
+aggregation_resolver.register(np.min, synonyms={"min"}, raise_on_conflict=False)
+aggregation_resolver.register(np.max, synonyms={"max"}, raise_on_conflict=False)
 """A resolver for common aggregation functions in NumPy including the following functions:
 
 - :func:`numpy.sum`
