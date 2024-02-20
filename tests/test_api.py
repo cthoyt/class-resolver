@@ -490,3 +490,8 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(TypeError) as e:
             resolver.make("a")
         self.assertEqual("surprise!", str(e.exception))
+
+    def test_subresolver(self):
+        """Test getting a sub-resolver."""
+        subresolver = self.resolver.subresolver(["a", "b", "c"])
+        self.assertEqual(3, len(subresolver.lookup_dict))

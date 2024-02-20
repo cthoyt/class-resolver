@@ -126,6 +126,16 @@ class BaseResolver(ABC, Generic[X, Y]):
         """Iterate over the registered elements."""
         return iter(self.lookup_dict.values())
 
+    def subresolver(self, keys: Iterable[str]) -> "BaseResolver[X, Y]":
+        """Create a resolver that's a subset of this one."""
+        elements = [self.lookup_str(key) for key in keys]
+        return self.__class__(
+            elements,
+            default=self.default,
+            synonyms=self.synonyms,
+            suffix=self.suffix,
+        )
+
     @property
     def options(self) -> Set[str]:
         """Return the normalized option names."""
@@ -188,6 +198,17 @@ class BaseResolver(ABC, Generic[X, Y]):
     @abstractmethod
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup an element."""
+
+    def lookup_str(self, query: str) -> X:
+        """Lookup an element by name."""
+        key = self.normalize(query)
+        if key in self.lookup_dict:
+            return self.lookup_dict[key]
+        elif key in self.synonyms:
+            return self.synonyms[key]
+        else:
+            valid_choices = sorted(self.options)
+            raise KeyError(f"{query} is an invalid. Try one of: {valid_choices}")
 
     def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None):
         """Lookup an element and get its docdata.

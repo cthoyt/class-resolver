@@ -112,3 +112,8 @@ class TestFunctionResolver(unittest.TestCase):
         self.assertEqual({"add", "sub", "mul"}, set(resolver.lookup_dict))
         self.assertEqual(set(), set(resolver.synonyms))
         self.assertNotIn("expected_failure", resolver.lookup_dict)
+
+    def test_subresolver(self):
+        """Test getting a sub-resolver."""
+        subresolver = self.resolver.subresolver(["add_two", "add_one"])
+        self.assertEqual(2, len(subresolver.lookup_dict))
