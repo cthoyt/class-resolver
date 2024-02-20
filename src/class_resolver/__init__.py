@@ -57,6 +57,7 @@ from .base import (
     RegistrationError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
+    SimpleResolver,
 )
 from .func import FunctionResolver
 from .utils import (
@@ -93,6 +94,7 @@ __all__ = [
     "Resolver",
     "ClassResolver",
     "FunctionResolver",
+    "SimpleResolver",
     # Utilities
     "get_cls",
     "get_subclasses",
