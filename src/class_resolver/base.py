@@ -7,6 +7,8 @@ import sys
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
+    Any,
+    Callable,
     Collection,
     Dict,
     Generic,
@@ -25,6 +27,7 @@ else:
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
 if TYPE_CHECKING:
+    import click.decorators
     import optuna
 
 __all__ = [
@@ -55,7 +58,7 @@ class RegistrationError(KeyError, Generic[X], ABC):
         self.existing = self._get_existing()
 
     @abstractmethod
-    def _get_existing(self):
+    def _get_existing(self) -> X:
         """Get the pre-existing element based on the error type and the given key."""
 
     def __str__(self) -> str:
@@ -67,17 +70,17 @@ class RegistrationError(KeyError, Generic[X], ABC):
         )
 
 
-class RegistrationNameConflict(RegistrationError):
+class RegistrationNameConflict(RegistrationError[X]):
     """Raised on a conflict with the lookup dict."""
 
-    def _get_existing(self) -> str:
+    def _get_existing(self) -> X:
         return self.resolver.lookup_dict[self.key]
 
 
-class RegistrationSynonymConflict(RegistrationError):
+class RegistrationSynonymConflict(RegistrationError[X]):
     """Raised on a conflict with the synonym dict."""
 
-    def _get_existing(self) -> str:
+    def _get_existing(self) -> X:
         return self.resolver.synonyms[self.key]
 
 
@@ -148,7 +151,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         element: X,
         synonyms: Optional[Iterable[str]] = None,
         raise_on_conflict: bool = True,
-    ):
+    ) -> None:
         """Register an additional element with this resolver.
 
         :param element: The element to register
@@ -189,7 +192,7 @@ class BaseResolver(ABC, Generic[X, Y]):
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup an element."""
 
-    def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None):
+    def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None) -> Any:
         """Lookup an element and get its docdata.
 
         :param query: The hint for looking something up in the resolver
@@ -210,21 +213,26 @@ class BaseResolver(ABC, Generic[X, Y]):
     @abstractmethod
     def make(
         self,
-        query,
+        query: Hint[X],
         pos_kwargs: OptionalKwargs = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Y:
         """Make an element."""
 
-    def make_safe(self, query, pos_kwargs: OptionalKwargs = None, **kwargs) -> Optional[Y]:
+    def make_safe(
+        self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any
+    ) -> Optional[Y]:
         """Run make, but pass through a none query."""
         if query is None:
             return None
         return self.make(query=query, pos_kwargs=pos_kwargs, **kwargs)
 
-    def _default(self, default):
+    def _default(self, default: Hint[X]) -> X:
         if default is not None:
-            return default
+            if isinstance(default, str):
+                return self.lookup(default)
+            else:
+                return default
         elif self.default is not None:
             return self.default
         else:
@@ -236,17 +244,21 @@ class BaseResolver(ABC, Generic[X, Y]):
         default: Hint[X] = None,
         as_string: bool = False,
         required: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Callable[["click.decorators.FC"], "click.decorators.FC"]:
         """Get a click option for this resolver."""
         if not required:
-            key = self.normalize(self.extract_name(self.lookup(self._default(default))))
+            norm_default = self._default(default)
+            looked_up = self.lookup(norm_default)
+            name = self.extract_name(looked_up)
+            key = self.normalize(name)
         else:
             key = None
 
         import click
 
-        return click.option(
+        # TODO are there better ways to type options?
+        return click.option(  # type:ignore
             *flags,
             type=click.Choice(list(self.lookup_dict), case_sensitive=False),
             default=[key] if kwargs.get("multiple") else key,
@@ -274,7 +286,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         return elements
 
     @classmethod
-    def from_entrypoint(cls, group: str, **kwargs) -> "BaseResolver":
+    def from_entrypoint(cls, group: str, **kwargs: Any) -> "BaseResolver[X, Y]":
         """Make a resolver from the elements registered at the given entrypoint."""
         elements = cls._from_entrypoint(group)
         return cls(elements, **kwargs)

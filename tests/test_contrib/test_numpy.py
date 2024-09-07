@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover
 class TestNumpy(unittest.TestCase):
     """Test for the numpy contribution module."""
 
-    def test_activation(self):
+    def test_activation(self) -> None:
         """Tests for the aggregation resolver."""
         import numpy as np
 

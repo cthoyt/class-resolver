@@ -18,7 +18,7 @@ from tests._private_extras import PrivateDict
 class TestUtilities(unittest.TestCase):
     """Test utilities."""
 
-    def test_is_private(self):
+    def test_is_private(self) -> None:
         """Test whether a module should be considered private."""
         self.assertFalse(is_private("A", "", main_is_private=False))
         self.assertFalse(is_private("A", "", main_is_private=True))
@@ -30,12 +30,12 @@ class TestUtilities(unittest.TestCase):
         self.assertTrue(is_private("_A", "__main__", main_is_private=True))
         self.assertTrue(is_private("_A", "__main__", main_is_private=False))
 
-    def test_same_module(self):
+    def test_same_module(self) -> None:
         """Test getting subclasses."""
         self.assertFalse(same_module(Counter, dict))
         self.assertTrue(same_module(Counter, defaultdict))
 
-    def test_get_subclasses(self):
+    def test_get_subclasses(self) -> None:
         """Test getting subclasses."""
         self.assertTrue(issubclass(PrivateDict, dict))
 
@@ -68,7 +68,7 @@ class TestUtilities(unittest.TestCase):
             enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True))
         )
 
-    def test_normalize_with_defaults(self):
+    def test_normalize_with_defaults(self) -> None:
         """Tests for normalize with defaults."""
         # choice and default are None -> error
         with self.assertRaises(ValueError):

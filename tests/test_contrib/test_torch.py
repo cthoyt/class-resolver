@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover
 class TestTorch(unittest.TestCase):
     """Test for the torch contribution module."""
 
-    def test_activation(self):
+    def test_activation(self) -> None:
         """Tests for the activation resolver."""
         from torch.nn import ReLU, Softplus
 
@@ -24,8 +24,8 @@ class TestTorch(unittest.TestCase):
         self.assertEqual(ReLU, activation_resolver.lookup("relu"))
         self.assertEqual(ReLU, activation_resolver.lookup(None))
 
-    def test_margin_activation(self):
-        """Tests for the argin activation resolver."""
+    def test_margin_activation(self) -> None:
+        """Tests for the margin activation resolver."""
         from torch.nn import ReLU, Softplus
 
         from class_resolver.contrib.torch import margin_activation_resolver
@@ -36,7 +36,7 @@ class TestTorch(unittest.TestCase):
         self.assertEqual(ReLU, margin_activation_resolver.lookup("hard"))
         self.assertEqual(ReLU, margin_activation_resolver.lookup(None))
 
-    def test_optimizer(self):
+    def test_optimizer(self) -> None:
         """Tests for the optimizer resolver."""
         from torch.optim import Adagrad, Adam
 
@@ -46,7 +46,7 @@ class TestTorch(unittest.TestCase):
         self.assertEqual(Adam, optimizer_resolver.lookup("adam"))
         self.assertEqual(Adam, optimizer_resolver.lookup(None))
 
-    def test_initializer(self):
+    def test_initializer(self) -> None:
         """Tests for the initializer function resolver."""
         from torch.nn.init import xavier_normal_
 
@@ -56,7 +56,7 @@ class TestTorch(unittest.TestCase):
         self.assertEqual(xavier_normal_, initializer_resolver.lookup("xavier_normal"))
         self.assertEqual(xavier_normal_, initializer_resolver.lookup("xaviernormal"))
 
-    def test_lr(self):
+    def test_lr(self) -> None:
         """Tests for the learning rate scheduler."""
         from torch.optim.lr_scheduler import ExponentialLR, LambdaLR, ReduceLROnPlateau
 

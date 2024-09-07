@@ -4,7 +4,7 @@
 
 import itertools
 import unittest
-from typing import ClassVar, Collection, Optional, Sequence
+from typing import Any, ClassVar, Collection, Optional, Sequence, cast
 
 import click
 from click.testing import CliRunner, Result
@@ -39,11 +39,11 @@ except ImportError:
 class Base:
     """A base class."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         """Initialize the class."""
         self.name = name
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check two instances are equal."""
         return type(self) is type(other) and self.name == other.name
 
@@ -76,7 +76,7 @@ class D(Base):
 class E(Base):
     """E base class."""
 
-    def __init__(self, name: Optional[str] = None):
+    def __init__(self, name: Optional[str] = None) -> None:
         """Initialize the class."""
         super().__init__(name or "default_name")
 
@@ -96,19 +96,19 @@ class TestResolver(unittest.TestCase):
         """Set up the resolver class."""
         self.resolver = Resolver([A, B, C, E], base=Base)
 
-    def test_version(self):
+    def test_version(self) -> None:
         """Test version."""
         self.assertIsInstance(VERSION, str)
 
-    def test_contents(self):
+    def test_contents(self) -> None:
         """Test the functions."""
         self.assertIn(A, set(self.resolver))
 
-    def test_iterator(self):
+    def test_iterator(self) -> None:
         """Test iterating over classes."""
         self.assertEqual([A, B, C, E], list(self.resolver))
 
-    def test_normalize(self):
+    def test_normalize(self) -> None:
         """Test normalize functions."""
         self.assertEqual("e", self.resolver.normalize_cls(E))
         self.assertEqual("e", self.resolver.normalize_cls(E))
@@ -116,7 +116,7 @@ class TestResolver(unittest.TestCase):
         instance = E()
         self.assertEqual("e", self.resolver.normalize_inst(instance))
 
-    def test_lookup(self):
+    def test_lookup(self) -> None:
         """Test looking up classes."""
         self.assertEqual(A, self.resolver.lookup("a"))
         self.assertEqual(A, self.resolver.lookup("A"))
@@ -128,15 +128,15 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.resolver.lookup("missing")
         with self.assertRaises(TypeError):
-            self.resolver.lookup(3)
+            self.resolver.lookup(3)  # type:ignore
         with self.assertRaises(TypeError) as e:
-            self.resolver.lookup(AAltBase)
+            self.resolver.lookup(AAltBase)  # type:ignore
         self.assertEqual(
             f"Not subclass of {self.resolver.base.__name__}: {AAltBase}", str(e.exception)
         )
         self.assertEqual(self.resolver.lookup(A(name="max")), A)
 
-    def test_docdata(self):
+    def test_docdata(self) -> None:
         """Test docdata."""
         full = {
             "k1": "v1",
@@ -147,7 +147,7 @@ class TestResolver(unittest.TestCase):
         self.assertEqual({"k21": "v21"}, self.resolver.docdata("a", "k2"))
         self.assertEqual("v21", self.resolver.docdata("a", "k2", "k21"))
 
-    def test_lookup_no_synonyms(self):
+    def test_lookup_no_synonyms(self) -> None:
         """Test looking up classes without auto-synonym."""
         resolver = Resolver([A], base=Base, synonym_attribute=None)
         self.assertEqual(A, resolver.lookup("a"))
@@ -155,20 +155,20 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.assertEqual(A, resolver.lookup("a_synonym_1"))
 
-    def test_passthrough(self):
+    def test_passthrough(self) -> None:
         """Test instances are passed through unmodified."""
         a = A(name="charlie")
         self.assertEqual(a, self.resolver.make(a))
 
-    def test_make(self):
+    def test_make(self) -> None:
         """Test making classes."""
         name = "charlie"
-        # Test instantiating with positional dict into kwargs
+        # Test instantiting with positional dict into kwargs
         self.assertEqual(A(name=name), self.resolver.make("a", {"name": name}))
         # Test instantiating with kwargs
         self.assertEqual(A(name=name), self.resolver.make("a", name=name))
 
-    def test_make_safe(self):
+    def test_make_safe(self) -> None:
         """Test the make_safe function, which always returns none on none input."""
         self.assertIsNone(self.resolver.make_safe(None))
         self.assertIsNone(Resolver.from_subclasses(Base, default=A).make_safe(None))
@@ -179,20 +179,20 @@ class TestResolver(unittest.TestCase):
         # Test instantiating with kwargs
         self.assertEqual(A(name=name), self.resolver.make_safe("a", name=name))
 
-    def test_registration_synonym(self):
+    def test_registration_synonym(self) -> None:
         """Test failure of registration."""
         self.assertNotIn(D, self.resolver.lookup_dict.values())
         self.resolver.register(D, synonyms={"dope"})
         name = "charlie"
         self.assertEqual(D(name=name), self.resolver.make("d", name=name))
 
-    def test_registration_empty_synonym_failure(self):
+    def test_registration_empty_synonym_failure(self) -> None:
         """Test failure of registration."""
         self.assertNotIn(D, self.resolver.lookup_dict.values())
         with self.assertRaises(ValueError):
             self.resolver.register(D, synonyms={""})
 
-    def test_registration_name_failure(self):
+    def test_registration_name_failure(self) -> None:
         """Test failure of registration."""
         with self.assertRaises(RegistrationNameConflict) as e:
             self.resolver.register(A)
@@ -203,7 +203,7 @@ class TestResolver(unittest.TestCase):
         self.assertEqual("synonym", e.exception.label)
         self.assertIn("synonym", str(e.exception))
 
-    def test_registration_synonym_failure(self):
+    def test_registration_synonym_failure(self) -> None:
         """Test failure of registration."""
         resolver = Resolver([], base=Base)
         resolver.register(A, synonyms={"B"})
@@ -220,7 +220,7 @@ class TestResolver(unittest.TestCase):
         self.assertEqual("synonym", e.exception.label)
         self.assertIn("synonym", str(e.exception))
 
-    def test_make_from_kwargs(self):
+    def test_make_from_kwargs(self) -> None:
         """Test making classes from kwargs."""
         name = "charlie"
         self.assertEqual(
@@ -238,7 +238,7 @@ class TestResolver(unittest.TestCase):
         )
 
     @unittest.skipIf(tune is None, "ray[tune] was not installed properly")
-    def test_variant_generation(self):
+    def test_variant_generation(self) -> None:
         """Test whether ray tune can generate variants from the search space."""
         search_space = self.resolver.ray_tune_search_space(
             kwargs_search_space=dict(
@@ -255,7 +255,7 @@ class TestResolver(unittest.TestCase):
 
     @unittest.skipIf(optuna is None, "optuna is not installed")
     @unittest.skipIf(sklearn is None, "sklearn is not installed")
-    def test_optuna_suggest(self):
+    def test_optuna_suggest(self) -> None:
         """Test suggesting categorical for optuna."""
         import optuna
         from sklearn import datasets
@@ -283,78 +283,78 @@ class TestResolver(unittest.TestCase):
             clf_cls = resolver.optuna_lookup(trial, "model")
             clf = clf_cls()
             clf.fit(x_train, y_train)
-            return clf.score(x_test, y_test)
+            return cast(float, clf.score(x_test, y_test))
 
         study = optuna.create_study(direction="maximize")
         study.optimize(objective, n_trials=100)
 
-    def test_bad_click_option(self):
+    def test_bad_click_option(self) -> None:
         """Test failure to get a click option."""
         with self.assertRaises(ValueError):
             self.resolver.get_option("--opt")  # no default given
 
-    def test_required_click_option(self):
+    def test_required_click_option(self) -> None:
         """Test non-failure to get a required click option without default."""
         self.resolver.get_option("--opt", as_string=True, required=True)
 
-    def test_click_option(self):
+    def test_click_option(self) -> None:
         """Test the click option."""
 
-        @click.command()
+        @click.command()  # type:ignore
         @self.resolver.get_option("--opt", default="a")
-        def cli(opt):
+        def cli(opt) -> None:
             """Run the test CLI."""
             self.assertIsInstance(opt, type)
             click.echo(opt.__name__, nl=False)
 
         self._test_cli(cli)
 
-    def _test_cli(self, cli):
+    def _test_cli(self, cli: click.Command) -> None:
         runner = CliRunner()
 
         # Test default
-        result: Result = runner.invoke(cli, [])
-        self.assertEqual(A.__name__, result.output)
+        result_1: Result = runner.invoke(cli, [])
+        self.assertEqual(A.__name__, result_1.output)
 
         # Test canonical name
-        result: Result = runner.invoke(cli, ["--opt", "A"])
-        self.assertEqual(A.__name__, result.output)
+        result_2: Result = runner.invoke(cli, ["--opt", "A"])
+        self.assertEqual(A.__name__, result_2.output)
 
         # Test normalizing name
-        result: Result = runner.invoke(cli, ["--opt", "a"])
-        self.assertEqual(A.__name__, result.output)
+        result_3: Result = runner.invoke(cli, ["--opt", "a"])
+        self.assertEqual(A.__name__, result_3.output)
 
-    def test_click_option_str(self):
+    def test_click_option_str(self) -> None:
         """Test the click option."""
 
-        @click.command()
+        @click.command()  # type:ignore
         @self.resolver.get_option("--opt", default="a", as_string=True)
-        def cli(opt):
+        def cli(opt: str):
             """Run the test CLI."""
             self.assertIsInstance(opt, str)
             click.echo(self.resolver.lookup(opt).__name__, nl=False)
 
         self._test_cli(cli)
 
-    def test_click_option_default(self):
+    def test_click_option_default(self) -> None:
         """Test generating an option with a default."""
         resolver = Resolver([A, B, C, E], base=Base, default=A)
 
-        @click.command()
+        @click.command()  # type:ignore
         @resolver.get_option("--opt", as_string=True)
-        def cli(opt):
+        def cli(opt: str) -> None:
             """Run the test CLI."""
             self.assertIsInstance(opt, str)
             click.echo(self.resolver.lookup(opt).__name__, nl=False)
 
         self._test_cli(cli)
 
-    def test_click_option_multiple(self):
+    def test_click_option_multiple(self) -> None:
         """Test the click option with multiple arguments."""
 
-        @click.command()
+        @click.command()  # type:ignore
         @self.resolver.get_option("--opt", default="a", as_string=True, multiple=True)
-        def cli(opt):
+        def cli(opt: Sequence[str]) -> None:
             """Run the test CLI."""
             self.assertIsInstance(opt, Sequence)
             for opt_ in opt:
@@ -363,19 +363,19 @@ class TestResolver(unittest.TestCase):
 
         self._test_cli(cli)
 
-    def test_signature(self):
+    def test_signature(self) -> None:
         """Check signature tests."""
         self.assertTrue(self.resolver.supports_argument("A", "name"))
         self.assertFalse(self.resolver.supports_argument("A", "nope"))
 
-    def test_no_arguments(self):
+    def test_no_arguments(self) -> None:
         """Check that the unexpected keyword error is thrown properly."""
         resolver = Resolver.from_subclasses(AltBase)
         with self.assertRaises(UnexpectedKeywordError) as e:
             resolver.make("A", nope="nopppeeee")
         self.assertEqual("AAltBase did not expect any keyword arguments", str(e.exception))
 
-    def test_base_suffix(self):
+    def test_base_suffix(self) -> None:
         """Check that the unexpected keyword error is thrown properly."""
         resolver = Resolver.from_subclasses(AltBase, suffix=None, base_as_suffix=True)
         self.assertEqual(AAltBase, resolver.lookup("AAltBase"))
@@ -396,7 +396,7 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             resolver.lookup("A")
 
-    def test_make_many(self):
+    def test_make_many(self) -> None:
         """Test the make_many function."""
         with self.assertRaises(ValueError):
             # no default is given
@@ -455,13 +455,13 @@ class TestResolver(unittest.TestCase):
         instances = resolver.make_many(None, dict(name="name"))
         self.assertEqual([A(name="name")], instances)
 
-    def test_missing_kwarg(self):
+    def test_missing_kwarg(self) -> None:
         """Test error on missing kwarg."""
 
         class Alt2Base:
             """Another alternative base class."""
 
-            def __init__(self, *, kwarg):
+            def __init__(self, *, kwarg: Any) -> None:
                 """Initialize the class."""
                 self.kwarg = kwarg
 
@@ -473,13 +473,13 @@ class TestResolver(unittest.TestCase):
             resolver.make("a")
         self.assertIn("required keyword-only", str(e.exception))
 
-    def test_unexpected_error(self):
+    def test_unexpected_error(self) -> None:
         """Test an arbitrary type error thrown during making a class."""
 
         class Alt3Base:
             """Another alternative base class."""
 
-            def __init__(self):
+            def __init__(self) -> None:
                 """Initialize the class."""
                 raise TypeError("surprise!")
 

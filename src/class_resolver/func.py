@@ -3,7 +3,7 @@
 """A resolver for functions."""
 
 from functools import partial
-from typing import Callable, Optional, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 from .base import BaseResolver
 from .utils import Hint, OptionalKwargs
@@ -12,7 +12,7 @@ __all__ = [
     "FunctionResolver",
 ]
 
-X = TypeVar("X", bound=Callable)
+X = TypeVar("X", bound=Callable[..., Any])
 
 
 class FunctionResolver(BaseResolver[X, X]):
@@ -40,7 +40,7 @@ class FunctionResolver(BaseResolver[X, X]):
         else:
             raise TypeError(f"Invalid function: {type(query)} - {query}")
 
-    def make(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs) -> X:
+    def make(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> X:
         """Make a function with partial bindings to the given kwargs."""
         func: X = self.lookup(query)
         if pos_kwargs or kwargs:

@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover
 class TestSklearn(unittest.TestCase):
     """Test for the scikit-learn contribution module."""
 
-    def test_classifier_resolver(self):
+    def test_classifier_resolver(self) -> None:
         """Tests for the classifier resolver."""
         from sklearn import datasets
         from sklearn.model_selection import train_test_split

@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 message_passing_resolver = ClassResolver.from_subclasses(
-    base=MessagePassing,  # type: ignore
+    base=MessagePassing,
     suffix="Conv",
     default=SimpleConv,
 )

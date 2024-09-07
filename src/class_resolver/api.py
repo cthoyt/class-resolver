@@ -5,7 +5,18 @@
 import inspect
 import logging
 from textwrap import dedent
-from typing import Any, Collection, List, Mapping, Optional, Sequence, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Collection,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from .base import BaseResolver
 from .utils import (
@@ -17,6 +28,9 @@ from .utils import (
     normalize_string,
     upgrade_to_sequence,
 )
+
+if TYPE_CHECKING:
+    import ray.tune.search.sample
 
 __all__ = [
     # Type Hints
@@ -38,7 +52,7 @@ logger = logging.getLogger(__name__)
 class KeywordArgumentError(TypeError):
     """Thrown when missing a keyword-only argument."""
 
-    def __init__(self, cls, s: str):
+    def __init__(self, cls: type, s: str):
         """Initialize the error.
 
         :param cls: The class that was trying to be instantiated
@@ -54,7 +68,7 @@ class KeywordArgumentError(TypeError):
 class UnexpectedKeywordError(TypeError):
     """Thrown when no arguments were expected."""
 
-    def __init__(self, cls):
+    def __init__(self, cls: type):
         """Initialize the error.
 
         :param cls: The class that was trying to be instantiated
@@ -136,8 +150,8 @@ class ClassResolver(BaseResolver[Type[X], X]):
         skip: Optional[Collection[Type[X]]] = None,
         exclude_private: bool = True,
         exclude_external: bool = True,
-        **kwargs,
-    ) -> "ClassResolver":
+        **kwargs: Any,
+    ) -> "ClassResolver[X]":
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
@@ -195,13 +209,13 @@ class ClassResolver(BaseResolver[Type[X], X]):
         self,
         query: HintOrType[X],
         pos_kwargs: Optional[Mapping[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> X:
         """Instantiate a class with optional kwargs."""
         if query is None or isinstance(query, (str, type)):
             cls: Type[X] = self.lookup(query)
             try:
-                return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
+                return cls(**(pos_kwargs or {}), **kwargs)
             except TypeError as e:
                 if "required keyword-only argument" in e.args[0]:
                     raise KeywordArgumentError(cls, e.args[0]) from None
@@ -218,7 +232,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         key: str,
         *,
         kwargs_suffix: str = "kwargs",
-        **o_kwargs,
+        **o_kwargs: Any,
     ) -> X:
         """Instantiate a class, by looking up query/pos_kwargs from a dictionary.
 
@@ -234,7 +248,9 @@ class ClassResolver(BaseResolver[Type[X], X]):
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
 
-    def ray_tune_search_space(self, kwargs_search_space: Optional[Mapping[str, Any]] = None):
+    def ray_tune_search_space(
+        self, kwargs_search_space: Optional[Mapping[str, Any]] = None
+    ) -> Union[Mapping[str, Any], "ray.tune.search.sample.Categorical"]:
         """Return a search space for ray.tune.
 
         ray.tune is a package for distributed hyperparameter optimization. The search space for this search is defined
@@ -289,7 +305,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
                 )
             ) from None
 
-        query = ray.tune.choice(self.options)
+        query = ray.tune.choice(list(self.options))
 
         if kwargs_search_space is None:
             return query
@@ -301,15 +317,17 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
     def make_many(
         self,
-        queries: OneOrManyHintOrType = None,
+        queries: OneOrManyHintOrType[X] = None,
         kwargs: OneOrManyOptionalKwargs = None,
-        **common_kwargs,
+        **common_kwargs: Any,
     ) -> List[X]:
         """Resolve and compose several queries together.
 
-        :param queries: Either none (will result in the default X),
-            a single X (as either a class, instance, or string for class name), or a list
-            of X's (as either a class, instance, or string for class name
+        :param queries: One of the following:
+
+            1. none (will result in the default X),
+            2. a single X, as either a class, instance, or string for class name
+            3. a sequence of X's, as either a class, instance, or string for class name
         :param kwargs: Either none (will use all defaults), a single dictionary
             (will be used for all instances), or a list of dictionaries with the same length
             as ``queries``
@@ -322,7 +340,8 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
         # Prepare the query list
         if queries is not None:
-            _query_list = upgrade_to_sequence(queries)
+            # FIXME, on first pass i think this should work. needs rethinking
+            _query_list = upgrade_to_sequence(queries)  # type:ignore
         elif self.default is None:
             raise ValueError
         else:

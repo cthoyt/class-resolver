@@ -35,11 +35,11 @@ class TestFunctionResolver(unittest.TestCase):
         """Set up the resolver class."""
         self.resolver = FunctionResolver([add_one, add_two, add_y])
 
-    def test_contents(self):
+    def test_contents(self) -> None:
         """Test the functions."""
         self.assertIn(add_one, set(self.resolver))
 
-    def test_lookup(self):
+    def test_lookup(self) -> None:
         """Test looking up functions."""
         self.assertEqual(add_one, self.resolver.lookup("add_one"))
         self.assertEqual(add_one, self.resolver.lookup("ADD_ONE"))
@@ -48,9 +48,9 @@ class TestFunctionResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.resolver.lookup("missing")
         with self.assertRaises(TypeError):
-            self.resolver.lookup(3)
+            self.resolver.lookup(3)  # type:ignore
 
-    def test_default_lookup(self):
+    def test_default_lookup(self) -> None:
         """Test lookup with default."""
         resolver = FunctionResolver([add_one, add_two, add_y], default=add_two)
         self.assertEqual(add_one, resolver.lookup("add_one"))
@@ -59,9 +59,9 @@ class TestFunctionResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             resolver.lookup("missing")
         with self.assertRaises(TypeError):
-            resolver.lookup(3)
+            resolver.lookup(3)  # type:ignore
 
-    def test_make(self):
+    def test_make(self) -> None:
         """Test making classes."""
         for x in range(10):
             f1 = self.resolver.make("add_y", {"y": 1})
@@ -70,23 +70,23 @@ class TestFunctionResolver(unittest.TestCase):
             f2 = self.resolver.make("add_y", y=1)
             self.assertEqual(add_one(x), f2(x))
 
-    def test_make_safe(self):
+    def test_make_safe(self) -> None:
         """Test the make_safe function, which always returns none on none input."""
         self.assertIsNone(self.resolver.make_safe(None))
         self.assertIsNone(FunctionResolver([add_one, add_two], default=add_two).make_safe(None))
 
-    def test_passthrough(self):
+    def test_passthrough(self) -> None:
         """Test instances are passed through unmodified."""
         for x in range(10):
             self.assertEqual(add_one(x), self.resolver.make(add_one)(x))
 
-    def test_registration_synonym(self):
+    def test_registration_synonym(self) -> None:
         """Test failure of registration."""
         self.resolver.register(add_three, synonyms={"add_trio"})
         for x in range(10):
             self.assertEqual(add_three(x), self.resolver.make("add_trio")(x))
 
-    def test_registration_failure(self):
+    def test_registration_failure(self) -> None:
         """Test failure of registration."""
         with self.assertRaises(KeyError):
             self.resolver.register(add_one)
@@ -97,14 +97,14 @@ class TestFunctionResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.resolver.register(_new_fn, synonyms={"add_one"})
 
-    def test_entrypoints(self):
+    def test_entrypoints(self) -> None:
         """Test loading from entrypoints."""
         resolver = FunctionResolver.from_entrypoint("class_resolver_demo")
         self.assertEqual({"add", "sub", "mul"}, set(resolver.lookup_dict))
         self.assertEqual(set(), set(resolver.synonyms))
         self.assertNotIn("expected_failure", resolver.lookup_dict)
 
-    def test_late_entrypoints(self):
+    def test_late_entrypoints(self) -> None:
         """Test loading late entrypoints."""
         resolver = FunctionResolver([operator.add, operator.sub])
         self.assertEqual({"add", "sub"}, set(resolver.lookup_dict))

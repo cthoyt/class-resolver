@@ -11,12 +11,13 @@ except ImportError:  # pragma: no cover
 
 
 @unittest.skipUnless(
-    torch_geometric, "Can not test torch_geometric contrib without ``pip install torch``."
+    torch_geometric,
+    "Can not test torch_geometric contrib without ``pip install torch torch-geometric``.",
 )
 class TestTorch(unittest.TestCase):
     """Test for the torch-geometric contribution module."""
 
-    def test_message_passing(self):
+    def test_message_passing(self) -> None:
         """Tests for the message passing resolver."""
         from torch_geometric.nn.conv import SimpleConv
 
@@ -25,7 +26,7 @@ class TestTorch(unittest.TestCase):
         self.assertEqual(SimpleConv, message_passing_resolver.lookup("simple"))
         self.assertEqual(SimpleConv, message_passing_resolver.lookup(None))
 
-    def test_aggregation(self):
+    def test_aggregation(self) -> None:
         """Test the aggregation resolver."""
         import torch
 
