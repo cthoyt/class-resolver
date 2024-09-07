@@ -1,12 +1,18 @@
-# See: https://docs.readthedocs.io/en/latest/config-file/v2.html
+# Read the Docs configuration file for Sphinx projects
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 
+# Required
 version: 2
 
+# Set the OS, Python version and other tools you might need
 build:
-  image: latest
+  os: ubuntu-lts-latest
+  apt_packages:
+    - graphviz
+  tools:
+    python: "3.12"
 
 python:
-  version: "3.8"
   install:
     - method: pip
       path: .
