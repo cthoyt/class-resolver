@@ -11,7 +11,8 @@ except ImportError:  # pragma: no cover
 
 
 @unittest.skipUnless(
-    torch_geometric, "Can not test torch_geometric contrib without ``pip install torch``."
+    torch_geometric,
+    "Can not test torch_geometric contrib without ``pip install torch torch-geometric``.",
 )
 class TestTorch(unittest.TestCase):
     """Test for the torch-geometric contribution module."""

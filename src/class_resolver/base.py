@@ -228,7 +228,7 @@ class BaseResolver(ABC, Generic[X, Y]):
     def _default(self, default: Hint[X]) -> X:
         if default is not None:
             if isinstance(default, str):
-                raise NotImplementedError
+                return self.lookup(default)
             else:
                 return default
         elif self.default is not None:
