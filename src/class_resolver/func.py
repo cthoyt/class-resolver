@@ -12,7 +12,7 @@ __all__ = [
     "FunctionResolver",
 ]
 
-X = TypeVar("X", bound=Callable)
+X = TypeVar("X", bound=Callable[..., Any])
 
 
 class FunctionResolver(BaseResolver[X, X]):
