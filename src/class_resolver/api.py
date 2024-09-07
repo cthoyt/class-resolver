@@ -195,13 +195,13 @@ class ClassResolver(BaseResolver[Type[X], X]):
         self,
         query: HintOrType[X],
         pos_kwargs: Optional[Mapping[str, Any]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> X:
         """Instantiate a class with optional kwargs."""
         if query is None or isinstance(query, (str, type)):
             cls: Type[X] = self.lookup(query)
             try:
-                return cls(**(pos_kwargs or {}), **kwargs)  # type: ignore
+                return cls(**(pos_kwargs or {}), **kwargs)
             except TypeError as e:
                 if "required keyword-only argument" in e.args[0]:
                     raise KeywordArgumentError(cls, e.args[0]) from None
@@ -303,7 +303,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         self,
         queries: OneOrManyHintOrType = None,
         kwargs: OneOrManyOptionalKwargs = None,
-        **common_kwargs,
+        **common_kwargs: Any,
     ) -> List[X]:
         """Resolve and compose several queries together.
 

@@ -118,7 +118,7 @@ margin_activation_resolver = ClassResolver(
         nn.ReLU,
         nn.Softplus,
     },
-    base=nn.Module,  # type: ignore
+    base=nn.Module,
     default=nn.ReLU,
     synonyms=dict(
         hard=nn.ReLU,
