@@ -5,7 +5,18 @@
 import inspect
 import logging
 from textwrap import dedent
-from typing import Any, Collection, List, Mapping, Optional, Sequence, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Collection,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from .base import BaseResolver
 from .utils import (
@@ -17,6 +28,9 @@ from .utils import (
     normalize_string,
     upgrade_to_sequence,
 )
+
+if TYPE_CHECKING:
+    import ray.tune.search.sample
 
 __all__ = [
     # Type Hints
@@ -38,7 +52,7 @@ logger = logging.getLogger(__name__)
 class KeywordArgumentError(TypeError):
     """Thrown when missing a keyword-only argument."""
 
-    def __init__(self, cls, s: str):
+    def __init__(self, cls: type, s: str):
         """Initialize the error.
 
         :param cls: The class that was trying to be instantiated
@@ -54,7 +68,7 @@ class KeywordArgumentError(TypeError):
 class UnexpectedKeywordError(TypeError):
     """Thrown when no arguments were expected."""
 
-    def __init__(self, cls):
+    def __init__(self, cls: type):
         """Initialize the error.
 
         :param cls: The class that was trying to be instantiated
@@ -136,7 +150,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         skip: Optional[Collection[Type[X]]] = None,
         exclude_private: bool = True,
         exclude_external: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> "ClassResolver":
         """Make a resolver from the subclasses of a given class.
 
@@ -218,7 +232,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         key: str,
         *,
         kwargs_suffix: str = "kwargs",
-        **o_kwargs,
+        **o_kwargs: Any,
     ) -> X:
         """Instantiate a class, by looking up query/pos_kwargs from a dictionary.
 
@@ -234,7 +248,9 @@ class ClassResolver(BaseResolver[Type[X], X]):
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
 
-    def ray_tune_search_space(self, kwargs_search_space: Optional[Mapping[str, Any]] = None):
+    def ray_tune_search_space(
+        self, kwargs_search_space: Optional[Mapping[str, Any]] = None
+    ) -> Union[Mapping[str, Any], "ray.tune.search.sample.Categorical"]:
         """Return a search space for ray.tune.
 
         ray.tune is a package for distributed hyperparameter optimization. The search space for this search is defined
@@ -289,7 +305,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
                 )
             ) from None
 
-        query = ray.tune.choice(self.options)
+        query = ray.tune.choice(list(self.options))
 
         if kwargs_search_space is None:
             return query

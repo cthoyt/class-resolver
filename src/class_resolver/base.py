@@ -226,9 +226,12 @@ class BaseResolver(ABC, Generic[X, Y]):
             return None
         return self.make(query=query, pos_kwargs=pos_kwargs, **kwargs)
 
-    def _default(self, default):
+    def _default(self, default: Hint[X]) -> X:
         if default is not None:
-            return default
+            if isinstance(default, str):
+                raise NotImplementedError
+            else:
+                return default
         elif self.default is not None:
             return self.default
         else:
@@ -244,7 +247,10 @@ class BaseResolver(ABC, Generic[X, Y]):
     ) -> Callable[["click.decorators.FC"], "click.decorators.FC"]:
         """Get a click option for this resolver."""
         if not required:
-            key = self.normalize(self.extract_name(self.lookup(self._default(default))))
+            norm_default = self._default(default)
+            looked_up = self.lookup(norm_default)
+            name = self.extract_name(looked_up)
+            key = self.normalize(name)
         else:
             key = None
 
