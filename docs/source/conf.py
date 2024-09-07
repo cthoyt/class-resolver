@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# Configuration file for the Sphinx documentation builder.
+"""Configuration file for the Sphinx documentation builder."""
 #
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
@@ -43,7 +41,7 @@ parsed_version = re.match(
 version = parsed_version.expand(r"\g<major>.\g<minor>.\g<patch>")
 
 if parsed_version.group("release"):
-    tags.add("prerelease")
+    tags.add("prerelease")  # noqa:F821
 
 # -- General configuration ---------------------------------------------------
 
@@ -69,7 +67,6 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinx_autodoc_typehints",
     "sphinx_automodapi.automodapi",
 ]
 

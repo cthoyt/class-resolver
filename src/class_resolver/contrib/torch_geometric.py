@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """
 PyTorch Geometric is an extension to PyTorch for geometric learning on graphs,
 point clouds, meshes, and other non-standard objects.
 The ``class-resolver`` provides several class resolvers and function resolvers
 to make it possible to more easily parametrize models and training loops.
-"""  # noqa:D205,D400
+"""  # noqa: D205
 
 from torch_geometric.nn.aggr import Aggregation, MeanAggregation
 from torch_geometric.nn.conv import MessagePassing, SimpleConv

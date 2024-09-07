@@ -5,7 +5,7 @@ as well as other generic tooling.
 
 The ``class-resolver`` provides several class resolvers for instantiating various
 implementations, such as those of linear models.
-"""  # noqa:D205,D400
+"""  # noqa: D205
 
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier

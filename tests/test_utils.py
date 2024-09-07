@@ -1,17 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """Test utilities."""
 
 import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver.utils import (
-    get_subclasses,
-    is_private,
-    normalize_with_default,
-    same_module,
-)
+from class_resolver.utils import get_subclasses, is_private, normalize_with_default, same_module
 from tests._private_extras import PrivateDict
 
 
@@ -42,31 +35,15 @@ class TestUtilities(unittest.TestCase):
         self.assertNotIn(Counter, set(get_subclasses(dict, exclude_external=True)))
         self.assertIn(Counter, set(get_subclasses(dict, exclude_external=False)))
 
-        self.assertIn(
-            PrivateDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False))
-        )
-        self.assertNotIn(
-            PrivateDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True))
-        )
-        self.assertNotIn(
-            PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False))
-        )
-        self.assertNotIn(
-            PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True))
-        )
+        self.assertIn(PrivateDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False)))
+        self.assertNotIn(PrivateDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True)))
+        self.assertNotIn(PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
+        self.assertNotIn(PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
 
-        self.assertIn(
-            enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False))
-        )
-        self.assertNotIn(
-            enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True))
-        )
-        self.assertNotIn(
-            enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False))
-        )
-        self.assertNotIn(
-            enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True))
-        )
+        self.assertIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False)))
+        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True)))
+        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
+        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
 
     def test_normalize_with_defaults(self) -> None:
         """Tests for normalize with defaults."""

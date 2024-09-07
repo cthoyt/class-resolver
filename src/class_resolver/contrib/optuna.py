@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Class resolvers for Optuna."""
 
 from optuna.pruners import BasePruner, MedianPruner

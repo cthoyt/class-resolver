@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """NumPy is a numerical package for Python."""
 
 import numpy as np
@@ -10,9 +8,7 @@ __all__ = [
     "aggregation_resolver",
 ]
 
-aggregation_resolver = FunctionResolver(
-    [np.sum, np.max, np.min, np.mean, np.median], default=np.mean
-)
+aggregation_resolver = FunctionResolver([np.sum, np.max, np.min, np.mean, np.median], default=np.mean)
 # compat with older numpy versions, where np.min points to np.amin
 aggregation_resolver.register(np.min, synonyms={"min"}, raise_on_conflict=False)
 aggregation_resolver.register(np.max, synonyms={"max"}, raise_on_conflict=False)

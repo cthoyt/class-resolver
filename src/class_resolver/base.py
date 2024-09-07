@@ -1,22 +1,15 @@
-# -*- coding: utf-8 -*-
-
 """A base resolver."""
 
 import logging
 import sys
 from abc import ABC, abstractmethod
+from collections.abc import Collection, Iterable, Iterator, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Collection,
-    Dict,
     Generic,
-    Iterable,
-    Iterator,
-    Mapping,
     Optional,
-    Set,
 )
 
 if sys.version_info[:2] >= (3, 10):
@@ -96,9 +89,9 @@ class BaseResolver(ABC, Generic[X, Y]):
 
     default: Optional[X]
     #: The mapping from synonyms to the classes indexed by this resolver
-    synonyms: Dict[str, X]
+    synonyms: dict[str, X]
     #: The mapping from normalized class names to the classes indexed by this resolver
-    lookup_dict: Dict[str, X]
+    lookup_dict: dict[str, X]
     #: The shared suffix fo all classes derived from the base class
     suffix: Optional[str]
 
@@ -130,7 +123,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         return iter(self.lookup_dict.values())
 
     @property
-    def options(self) -> Set[str]:
+    def options(self) -> set[str]:
         """Return the normalized option names."""
         return set(self.lookup_dict.keys()).union(self.synonyms.keys())
 
@@ -219,9 +212,7 @@ class BaseResolver(ABC, Generic[X, Y]):
     ) -> Y:
         """Make an element."""
 
-    def make_safe(
-        self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any
-    ) -> Optional[Y]:
+    def make_safe(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Optional[Y]:
         """Run make, but pass through a none query."""
         if query is None:
             return None
@@ -274,8 +265,8 @@ class BaseResolver(ABC, Generic[X, Y]):
             self.register(element)
 
     @staticmethod
-    def _from_entrypoint(group: str) -> Set[X]:
-        elements: Set[X] = set()
+    def _from_entrypoint(group: str) -> set[X]:
+        elements: set[X] = set()
         for entry in entry_points(group=group):
             try:
                 element = entry.load()

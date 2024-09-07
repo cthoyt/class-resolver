@@ -1,19 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for the resolver."""
 
 import collections.abc
 import logging
+from collections.abc import Iterable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Iterable,
-    Mapping,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
 )
@@ -49,14 +43,14 @@ X = TypeVar("X")
 Y = TypeVar("Y")
 
 #: A type annotation for either an instance of X or a class of X
-InstOrType = Union[X, Type[X]]
+InstOrType = Union[X, type[X]]
 #: A type annotation for either an instance of X or name a class X
 Lookup = Union[str, X]
 
-LookupType = Lookup[Type[X]]
+LookupType = Lookup[type[X]]
 LookupOrType = Lookup[InstOrType[X]]
 Hint = Optional[Lookup[X]]
-HintType = Hint[Type[X]]
+HintType = Hint[type[X]]
 HintOrType = Hint[InstOrType[X]]
 OptionalKwargs = Optional[Mapping[str, Any]]
 OneOrSequence = Union[X, Sequence[X]]
@@ -89,11 +83,11 @@ def is_private(class_name: str, module_name: str, main_is_private: bool = True) 
 
 
 def get_subclasses(
-    cls: Type[X],
+    cls: type[X],
     exclude_private: bool = True,
     exclude_external: bool = True,
     main_is_private: bool = True,
-) -> Iterable[Type[X]]:
+) -> Iterable[type[X]]:
     """Get all subclasses.
 
     :param cls: The ancestor class
@@ -168,7 +162,7 @@ def normalize_with_default(
     kwargs: OptionalKwargs = None,
     default: HintOrType[X] = None,
     default_kwargs: OptionalKwargs = None,
-) -> Tuple[HintOrType[X], OptionalKwargs]:
+) -> tuple[HintOrType[X], OptionalKwargs]:
     """
     Normalize a choice for class resolver, with default options.
 

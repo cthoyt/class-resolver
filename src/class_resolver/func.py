@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """A resolver for functions."""
 
 from functools import partial
