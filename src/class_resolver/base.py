@@ -57,7 +57,7 @@ class RegistrationError(KeyError, Generic[X], ABC):
         self.existing = self._get_existing()
 
     @abstractmethod
-    def _get_existing(self) -> str:
+    def _get_existing(self) -> X:
         """Get the pre-existing element based on the error type and the given key."""
 
     def __str__(self) -> str:
@@ -69,17 +69,17 @@ class RegistrationError(KeyError, Generic[X], ABC):
         )
 
 
-class RegistrationNameConflict(RegistrationError):
+class RegistrationNameConflict(RegistrationError[X]):
     """Raised on a conflict with the lookup dict."""
 
-    def _get_existing(self) -> str:
+    def _get_existing(self) -> X:
         return self.resolver.lookup_dict[self.key]
 
 
-class RegistrationSynonymConflict(RegistrationError):
+class RegistrationSynonymConflict(RegistrationError[X]):
     """Raised on a conflict with the synonym dict."""
 
-    def _get_existing(self) -> str:
+    def _get_existing(self) -> X:
         return self.resolver.synonyms[self.key]
 
 
@@ -150,7 +150,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         element: X,
         synonyms: Optional[Iterable[str]] = None,
         raise_on_conflict: bool = True,
-    ):
+    ) -> None:
         """Register an additional element with this resolver.
 
         :param element: The element to register
@@ -191,7 +191,7 @@ class BaseResolver(ABC, Generic[X, Y]):
     def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
         """Lookup an element."""
 
-    def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None):
+    def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None) -> Any:
         """Lookup an element and get its docdata.
 
         :param query: The hint for looking something up in the resolver
@@ -238,7 +238,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         default: Hint[X] = None,
         as_string: bool = False,
         required: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> Callable[["click.decorators.FC"], "click.decorators.FC"]:
         """Get a click option for this resolver."""
         if not required:
@@ -276,7 +276,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         return elements
 
     @classmethod
-    def from_entrypoint(cls, group: str, **kwargs) -> "BaseResolver":
+    def from_entrypoint(cls, group: str, **kwargs: Any) -> "BaseResolver":
         """Make a resolver from the elements registered at the given entrypoint."""
         elements = cls._from_entrypoint(group)
         return cls(elements, **kwargs)
