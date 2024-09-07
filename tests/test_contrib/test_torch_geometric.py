@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the torch-geometric contribution module."""
 
 import unittest

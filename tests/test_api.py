@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the class resolver."""
 
 import itertools
 import unittest
-from typing import Any, ClassVar, Collection, Optional, Sequence, cast
+from collections.abc import Collection, Sequence
+from typing import Any, ClassVar, Optional, cast
 
 import click
 from click.testing import CliRunner, Result
@@ -131,9 +130,7 @@ class TestResolver(unittest.TestCase):
             self.resolver.lookup(3)  # type:ignore
         with self.assertRaises(TypeError) as e:
             self.resolver.lookup(AAltBase)  # type:ignore
-        self.assertEqual(
-            f"Not subclass of {self.resolver.base.__name__}: {AAltBase}", str(e.exception)
-        )
+        self.assertEqual(f"Not subclass of {self.resolver.base.__name__}: {AAltBase}", str(e.exception))
         self.assertEqual(self.resolver.lookup(A(name="max")), A)
 
     def test_docdata(self) -> None:
@@ -245,9 +242,7 @@ class TestResolver(unittest.TestCase):
                 name=tune.choice(["charlie", "max"]),
             ),
         )
-        for spec in itertools.islice(
-            tune.suggest.variant_generator.generate_variants(search_space), 2
-        ):
+        for spec in itertools.islice(tune.suggest.variant_generator.generate_variants(search_space), 2):
             config = {k[0]: v for k, v in spec[0].items()}
             query = config.pop("query")
             instance = self.resolver.make(query=query, pos_kwargs=config)
@@ -277,9 +272,7 @@ class TestResolver(unittest.TestCase):
         def objective(trial: optuna.Trial) -> float:
             """Calculate the classification accuracy for the iris dataset."""
             x, y = datasets.load_iris(return_X_y=True)
-            x_train, x_test, y_train, y_test = train_test_split(
-                x, y, test_size=0.33, random_state=42
-            )
+            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
             clf_cls = resolver.optuna_lookup(trial, "model")
             clf = clf_cls()
             clf.fit(x_train, y_train)

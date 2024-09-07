@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """The :mod:`class_resolver` package helps you look up related classes and functions to parametrize your code.
 
 Getting Started
@@ -45,13 +43,7 @@ it one of the following:
    ``ClassResolver.from_subclasses(Algorithm, default=GreedyAlgorithm``.
 """
 
-from .api import (
-    ClassResolver,
-    KeywordArgumentError,
-    Resolver,
-    UnexpectedKeywordError,
-    get_cls,
-)
+from .api import ClassResolver, KeywordArgumentError, Resolver, UnexpectedKeywordError, get_cls
 from .base import (
     BaseResolver,
     RegistrationError,

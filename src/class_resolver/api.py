@@ -1,19 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """Resolve classes."""
 
 import inspect
 import logging
+from collections.abc import Collection, Mapping, Sequence
 from textwrap import dedent
 from typing import (
     TYPE_CHECKING,
     Any,
-    Collection,
-    List,
-    Mapping,
     Optional,
-    Sequence,
-    Type,
     TypeVar,
     Union,
 )
@@ -61,7 +55,7 @@ class KeywordArgumentError(TypeError):
         self.cls = cls
         self.name = s.rstrip("'").rsplit("'", 1)[1]
 
-    def __str__(self) -> str:  # noqa:D105
+    def __str__(self) -> str:
         return f"{self.cls.__name__}: __init__() missing 1 required keyword-only argument: '{self.name}'"
 
 
@@ -75,7 +69,7 @@ class UnexpectedKeywordError(TypeError):
         """
         self.cls = cls
 
-    def __str__(self) -> str:  # noqa:D105
+    def __str__(self) -> str:
         return f"{self.cls.__name__} did not expect any keyword arguments"
 
 
@@ -85,11 +79,11 @@ MISSING_ARGS = [
 ]
 
 
-class ClassResolver(BaseResolver[Type[X], X]):
+class ClassResolver(BaseResolver[type[X], X]):
     """Resolve from a list of classes."""
 
     #: The base class
-    base: Type[X]
+    base: type[X]
     #: The shared suffix fo all classes derived from the base class
     suffix: str
     #: The variable name to look up synonyms in classes that are registered with this resolver
@@ -97,12 +91,12 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
     def __init__(
         self,
-        classes: Optional[Collection[Type[X]]] = None,
+        classes: Optional[Collection[type[X]]] = None,
         *,
-        base: Type[X],
-        default: Optional[Type[X]] = None,
+        base: type[X],
+        default: Optional[type[X]] = None,
         suffix: Optional[str] = None,
-        synonyms: Optional[Mapping[str, Type[X]]] = None,
+        synonyms: Optional[Mapping[str, type[X]]] = None,
         synonym_attribute: Optional[str] = "synonyms",
         base_as_suffix: bool = True,
     ) -> None:
@@ -132,11 +126,11 @@ class ClassResolver(BaseResolver[Type[X], X]):
             suffix=suffix,
         )
 
-    def extract_name(self, element: Type[X]) -> str:
+    def extract_name(self, element: type[X]) -> str:
         """Get the name for an element."""
         return element.__name__
 
-    def extract_synonyms(self, element: Type[X]) -> Collection[str]:
+    def extract_synonyms(self, element: type[X]) -> Collection[str]:
         """Get synonyms from an element."""
         if not self.synonyms_attribute:
             return []
@@ -145,9 +139,9 @@ class ClassResolver(BaseResolver[Type[X], X]):
     @classmethod
     def from_subclasses(
         cls,
-        base: Type[X],
+        base: type[X],
         *,
-        skip: Optional[Collection[Type[X]]] = None,
+        skip: Optional[Collection[type[X]]] = None,
         exclude_private: bool = True,
         exclude_external: bool = True,
         **kwargs: Any,
@@ -168,9 +162,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         return cls(
             {
                 subcls
-                for subcls in get_subclasses(
-                    base, exclude_private=exclude_private, exclude_external=exclude_external
-                )
+                for subcls in get_subclasses(base, exclude_private=exclude_private, exclude_external=exclude_external)
                 if subcls not in skip
             },
             base=base,
@@ -181,11 +173,11 @@ class ClassResolver(BaseResolver[Type[X], X]):
         """Normalize the class name of the instance."""
         return self.normalize_cls(x.__class__)
 
-    def normalize_cls(self, cls: Type[X]) -> str:
+    def normalize_cls(self, cls: type[X]) -> str:
         """Normalize the class name."""
         return self.normalize(cls.__name__)
 
-    def lookup(self, query: HintOrType[X], default: Optional[Type[X]] = None) -> Type[X]:
+    def lookup(self, query: HintOrType[X], default: Optional[type[X]] = None) -> type[X]:
         """Lookup a class."""
         return get_cls(
             query,
@@ -213,7 +205,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
     ) -> X:
         """Instantiate a class with optional kwargs."""
         if query is None or isinstance(query, (str, type)):
-            cls: Type[X] = self.lookup(query)
+            cls: type[X] = self.lookup(query)
             try:
                 return cls(**(pos_kwargs or {}), **kwargs)
             except TypeError as e:
@@ -320,7 +312,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         queries: OneOrManyHintOrType[X] = None,
         kwargs: OneOrManyOptionalKwargs = None,
         **common_kwargs: Any,
-    ) -> List[X]:
+    ) -> list[X]:
         """Resolve and compose several queries together.
 
         :param queries: One of the following:
@@ -373,12 +365,12 @@ Resolver = ClassResolver
 
 def get_cls(
     query: HintOrType[X],
-    base: Type[X],
-    lookup_dict: Mapping[str, Type[X]],
-    lookup_dict_synonyms: Optional[Mapping[str, Type[X]]] = None,
-    default: Optional[Type[X]] = None,
+    base: type[X],
+    lookup_dict: Mapping[str, type[X]],
+    lookup_dict_synonyms: Optional[Mapping[str, type[X]]] = None,
+    default: Optional[type[X]] = None,
     suffix: Optional[str] = None,
-) -> Type[X]:
+) -> type[X]:
     """Get a class by string, default, or implementation."""
     if query is None:
         if default is None:

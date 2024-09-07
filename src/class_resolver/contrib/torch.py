@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """
 PyTorch is a tensor and autograd library widely used for machine learning.
 The ``class-resolver`` provides several class resolvers and function resolvers
 to make it possible to more easily parametrize models and training loops.
-"""  # noqa:D205,D400
+"""  # noqa: D205
 
 import torch
 from torch import nn
@@ -14,10 +12,10 @@ from torch.optim import Adam, Optimizer
 from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau
 
 try:
-    # torch >= 2.0
+    # when torch >= 2.0
     from torch.optim.lr_scheduler import LRScheduler
 except ImportError:
-    # torch < 2.0
+    # when torch < 2.0
     from torch.optim.lr_scheduler import _LRScheduler as LRScheduler
 
 from ..api import ClassResolver
@@ -77,9 +75,7 @@ activation_resolver = ClassResolver(
     classes=[
         module
         for module in vars(activation).values()
-        if isinstance(module, type)
-        and issubclass(module, nn.Module)
-        and module not in ACTIVATION_SKIP
+        if isinstance(module, type) and issubclass(module, nn.Module) and module not in ACTIVATION_SKIP
     ],
     base=nn.Module,
     default=activation.ReLU,
