@@ -317,7 +317,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
     def make_many(
         self,
-        queries: OneOrManyHintOrType = None,
+        queries: OneOrManyHintOrType[X] = None,
         kwargs: OneOrManyOptionalKwargs = None,
         **common_kwargs: Any,
     ) -> List[X]:

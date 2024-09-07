@@ -213,13 +213,15 @@ class BaseResolver(ABC, Generic[X, Y]):
     @abstractmethod
     def make(
         self,
-        query,
+        query: Hint[X],
         pos_kwargs: OptionalKwargs = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Y:
         """Make an element."""
 
-    def make_safe(self, query, pos_kwargs: OptionalKwargs = None, **kwargs) -> Optional[Y]:
+    def make_safe(
+        self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any
+    ) -> Optional[Y]:
         """Run make, but pass through a none query."""
         if query is None:
             return None
@@ -255,7 +257,8 @@ class BaseResolver(ABC, Generic[X, Y]):
 
         import click
 
-        return click.option(
+        # TODO are there better ways to type options?
+        return click.option(  # type:ignore
             *flags,
             type=click.Choice(list(self.lookup_dict), case_sensitive=False),
             default=[key] if kwargs.get("multiple") else key,
@@ -283,7 +286,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         return elements
 
     @classmethod
-    def from_entrypoint(cls, group: str, **kwargs: Any) -> "BaseResolver":
+    def from_entrypoint(cls, group: str, **kwargs: Any) -> "BaseResolver[X, Y]":
         """Make a resolver from the elements registered at the given entrypoint."""
         elements = cls._from_entrypoint(group)
         return cls(elements, **kwargs)
