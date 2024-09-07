@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover
 class TestTorch(unittest.TestCase):
     """Test for the optuna contribution module."""
 
-    def test_sampler(self):
+    def test_sampler(self) -> None:
         """Tests for the sampler resolver."""
         from optuna.samplers import RandomSampler, TPESampler
 
@@ -24,7 +24,7 @@ class TestTorch(unittest.TestCase):
         self.assertEqual(TPESampler, sampler_resolver.lookup("tpe"))
         self.assertEqual(TPESampler, sampler_resolver.lookup(None))
 
-    def test_pruner(self):
+    def test_pruner(self) -> None:
         """Tests for the pruner resolver."""
         from optuna.pruners import MedianPruner, PatientPruner
 

@@ -7,6 +7,7 @@ import sys
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
+    Callable,
     Collection,
     Dict,
     Generic,
@@ -25,6 +26,7 @@ else:
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
 if TYPE_CHECKING:
+    import click.decorators
     import optuna
 
 __all__ = [
@@ -55,7 +57,7 @@ class RegistrationError(KeyError, Generic[X], ABC):
         self.existing = self._get_existing()
 
     @abstractmethod
-    def _get_existing(self):
+    def _get_existing(self) -> str:
         """Get the pre-existing element based on the error type and the given key."""
 
     def __str__(self) -> str:
@@ -237,7 +239,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         as_string: bool = False,
         required: bool = False,
         **kwargs,
-    ):
+    ) -> Callable[["click.decorators.FC"], "click.decorators.FC"]:
         """Get a click option for this resolver."""
         if not required:
             key = self.normalize(self.extract_name(self.lookup(self._default(default))))

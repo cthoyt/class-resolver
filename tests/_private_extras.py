@@ -4,4 +4,4 @@
 
 
 class PrivateDict(dict):
-    """A priviate dictionary."""
+    """A private dictionary."""
