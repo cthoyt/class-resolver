@@ -48,7 +48,7 @@ class TestFunctionResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.resolver.lookup("missing")
         with self.assertRaises(TypeError):
-            self.resolver.lookup(3)
+            self.resolver.lookup(3)  # type:ignore
 
     def test_default_lookup(self) -> None:
         """Test lookup with default."""
@@ -59,7 +59,7 @@ class TestFunctionResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             resolver.lookup("missing")
         with self.assertRaises(TypeError):
-            resolver.lookup(3)
+            resolver.lookup(3)  # type:ignore
 
     def test_make(self) -> None:
         """Test making classes."""
@@ -70,7 +70,7 @@ class TestFunctionResolver(unittest.TestCase):
             f2 = self.resolver.make("add_y", y=1)
             self.assertEqual(add_one(x), f2(x))
 
-    def test_make_safe(self):
+    def test_make_safe(self) -> None:
         """Test the make_safe function, which always returns none on none input."""
         self.assertIsNone(self.resolver.make_safe(None))
         self.assertIsNone(FunctionResolver([add_one, add_two], default=add_two).make_safe(None))

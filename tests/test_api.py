@@ -43,7 +43,7 @@ class Base:
         """Initialize the class."""
         self.name = name
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check two instances are equal."""
         return type(self) is type(other) and self.name == other.name
 
@@ -128,9 +128,9 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.resolver.lookup("missing")
         with self.assertRaises(TypeError):
-            self.resolver.lookup(3)
+            self.resolver.lookup(3)  # type:ignore
         with self.assertRaises(TypeError) as e:
-            self.resolver.lookup(AAltBase)
+            self.resolver.lookup(AAltBase)  # type:ignore
         self.assertEqual(
             f"Not subclass of {self.resolver.base.__name__}: {AAltBase}", str(e.exception)
         )
@@ -300,7 +300,7 @@ class TestResolver(unittest.TestCase):
     def test_click_option(self) -> None:
         """Test the click option."""
 
-        @click.command()
+        @click.command()  # type:ignore
         @self.resolver.get_option("--opt", default="a")
         def cli(opt) -> None:
             """Run the test CLI."""
@@ -327,7 +327,7 @@ class TestResolver(unittest.TestCase):
     def test_click_option_str(self) -> None:
         """Test the click option."""
 
-        @click.command()
+        @click.command()  # type:ignore
         @self.resolver.get_option("--opt", default="a", as_string=True)
         def cli(opt: str):
             """Run the test CLI."""
@@ -340,7 +340,7 @@ class TestResolver(unittest.TestCase):
         """Test generating an option with a default."""
         resolver = Resolver([A, B, C, E], base=Base, default=A)
 
-        @click.command()
+        @click.command()  # type:ignore
         @resolver.get_option("--opt", as_string=True)
         def cli(opt: str) -> None:
             """Run the test CLI."""
@@ -352,7 +352,7 @@ class TestResolver(unittest.TestCase):
     def test_click_option_multiple(self) -> None:
         """Test the click option with multiple arguments."""
 
-        @click.command()
+        @click.command()  # type:ignore
         @self.resolver.get_option("--opt", default="a", as_string=True, multiple=True)
         def cli(opt: Sequence[str]) -> None:
             """Run the test CLI."""
