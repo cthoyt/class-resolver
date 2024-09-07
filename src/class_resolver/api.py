@@ -340,8 +340,8 @@ class ClassResolver(BaseResolver[Type[X], X]):
 
         # Prepare the query list
         if queries is not None:
-            # FIXME!
-            _query_list = upgrade_to_sequence(queries)
+            # FIXME, on first pass i think this should work. needs rethinking
+            _query_list = upgrade_to_sequence(queries)  # type:ignore
         elif self.default is None:
             raise ValueError
         else:
