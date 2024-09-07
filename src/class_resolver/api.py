@@ -151,7 +151,7 @@ class ClassResolver(BaseResolver[Type[X], X]):
         exclude_private: bool = True,
         exclude_external: bool = True,
         **kwargs: Any,
-    ) -> "ClassResolver":
+    ) -> "ClassResolver[X]":
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
@@ -323,9 +323,11 @@ class ClassResolver(BaseResolver[Type[X], X]):
     ) -> List[X]:
         """Resolve and compose several queries together.
 
-        :param queries: Either none (will result in the default X),
-            a single X (as either a class, instance, or string for class name), or a list
-            of X's (as either a class, instance, or string for class name
+        :param queries: One of the following:
+
+            1. none (will result in the default X),
+            2. a single X, as either a class, instance, or string for class name
+            3. a sequence of X's, as either a class, instance, or string for class name
         :param kwargs: Either none (will use all defaults), a single dictionary
             (will be used for all instances), or a list of dictionaries with the same length
             as ``queries``
