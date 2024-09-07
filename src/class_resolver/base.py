@@ -7,6 +7,7 @@ import sys
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     Collection,
     Dict,
@@ -17,7 +18,6 @@ from typing import (
     Optional,
     Set,
     cast,
-    Any,
 )
 
 if sys.version_info[:2] >= (3, 10):
