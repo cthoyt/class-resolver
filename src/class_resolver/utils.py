@@ -202,7 +202,7 @@ F = TypeVar("F", bound=Callable)
 
 
 def add_doc_note_about_resolvers(
-    *params: str,
+    *params: str | tuple[str, str],
     resolver_name: str,
 ) -> Callable[[F], F]:
     """
@@ -223,7 +223,28 @@ def add_doc_note_about_resolvers(
 
     :return:
         a decorator which extends a function's docstring.
+    :raises ValueError:
+        When either no parameter name was provided, there was a duplicate parameter name.
     """
+    # input validation
+    if not params:
+        raise ValueError("Must provided at least one parameter name.")
+
+    # normalize parameter name pairs
+    param_pairs: list[tuple[str, str]] = []
+    for p in params:
+        if isinstance(p, str):
+            pair = (p, f"{p}_kwargs")
+        elif len(p) != 2:
+            raise ValueError(f"Invalid parameter pair {p}")
+        else:
+            pair = p
+        param_pairs.append(pair)
+
+    # check for duplicates
+    expanded_params = set(e for pair in param_pairs for e in pair)
+    if len(expanded_params) < 2 * len(param_pairs):
+        raise ValueError(f"There are duplicates in (the expanded) {params=}")
 
     def add_note(func: F) -> F:
         """
@@ -236,16 +257,14 @@ def add_doc_note_about_resolvers(
             the function with extended docstring.
 
         :raises ValueError:
-            when the signature does not contain the resolved parameter names.
+            When the signature does not contain the resolved parameter names, or the docstring is missing.
         """
         signature = inspect.signature(func)
-        if missing := set(f"{p}{suffix}" for p in params for suffix in ("", "_kwargs")).difference(
-            signature.parameters
-        ):
+        if missing := expanded_params.difference(signature.parameters):
             raise ValueError(f"{missing=} parameters in {signature=}.")
         if not func.__doc__:
             raise ValueError("docstring is empty")
-        pairs_str = ", ".join(f"``({param}, {param}_kwargs)``" for param in params)
+        pairs_str = ", ".join(f"``({param}, {param_kwargs})``" for param, param_kwargs in param_pairs)
         note_str = textwrap.dedent(
             f"""\
             .. note ::
