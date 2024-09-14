@@ -84,14 +84,22 @@ class DecoratorTests(unittest.TestCase):
         """Do something, and also use model."""
         pass
 
+    @staticmethod
+    def f_no_doc(model, model_kwargs) -> None:  # noqa: D102
+        pass
+
     def test_decorator(self):
         """Test decorator."""
+        old_doc = self.f.__doc__
         for params in [["model"], [("model", "model_kwargs")]]:
             decorator = add_doc_note_about_resolvers(*params, resolver_name="model_resolver")
             f_dec = decorator(self.f)
+            # note: the decorator modifies the doc string in-place...
             # check that the doc string got extended
-            self.assertNotEqual(self.f.__doc__, f_dec.__doc__)
-            self.assertTrue(f_dec.__doc__.startswith(self.f.__doc__))
+            self.assertNotEqual(f_dec.__doc__, old_doc)
+            self.assertTrue(f_dec.__doc__.startswith(old_doc))
+            # revert for next time
+            self.f.__doc__ = old_doc
 
     def test_error(self):
         """Test error handling."""
