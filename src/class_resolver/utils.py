@@ -251,7 +251,8 @@ def add_doc_note_about_resolvers(
             .. note ::
 
                 The parameter pairs {pairs_str} are passed to :data:`{resolver_name}`.
-                An explanation of resolvers and how to use them is given in :ref:`using_resolvers`.
+                An explanation of resolvers and how to use them is given in
+                https://class-resolver.readthedocs.io/en/latest/.
             """
         )
         note_str = textwrap.indent(text=note_str, prefix="        ", predicate=bool)
