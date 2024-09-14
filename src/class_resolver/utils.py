@@ -214,7 +214,7 @@ def add_doc_note_about_resolvers(
     .. code-block::
 
         @add_doc_note_about_resolvers("model", resolver_name="pykeen.models.model_resolver")
-        def f(..., model: HintOrType[Class], model_kwargs: OptionalKwargs, ...)
+        def f(..., model: X | Type[X] | None, model_kwargs: dict[str, Any] | None, ...)
 
     :param params:
         the name of the parameters. Will be automatically completed to include all the ``_kwargs`` suffixed parts, too.
