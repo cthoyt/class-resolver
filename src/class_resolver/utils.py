@@ -222,7 +222,7 @@ def add_doc_note_about_resolvers(
         the fully qualified path of the resolver used to construct a reference via the ``:data:`` role.
 
     :return:
-        a decorator for function.
+        a decorator which extends a function's docstring.
     """
 
     def add_note(func: F) -> F:
