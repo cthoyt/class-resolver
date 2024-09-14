@@ -122,7 +122,7 @@ def same_module(cls1: type, cls2: type) -> bool:
     return cls1.__module__.split(".")[0] == cls2.__module__.split(".")[0]
 
 
-def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
+def normalize_string(s: str, *, suffix: str | None = None) -> str:
     """Normalize a string for lookup."""
     s = s.lower().replace("-", "").replace("_", "").replace(" ", "")
     if suffix is not None and s.endswith(suffix.lower()):
@@ -130,7 +130,7 @@ def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
     return s.strip()
 
 
-def upgrade_to_sequence(x: Union[X, Sequence[X]]) -> Sequence[X]:
+def upgrade_to_sequence(x: X | Sequence[X]) -> Sequence[X]:
     """Ensure that the input is a sequence.
 
     :param x: A literal or sequence of literals (don't consider a string x as a sequence)
@@ -153,10 +153,10 @@ def upgrade_to_sequence(x: Union[X, Sequence[X]]) -> Sequence[X]:
         return (x,)
 
 
-def make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Parameter", X], Y]:
+def make_callback(f: Callable[[X], Y]) -> Callable[[click.Context, click.Parameter, X], Y]:
     """Make a click-appropriate callback."""
 
-    def _callback(_ctx: "click.Context", _param: "click.Parameter", value: X) -> Y:
+    def _callback(_ctx: click.Context, _param: click.Parameter, value: X) -> Y:
         return f(value)
 
     return _callback
