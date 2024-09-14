@@ -62,6 +62,7 @@ from .utils import (
     OneOrManyHintOrType,
     OneOrManyOptionalKwargs,
     OptionalKwargs,
+    add_doc_note_about_resolvers,
     get_subclasses,
     normalize_string,
 )
@@ -89,6 +90,7 @@ __all__ = [
     "get_cls",
     "get_subclasses",
     "normalize_string",
+    "add_doc_note_about_resolvers",
     # Exceptions
     "RegistrationError",
     "RegistrationNameConflict",
