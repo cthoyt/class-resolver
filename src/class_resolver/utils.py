@@ -208,6 +208,14 @@ def add_doc_note_about_resolvers(
     """
     Build a decorator to add information about resolved parameter pairs.
 
+    The decorator is intended for methods with follow the ``param`` + ``param_kwargs`` pattern and internally use a
+    class resolver.
+
+    .. code-block::
+
+        @add_doc_note_about_resolvers("model", resolver_name="pykeen.models.model_resolver")
+        def f(..., model: HintOrType[Class], model_kwargs: OptionalKwargs, ...)
+
     :param params:
         the name of the parameters. Will be automatically completed to include all the ``_kwargs`` suffixed parts, too.
     :param resolver_name:
