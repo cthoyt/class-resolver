@@ -248,7 +248,7 @@ def add_doc_note_about_resolvers(
     if len(expanded_params) < 2 * len(param_pairs):
         raise ValueError(f"There are duplicates in (the expanded) {params=}")
 
-    # TODO: we could do some more sanitization, e.g., importing the resolver, typing match types, ...
+    # TODO: we could do some more sanitization, e.g., importing the resolver, trying to match types, ...
 
     def add_note(func: F) -> F:
         """
