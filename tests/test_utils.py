@@ -116,5 +116,9 @@ class DecoratorTests(unittest.TestCase):
 
     def test_error_decoration(self):
         """Test errors when decorating."""
+        # missing docstring
+        with self.assertRaises(ValueError):
+            add_doc_note_about_resolvers("model", resolver_name="model_resolver")(self.f_no_doc)
+        # non-existing parameter name
         with self.assertRaises(ValueError):
             add_doc_note_about_resolvers("interaction", resolver_name="model_resolver")(self.f)
