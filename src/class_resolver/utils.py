@@ -1,7 +1,9 @@
 """Utilities for the resolver."""
 
 import collections.abc
+import inspect
 import logging
+import textwrap
 from collections.abc import Iterable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
@@ -35,6 +37,7 @@ __all__ = [
     "make_callback",
     "same_module",
     "normalize_with_default",
+    "add_doc_note_about_resolvers",
 ]
 
 logger = logging.getLogger(__name__)
@@ -193,3 +196,58 @@ def normalize_with_default(
             )
         kwargs = default_kwargs
     return choice, kwargs
+
+
+F = TypeVar("F", bound=Callable)
+
+
+def add_doc_note_about_resolvers(
+    *params: str,
+    resolver_name: str,
+) -> Callable[[F], F]:
+    """
+    Build a decorator to add information about resolved parameter pairs.
+
+    :param params:
+        the name of the parameters. Will be automatically completed to include all the ``_kwargs`` suffixed parts, too.
+    :param resolver_name:
+        the fully qualified path of the resolver used to construct a reference via the ``:data:`` role.
+
+    :return:
+        a decorator for function.
+    """
+
+    def add_note(func: F) -> F:
+        """
+        Extend the function's docstring with a note about resolved parameters.
+
+        :param func:
+            the function to decorate.
+
+        :return:
+            the function with extended docstring.
+
+        :raises ValueError:
+            when the signature does not contain the resolved parameter names.
+        """
+        signature = inspect.signature(func)
+        if missing := set(f"{p}{suffix}" for p in params for suffix in ("", "_kwargs")).difference(
+            signature.parameters
+        ):
+            raise ValueError(f"{missing=} parameters in {signature=}.")
+        if not func.__doc__:
+            raise ValueError("docstring is empty")
+        pairs_str = ", ".join(f"``({param}, {param}_kwargs)``" for param in params)
+        note_str = textwrap.dedent(
+            f"""\
+            .. note ::
+
+                The parameter pairs {pairs_str} are passed to :data:`{resolver_name}`.
+                An explanation of resolvers and how to use them is given in :ref:`using_resolvers`.
+            """
+        )
+        note_str = textwrap.indent(text=note_str, prefix="        ", predicate=bool)
+        func.__doc__ = f"{func.__doc__.lstrip()}\n\n{note_str}"
+        return func
+
+    return add_note
