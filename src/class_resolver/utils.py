@@ -1,5 +1,7 @@
 """Utilities for the resolver."""
 
+from __future__ import annotations
+
 import collections.abc
 import inspect
 import logging
