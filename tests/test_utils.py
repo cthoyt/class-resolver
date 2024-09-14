@@ -4,7 +4,13 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver.utils import get_subclasses, is_private, normalize_with_default, same_module
+from class_resolver.utils import (
+    add_doc_note_about_resolvers,
+    get_subclasses,
+    is_private,
+    normalize_with_default,
+    same_module,
+)
 from tests._private_extras import PrivateDict
 
 
@@ -68,3 +74,39 @@ class TestUtilities(unittest.TestCase):
             )
             self.assertIs(cls, dict)
             self.assertIs(kwargs, choice_kwargs)
+
+
+class DecoratorTests(unittest.TestCase):
+    """Decorator tests."""
+
+    @staticmethod
+    def f(model, model_kwargs) -> None:
+        """Do something, and also use model."""
+        pass
+
+    def test_decorator(self):
+        """Test decorator."""
+        for params in [["model"], [("model", "model_kwargs")]]:
+            decorator = add_doc_note_about_resolvers(*params, resolver_name="model_resolver")
+            f_dec = decorator(self.f)
+            # check that the doc string got extended
+            self.assertNotEqual(self.f.__doc__, f_dec.__doc__)
+            self.assertTrue(f_dec.__doc__.startswith(self.f.__doc__))
+
+    def test_error(self):
+        """Test error handling."""
+        for params in [
+            # empty
+            [],
+            # one-element tuple
+            [[("model",)]],
+            # three element tuple
+            [[("model", "model_kwargs", "model_kwargs2")]],
+        ]:
+            with self.assertRaises(ValueError):
+                add_doc_note_about_resolvers(*params, resolver_name="model_resolver")
+
+    def test_error_decoration(self):
+        """Test errors when decorating."""
+        with self.assertRaises(ValueError):
+            add_doc_note_about_resolvers("interaction", resolver_name="model_resolver")(self.f)
