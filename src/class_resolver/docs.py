@@ -23,28 +23,45 @@ def document_resolver(
     The decorator is intended for methods with follow the ``param`` + ``param_kwargs`` pattern and internally use a
     class resolver.
 
-    .. code-block::
+    .. code-block:: python
 
-        @document_resolver("activation", "class_resolver.contrib.torch.activation_resolver")
+        from typing import Any, Union
+        from torch import Tensor, nn
+        from class_resolver import document_resolver
+        from class_resolver.contrib.torch import activation_resolver
+
+        @document_resolver(
+            "activation", resolver_name="class_resolver.contrib.torch.activation_resolver"
+        )
         def f(
-            tensor,
-            activation: None | str | nn.Module | type[nn.Module],
+            tensor: Tensor,
+            activation: Union[None, str, type[nn.Module], nn.Module],
             activation_kwargs: dict[str, Any] | None,
         ):
-          _activation = activation_resolver.make(activation, activation_kwargs)
-          return _activation(tensor)
+            _activation = activation_resolver.make(activation, activation_kwargs)
+            return _activation(tensor)
+
 
     This also can be stacked for multiple resolvers.
 
-    .. code-block::
+    .. code-block:: python
 
-        @document_resolver("activation", "class_resolver.contrib.torch.activation_resolver")
-        @document_resolver("aggregation", "class_resolver.contrib.torch.aggregation_resolver")
+        from typing import Any, Union
+        from torch import Tensor, nn
+        from class_resolver import document_resolver
+        from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
+
+        @document_resolver(
+            "activation", resolver_name="class_resolver.contrib.torch.activation_resolver"
+        )
+        @document_resolver(
+            "aggregation", resolver_name="class_resolver.contrib.torch.aggregation_resolver"
+        )
         def f(
-            *args,
-            activation: None | str | nn.Module | type[nn.Module],
+            tensor: Tensor,
+            activation: Union[None, str, type[nn.Module], nn.Module],
             activation_kwargs: dict[str, Any] | None,
-            aggregation: None | str | nn.Module | type[nn.Module],
+            aggregation: Union[None, str, type[nn.Module], nn.Module],
             aggregation_kwargs: dict[str, Any] | None,
         ):
             _activation = activation_resolver.make(activation, activation_kwargs)
