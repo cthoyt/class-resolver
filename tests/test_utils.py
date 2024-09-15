@@ -5,7 +5,7 @@ import unittest
 from collections import Counter, defaultdict
 
 from class_resolver.utils import (
-    add_doc_note_about_resolvers,
+    document_resolver,
     get_subclasses,
     is_private,
     normalize_with_default,
@@ -93,7 +93,7 @@ class DecoratorTests(unittest.TestCase):
         """Test decorator."""
         old_doc = self.f.__doc__
         for params in [["model"], [("model", "model_kwargs")]]:
-            decorator = add_doc_note_about_resolvers(*params, resolver_name="model_resolver")
+            decorator = document_resolver(*params, resolver_name="model_resolver")
             f_dec = decorator(self.f)
             # note: the decorator modifies the doc string in-place...
             # check that the doc string got extended
@@ -113,13 +113,13 @@ class DecoratorTests(unittest.TestCase):
             [[("model", "model_kwargs", "model_kwargs2")]],
         ]:
             with self.assertRaises(ValueError):
-                add_doc_note_about_resolvers(*params, resolver_name="model_resolver")
+                document_resolver(*params, resolver_name="model_resolver")
 
     def test_error_decoration(self):
         """Test errors when decorating."""
         # missing docstring
         with self.assertRaises(ValueError):
-            add_doc_note_about_resolvers("model", resolver_name="model_resolver")(self.f_no_doc)
+            document_resolver("model", resolver_name="model_resolver")(self.f_no_doc)
         # non-existing parameter name
         with self.assertRaises(ValueError):
-            add_doc_note_about_resolvers("interaction", resolver_name="model_resolver")(self.f)
+            document_resolver("interaction", resolver_name="model_resolver")(self.f)

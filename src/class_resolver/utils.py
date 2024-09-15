@@ -39,7 +39,7 @@ __all__ = [
     "make_callback",
     "same_module",
     "normalize_with_default",
-    "add_doc_note_about_resolvers",
+    "document_resolver",
 ]
 
 logger = logging.getLogger(__name__)
@@ -203,7 +203,7 @@ def normalize_with_default(
 F = TypeVar("F", bound=Callable)
 
 
-def add_doc_note_about_resolvers(
+def document_resolver(
     *params: str | tuple[str, str],
     resolver_name: str,
 ) -> Callable[[F], F]:
@@ -215,8 +215,31 @@ def add_doc_note_about_resolvers(
 
     .. code-block::
 
-        @add_doc_note_about_resolvers("model", resolver_name="pykeen.models.model_resolver")
-        def f(..., model: X | Type[X] | None, model_kwargs: dict[str, Any] | None, ...)
+        @document_resolver("activation", "class_resolver.contrib.torch.activation_resolver")
+        def f(
+            tensor,
+            activation: None | str | nn.Module | type[nn.Module],
+            activation_kwargs: dict[str, Any] | None,
+        ):
+          _activation = activation_resolver.make(activation, activation_kwargs)
+          return _activation(tensor)
+
+    This also can be stacked for multiple resolvers.
+
+    .. code-block::
+
+        @document_resolver("activation", "class_resolver.contrib.torch.activation_resolver")
+        @document_resolver("aggregation", "class_resolver.contrib.torch.aggregation_resolver")
+        def f(
+            *args,
+            activation: None | str | nn.Module | type[nn.Module],
+            activation_kwargs: dict[str, Any] | None,
+            aggregation: None | str | nn.Module | type[nn.Module],
+            aggregation_kwargs: dict[str, Any] | None,
+        ):
+            _activation = activation_resolver.make(activation, activation_kwargs)
+            _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
+            return _aggregation(_activation(tensor))
 
     :param params:
         the name of the parameters. Will be automatically completed to include all the ``_kwargs`` suffixed parts, too.
