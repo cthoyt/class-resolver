@@ -234,13 +234,11 @@ def add_doc_note_about_resolvers(
 
     # normalize parameter name pairs
     param_pairs: list[tuple[str, str]] = []
-    for p in params:
-        if isinstance(p, str):
-            pair = (p, f"{p}_kwargs")
-        elif len(p) != 2:
-            raise ValueError(f"Invalid parameter pair {p}")
-        else:
-            pair = p
+    for pair in params:
+        if isinstance(pair, str):
+            pair = (pair, f"{pair}_kwargs")
+        elif len(pair) != 2:
+            raise ValueError(f"Invalid parameter pair {pair}")
         param_pairs.append(pair)
 
     # check for duplicates
