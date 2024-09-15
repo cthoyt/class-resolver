@@ -1,5 +1,7 @@
 """Utilities for the resolver."""
 
+from __future__ import annotations
+
 import collections.abc
 import logging
 from collections.abc import Iterable, Mapping, Sequence
@@ -124,7 +126,7 @@ def normalize_string(s: str, *, suffix: str | None = None) -> str:
     return s.strip()
 
 
-def upgrade_to_sequence(x: Union[X, Sequence[X]]) -> Sequence[X]:
+def upgrade_to_sequence(x: X | Sequence[X]) -> Sequence[X]:
     """Ensure that the input is a sequence.
 
     :param x: A literal or sequence of literals (don't consider a string x as a sequence)
@@ -147,10 +149,10 @@ def upgrade_to_sequence(x: Union[X, Sequence[X]]) -> Sequence[X]:
         return (x,)
 
 
-def make_callback(f: Callable[[X], Y]) -> Callable[["click.Context", "click.Parameter", X], Y]:
+def make_callback(f: Callable[[X], Y]) -> Callable[[click.Context, click.Parameter, X], Y]:
     """Make a click-appropriate callback."""
 
-    def _callback(_ctx: "click.Context", _param: "click.Parameter", value: X) -> Y:
+    def _callback(_ctx: click.Context, _param: click.Parameter, value: X) -> Y:
         return f(value)
 
     return _callback

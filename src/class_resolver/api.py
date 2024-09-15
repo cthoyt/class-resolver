@@ -1,5 +1,7 @@
 """Resolve classes."""
 
+from __future__ import annotations
+
 import inspect
 import logging
 from collections.abc import Collection, Mapping, Sequence
@@ -8,7 +10,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     TypeVar,
-    Union,
 )
 
 from .base import BaseResolver
@@ -144,7 +145,7 @@ class ClassResolver(BaseResolver[type[X], X]):
         exclude_private: bool = True,
         exclude_external: bool = True,
         **kwargs: Any,
-    ) -> "ClassResolver[X]":
+    ) -> ClassResolver[X]:
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
@@ -241,7 +242,7 @@ class ClassResolver(BaseResolver[type[X], X]):
 
     def ray_tune_search_space(
         self, kwargs_search_space: Mapping[str, Any] | None = None
-    ) -> Union[Mapping[str, Any], "ray.tune.search.sample.Categorical"]:
+    ) -> Mapping[str, Any] | ray.tune.search.sample.Categorical:
         """Return a search space for ray.tune.
 
         ray.tune is a package for distributed hyperparameter optimization. The search space for this search is defined

@@ -1,5 +1,7 @@
 """A base resolver."""
 
+from __future__ import annotations
+
 import logging
 import sys
 from abc import ABC, abstractmethod
@@ -35,7 +37,7 @@ logger = logging.getLogger(__name__)
 class RegistrationError(KeyError, Generic[X], ABC):
     """Raised when trying to add a new element to a resolver with a pre-existing lookup key."""
 
-    def __init__(self, resolver: "BaseResolver[X, Y]", key: str, proposed: X, label: str):
+    def __init__(self, resolver: BaseResolver[X, Y], key: str, proposed: X, label: str):
         """Initialize the registration error.
 
         :param resolver: The resolver where the registration error occurred
@@ -235,7 +237,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         as_string: bool = False,
         required: bool = False,
         **kwargs: Any,
-    ) -> Callable[["click.decorators.FC"], "click.decorators.FC"]:
+    ) -> Callable[[click.decorators.FC], click.decorators.FC]:
         """Get a click option for this resolver."""
         if not required:
             norm_default = self._default(default)
@@ -276,12 +278,12 @@ class BaseResolver(ABC, Generic[X, Y]):
         return elements
 
     @classmethod
-    def from_entrypoint(cls, group: str, **kwargs: Any) -> "BaseResolver[X, Y]":
+    def from_entrypoint(cls, group: str, **kwargs: Any) -> BaseResolver[X, Y]:
         """Make a resolver from the elements registered at the given entrypoint."""
         elements = cls._from_entrypoint(group)
         return cls(elements, **kwargs)
 
-    def optuna_lookup(self, trial: "optuna.Trial", name: str) -> X:
+    def optuna_lookup(self, trial: optuna.Trial, name: str) -> X:
         """Suggest an element from this resolver for hyper-parameter optimization in Optuna.
 
         :param trial: A trial object from :mod:`optuna`. Note that this object shouldn't be constructed

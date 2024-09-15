@@ -1,5 +1,7 @@
 """A resolver for functions."""
 
+from __future__ import annotations
+
 from functools import partial
 from typing import Any, Callable, TypeVar
 
