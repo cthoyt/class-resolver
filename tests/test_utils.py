@@ -84,7 +84,7 @@ class DecoratorTests(unittest.TestCase):
         """Do something, and also use model."""
         pass
 
-    # docstr-coverage: ignore
+    # docstr-coverage:excused `testing missing docstr on purpose`
     @staticmethod
     def f_no_doc(model, model_kwargs) -> None:  # noqa: D102
         pass
