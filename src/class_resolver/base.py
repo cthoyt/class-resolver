@@ -9,7 +9,6 @@ from typing import (
     Any,
     Callable,
     Generic,
-    Optional,
 )
 
 if sys.version_info[:2] >= (3, 10):
@@ -87,21 +86,21 @@ class BaseResolver(ABC, Generic[X, Y]):
       the same as ``X``, but might be different from ``X``, such as in the class resolver.
     """
 
-    default: Optional[X]
+    default: X | None
     #: The mapping from synonyms to the classes indexed by this resolver
     synonyms: dict[str, X]
     #: The mapping from normalized class names to the classes indexed by this resolver
     lookup_dict: dict[str, X]
     #: The shared suffix fo all classes derived from the base class
-    suffix: Optional[str]
+    suffix: str | None
 
     def __init__(
         self,
-        elements: Optional[Iterable[X]] = None,
+        elements: Iterable[X] | None = None,
         *,
-        default: Optional[X] = None,
-        synonyms: Optional[Mapping[str, X]] = None,
-        suffix: Optional[str] = None,
+        default: X | None = None,
+        synonyms: Mapping[str, X] | None = None,
+        suffix: str | None = None,
     ):
         """Initialize the resolver.
 
@@ -142,7 +141,7 @@ class BaseResolver(ABC, Generic[X, Y]):
     def register(
         self,
         element: X,
-        synonyms: Optional[Iterable[str]] = None,
+        synonyms: Iterable[str] | None = None,
         raise_on_conflict: bool = True,
     ) -> None:
         """Register an additional element with this resolver.
@@ -182,10 +181,10 @@ class BaseResolver(ABC, Generic[X, Y]):
                 raise RegistrationSynonymConflict(self, synonym_key, element, label="synonym")
 
     @abstractmethod
-    def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
+    def lookup(self, query: Hint[X], default: X | None = None) -> X:
         """Lookup an element."""
 
-    def docdata(self, query: Hint[X], *path: str, default: Optional[X] = None) -> Any:
+    def docdata(self, query: Hint[X], *path: str, default: X | None = None) -> Any:
         """Lookup an element and get its docdata.
 
         :param query: The hint for looking something up in the resolver
@@ -212,7 +211,7 @@ class BaseResolver(ABC, Generic[X, Y]):
     ) -> Y:
         """Make an element."""
 
-    def make_safe(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Optional[Y]:
+    def make_safe(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Y | None:
         """Run make, but pass through a none query."""
         if query is None:
             return None

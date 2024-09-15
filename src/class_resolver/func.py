@@ -1,7 +1,7 @@
 """A resolver for functions."""
 
 from functools import partial
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, TypeVar
 
 from .base import BaseResolver
 from .utils import Hint, OptionalKwargs
@@ -20,7 +20,7 @@ class FunctionResolver(BaseResolver[X, X]):
         """Get the name for an element."""
         return element.__name__
 
-    def lookup(self, query: Hint[X], default: Optional[X] = None) -> X:
+    def lookup(self, query: Hint[X], default: X | None = None) -> X:
         """Lookup a function."""
         if query is None:
             return self._default(default)

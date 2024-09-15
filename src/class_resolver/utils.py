@@ -7,7 +7,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Optional,
     TypeVar,
     Union,
 )
@@ -49,13 +48,13 @@ Lookup = Union[str, X]
 
 LookupType = Lookup[type[X]]
 LookupOrType = Lookup[InstOrType[X]]
-Hint = Optional[Lookup[X]]
+Hint = Lookup[X] | None
 HintType = Hint[type[X]]
 HintOrType = Hint[InstOrType[X]]
-OptionalKwargs = Optional[Mapping[str, Any]]
+OptionalKwargs = Mapping[str, Any] | None
 OneOrSequence = Union[X, Sequence[X]]
-OneOrManyHintOrType = Optional[OneOrSequence[HintOrType[X]]]
-OneOrManyOptionalKwargs = Optional[OneOrSequence[OptionalKwargs]]
+OneOrManyHintOrType = OneOrSequence[HintOrType[X]] | None
+OneOrManyOptionalKwargs = OneOrSequence[OptionalKwargs] | None
 
 
 def is_private(class_name: str, module_name: str, main_is_private: bool = True) -> bool:
@@ -117,7 +116,7 @@ def same_module(cls1: type, cls2: type) -> bool:
     return cls1.__module__.split(".")[0] == cls2.__module__.split(".")[0]
 
 
-def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
+def normalize_string(s: str, *, suffix: str | None = None) -> str:
     """Normalize a string for lookup."""
     s = s.lower().replace("-", "").replace("_", "").replace(" ", "")
     if suffix is not None and s.endswith(suffix.lower()):
