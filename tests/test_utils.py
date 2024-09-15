@@ -4,8 +4,8 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
+from class_resolver import document_resolver
 from class_resolver.utils import (
-    document_resolver,
     get_subclasses,
     is_private,
     normalize_with_default,

@@ -50,6 +50,7 @@ from .base import (
     RegistrationNameConflict,
     RegistrationSynonymConflict,
 )
+from .docs import document_resolver
 from .func import FunctionResolver
 from .utils import (
     Hint,
@@ -62,7 +63,6 @@ from .utils import (
     OneOrManyHintOrType,
     OneOrManyOptionalKwargs,
     OptionalKwargs,
-    document_resolver,
     get_subclasses,
     normalize_string,
 )
