@@ -3,7 +3,9 @@
 Delete this before merging
 """
 
-from typing import Any, Union
+from __future__ import annotations
+
+from typing import Any
 
 from torch import Tensor, nn
 
@@ -17,9 +19,9 @@ __all__ = ["f"]
 @document_resolver("aggregation", resolver_name="class_resolver.contrib.torch.aggregation_resolver")
 def f(
     tensor: Tensor,
-    activation: Union[None, str, type[nn.Module], nn.Module],
+    activation: None | str | type[nn.Module] | nn.Module,
     activation_kwargs: dict[str, Any] | None,
-    aggregation: Union[None, str, type[nn.Module], nn.Module],
+    aggregation: None | str | type[nn.Module] | nn.Module,
     aggregation_kwargs: dict[str, Any] | None,
 ):
     """Apply an activation then aggregation.
