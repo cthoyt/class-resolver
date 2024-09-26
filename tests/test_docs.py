@@ -9,6 +9,46 @@ from torch import Tensor, nn
 
 from class_resolver import DocKey, document_resolver
 from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
+from class_resolver.docs import _clean_docstring
+
+TARGET = """This method does some stuff
+
+:param a: Something about A
+:param b: Something about B
+""".rstrip()
+
+DS1 = """This method does some stuff
+
+:param a: Something about A
+:param b: Something about B
+"""
+
+DS2 = """This method does some stuff
+
+    :param a: Something about A
+    :param b: Something about B
+"""
+
+DS3 = """This method does some stuff
+
+        :param a: Something about A
+        :param b: Something about B
+"""
+
+DS4 = """\
+This method does some stuff
+
+:param a: Something about A
+:param b: Something about B
+"""
+
+DS5 = """\
+    This method does some stuff
+
+    :param a: Something about A
+    :param b: Something about B
+"""
+
 
 TEST_RESOLVER_1 = document_resolver(
     DocKey("activation", "class_resolver.contrib.torch.activation_resolver"),
@@ -192,6 +232,13 @@ class DecoratorTests(unittest.TestCase):
 
 class TestDocumentResolver(unittest.TestCase):
     """Test documenting resolvers."""
+
+    def test_clean_docstring(self) -> None:
+        """Test cleaning a docstring works correctly."""
+        for ds in [TARGET, DS1, DS2, DS3, DS4, DS5]:
+            with self.subTest(docstring=ds):
+                self.assertEqual(TARGET, _clean_docstring(ds))
+
 
     def test_no_params(self):
         """Test when no keys are passed."""

@@ -4,7 +4,6 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver.docs import _clean_docstring
 from class_resolver.utils import (
     get_subclasses,
     is_private,
@@ -12,44 +11,6 @@ from class_resolver.utils import (
     same_module,
 )
 from tests._private_extras import PrivateDict
-
-TARGET = """This method does some stuff
-
-:param a: Something about A
-:param b: Something about B
-""".rstrip()
-
-DS1 = """This method does some stuff
-
-:param a: Something about A
-:param b: Something about B
-"""
-
-DS2 = """This method does some stuff
-
-    :param a: Something about A
-    :param b: Something about B
-"""
-
-DS3 = """This method does some stuff
-
-        :param a: Something about A
-        :param b: Something about B
-"""
-
-DS4 = """\
-This method does some stuff
-
-:param a: Something about A
-:param b: Something about B
-"""
-
-DS5 = """\
-    This method does some stuff
-
-    :param a: Something about A
-    :param b: Something about B
-"""
 
 
 class TestUtilities(unittest.TestCase):
@@ -112,9 +73,3 @@ class TestUtilities(unittest.TestCase):
             )
             self.assertIs(cls, dict)
             self.assertIs(kwargs, choice_kwargs)
-
-    def test_clean_docstring(self) -> None:
-        """Test cleaning a docstring works correctly."""
-        for ds in [TARGET, DS1, DS2, DS3, DS4, DS5]:
-            with self.subTest(docstring=ds):
-                self.assertEqual(TARGET, _clean_docstring(ds))
