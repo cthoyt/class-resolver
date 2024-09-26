@@ -190,6 +190,7 @@ ignore = [
 "docs/source/conf.py" = ["ERA001"]
 # Prints are okay in notebooks
 "notebooks/**/*.ipynb" = ["T201"]
+"tests/test_docs.py" = ["E501"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"

@@ -50,7 +50,7 @@ from .base import (
     RegistrationNameConflict,
     RegistrationSynonymConflict,
 )
-from .docs import document_resolver
+from .docs import DocKey, document_resolver
 from .func import FunctionResolver
 from .utils import (
     Hint,
@@ -91,6 +91,7 @@ __all__ = [
     "get_subclasses",
     "normalize_string",
     "document_resolver",
+    "DocKey",
     # Exceptions
     "RegistrationError",
     "RegistrationNameConflict",
