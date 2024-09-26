@@ -7,7 +7,7 @@ from typing import Any
 
 from torch import Tensor, nn
 
-from class_resolver import DocKey, document_resolver
+from class_resolver import ResolverKey, update_docstring_with_resolvers
 from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 from class_resolver.docs import _clean_docstring
 
@@ -50,8 +50,8 @@ DS5 = """\
 """
 
 
-TEST_RESOLVER_1 = document_resolver(
-    DocKey("activation", "class_resolver.contrib.torch.activation_resolver"),
+TEST_RESOLVER_1 = update_docstring_with_resolvers(
+    ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
 )
 
 EXPECTED_FUNCTION_1_DOC = """\
@@ -87,9 +87,9 @@ def f2(activation, activation_kwargs):
     """
 
 
-@document_resolver(
-    DocKey("activation", "class_resolver.contrib.torch.activation_resolver"),
-    DocKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
+@update_docstring_with_resolvers(
+    ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
+    ResolverKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
 )
 def f3(
     tensor: Tensor,
@@ -136,10 +136,10 @@ Apply an activation then aggregation.
 """.rstrip()
 
 
-@document_resolver(
-    DocKey("activation_1", "class_resolver.contrib.torch.activation_resolver"),
-    DocKey("activation_2", "class_resolver.contrib.torch.activation_resolver"),
-    DocKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
+@update_docstring_with_resolvers(
+    ResolverKey("activation_1", "class_resolver.contrib.torch.activation_resolver"),
+    ResolverKey("activation_2", "class_resolver.contrib.torch.activation_resolver"),
+    ResolverKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
 )
 def f4(
     tensor: Tensor,
@@ -211,7 +211,7 @@ class DecoratorTests(unittest.TestCase):
         old_doc = self.f.__doc__
         for params in [("model", "model_resolver"), ("model", "model_resolver", "model_kwargs")]:
             with self.subTest(params=params):
-                decorator = document_resolver(DocKey(*params))
+                decorator = update_docstring_with_resolvers(ResolverKey(*params))
                 f_dec = decorator(self.f)
                 # note: the decorator modifies the doc string in-place...
                 # check that the doc string got extended
@@ -224,10 +224,10 @@ class DecoratorTests(unittest.TestCase):
         """Test errors when decorating."""
         # missing docstring
         with self.assertRaises(ValueError):
-            document_resolver(DocKey("model", "model_resolver"))(self.f_no_doc)
+            update_docstring_with_resolvers(ResolverKey("model", "model_resolver"))(self.f_no_doc)
         # non-existing parameter name
         with self.assertRaises(ValueError):
-            document_resolver(DocKey("interaction", "model_resolver"))(self.f)
+            update_docstring_with_resolvers(ResolverKey("interaction", "model_resolver"))(self.f)
 
 
 class TestDocumentResolver(unittest.TestCase):
@@ -239,23 +239,22 @@ class TestDocumentResolver(unittest.TestCase):
             with self.subTest(docstring=ds):
                 self.assertEqual(TARGET, _clean_docstring(ds))
 
-
     def test_no_params(self):
         """Test when no keys are passed."""
         with self.assertRaises(ValueError):
-            document_resolver()
+            update_docstring_with_resolvers()
 
     def test_duplicate_params(self):
         """Test when no keys are passed."""
-        key = DocKey("a", "b")
+        key = ResolverKey("a", "b")
         with self.assertRaises(ValueError):
-            document_resolver(key, key)
+            update_docstring_with_resolvers(key, key)
 
     def test_missing_params(self):
         """Test when trying to document a parameter that does not exist."""
         with self.assertRaises(ValueError):
 
-            @document_resolver(DocKey("some-other-param", "y"))
+            @update_docstring_with_resolvers(ResolverKey("some-other-param", "y"))
             def f(x):
                 """Do the thing."""
 

@@ -11,14 +11,18 @@ from typing import Callable, TypeVar
 from .base import BaseResolver
 
 __all__ = [
-    "document_resolver",
-    "DocKey",
+    "update_docstring_with_resolvers",
+    "ResolverKey",
 ]
 
 F = TypeVar("F", bound=Callable)
 
 
-class DocKey:
+def _get_qualpath_from_object(resolver: BaseResolver) -> str:
+    raise NotImplementedError
+
+
+class ResolverKey:
     """An object storing information about how a resolver is used in a signature."""
 
     name: str
@@ -32,7 +36,7 @@ class DocKey:
         resolver: str | BaseResolver,
         key: str | None = None,
     ) -> None:
-        """Initialize the key for :func:`document_resolver`."""
+        """Initialize the key for :func:`update_docstring_with_resolvers`."""
         self.name = name
         self.key = f"{self.name}_kwargs" if key is None else key
 
@@ -47,7 +51,8 @@ class DocKey:
             else:
                 self.resolver = resolver_inst
         elif isinstance(resolver, BaseResolver):
-            raise NotImplementedError
+            self.resolver_path = _get_qualpath_from_object(resolver)
+            self.resolver = resolver
         else:
             raise TypeError
 
@@ -84,9 +89,7 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def document_resolver(
-    *keys: DocKey,
-) -> Callable[[F], F]:
+def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
     """
     Build a decorator to add information about resolved parameter pairs.
 
@@ -95,17 +98,17 @@ def document_resolver(
 
     .. code-block:: python
 
-        from typing import Any, Union
+        from typing import Any
         from torch import Tensor, nn
-        from class_resolver import document_resolver, DocKey
+        from class_resolver import update_docstring_with_resolvers, ResolverKey
         from class_resolver.contrib.torch import activation_resolver
 
-        @document_resolver(
-            DocKey("activation", "class_resolver.contrib.torch.activation_resolver")
+        @update_docstring_with_resolvers(
+            ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver")
         )
         def f(
             tensor: Tensor,
-            activation: Union[None, str, type[nn.Module], nn.Module],
+            activation: None | str | type[nn.Module] | nn.Module,
             activation_kwargs: dict[str, Any] | None,
         ):
             _activation = activation_resolver.make(activation, activation_kwargs)
@@ -116,20 +119,20 @@ def document_resolver(
 
     .. code-block:: python
 
-        from typing import Any, Union
+        from typing import Any
         from torch import Tensor, nn
-        from class_resolver import document_resolver
+        from class_resolver import update_docstring_with_resolvers
         from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 
-        @document_resolver(
-            DocKey("activation", "class_resolver.contrib.torch.activation_resolver"),
-            DocKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
+        @update_docstring_with_resolvers(
+            ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
+            ResolverKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
         )
         def f(
             tensor: Tensor,
-            activation: Union[None, str, type[nn.Module], nn.Module],
+            activation: None | str | type[nn.Module] | nn.Module,
             activation_kwargs: dict[str, Any] | None,
-            aggregation: Union[None, str, type[nn.Module], nn.Module],
+            aggregation: None | str | type[nn.Module] | nn.Module,
             aggregation_kwargs: dict[str, Any] | None,
         ):
             _activation = activation_resolver.make(activation, activation_kwargs)
@@ -140,20 +143,20 @@ def document_resolver(
 
     .. code-block:: python
 
-        from typing import Any, Union
+        from typing import Any
         from torch import Tensor, nn
-        from class_resolver import document_resolver
+        from class_resolver import update_docstring_with_resolvers
         from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 
-        @document_resolver(
-            DocKey("activation", activation_resolver),
-            DocKey("aggregation", aggregation_resolver),
+        @update_docstring_with_resolvers(
+            ResolverKey("activation", activation_resolver),
+            ResolverKey("aggregation", aggregation_resolver),
         )
         def f(
             tensor: Tensor,
-            activation: Union[None, str, type[nn.Module], nn.Module],
+            activation: None | str | type[nn.Module] | nn.Module,
             activation_kwargs: dict[str, Any] | None,
-            aggregation: Union[None, str, type[nn.Module], nn.Module],
+            aggregation: None | str | type[nn.Module] | nn.Module,
             aggregation_kwargs: dict[str, Any] | None,
         ):
             _activation = activation_resolver.make(activation, activation_kwargs)
@@ -165,23 +168,23 @@ def document_resolver(
 
     .. code-block:: python
 
-        from typing import Any, Union
+        from typing import Any
         from torch import Tensor, nn
-        from class_resolver import document_resolver
+        from class_resolver import update_docstring_with_resolvers
         from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 
-        @document_resolver(
-            DocKey("activation_1", activation_resolver),
-            DocKey("activation_2", activation_resolver),
-            DocKey("aggregation", aggregation_resolver),
+        @update_docstring_with_resolvers(
+            ResolverKey("activation_1", activation_resolver),
+            ResolverKey("activation_2", activation_resolver),
+            ResolverKey("aggregation", aggregation_resolver),
         )
         def f(
             tensor: Tensor,
-            activation_1: Union[None, str, type[nn.Module], nn.Module],
+            activation_1: None | str | type[nn.Module] | nn.Module,
             activation_1_kwargs: dict[str, Any] | None,
-            aggregation: Union[None, str, type[nn.Module], nn.Module],
+            aggregation: None | str | type[nn.Module] | nn.Module,
             aggregation_kwargs: dict[str, Any] | None,
-            activation_2: Union[None, str, type[nn.Module], nn.Module],
+            activation_2: None | str | type[nn.Module] | nn.Module,
             activation_2_kwargs: dict[str, Any] | None,
         ):
             _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
