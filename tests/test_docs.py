@@ -19,7 +19,6 @@ Apply an activation then aggregation.
 
 :param activation: An activation function (stateful)
 :param activation_kwargs: Keyword arguments for activation function
-:return: An aggregation
 
 .. note ::
 
