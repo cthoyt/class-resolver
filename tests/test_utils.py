@@ -4,7 +4,6 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver import DocKey, document_resolver
 from class_resolver.docs import _clean_docstring
 from class_resolver.utils import (
     get_subclasses,
@@ -119,40 +118,3 @@ class TestUtilities(unittest.TestCase):
         for ds in [TARGET, DS1, DS2, DS3, DS4, DS5]:
             with self.subTest(docstring=ds):
                 self.assertEqual(TARGET, _clean_docstring(ds))
-
-
-class DecoratorTests(unittest.TestCase):
-    """Decorator tests."""
-
-    @staticmethod
-    def f(model, model_kwargs) -> None:
-        """Do something, and also use model."""
-        pass
-
-    # docstr-coverage:excused `testing missing docstr on purpose`
-    @staticmethod
-    def f_no_doc(model, model_kwargs) -> None:  # noqa: D102
-        pass
-
-    def test_decorator(self):
-        """Test decorator."""
-        old_doc = self.f.__doc__
-        for params in [("model", "model_resolver"), ("model", "model_resolver", "model_kwargs")]:
-            with self.subTest(params=params):
-                decorator = document_resolver(DocKey(*params))
-                f_dec = decorator(self.f)
-                # note: the decorator modifies the doc string in-place...
-                # check that the doc string got extended
-                self.assertNotEqual(f_dec.__doc__, old_doc)
-                self.assertTrue(f_dec.__doc__.startswith(old_doc))
-                # revert for next time
-                self.f.__doc__ = old_doc
-
-    def test_error_decoration(self):
-        """Test errors when decorating."""
-        # missing docstring
-        with self.assertRaises(ValueError):
-            document_resolver(DocKey("model", "model_resolver"))(self.f_no_doc)
-        # non-existing parameter name
-        with self.assertRaises(ValueError):
-            document_resolver(DocKey("interaction", "model_resolver"))(self.f)

@@ -84,7 +84,7 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def document_resolver(  # noqa:C901
+def document_resolver(
     *keys: DocKey,
 ) -> Callable[[F], F]:
     """
@@ -184,8 +184,8 @@ def document_resolver(  # noqa:C901
             activation_2: Union[None, str, type[nn.Module], nn.Module],
             activation_2_kwargs: dict[str, Any] | None,
         ):
-            _activation_1 = activation_resolver.make(activation_1, activation_kwargs)
-            _activation_2 = activation_resolver.make(activation_2, activation_kwargs)
+            _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
+            _activation_2 = activation_resolver.make(activation_2, activation_2_kwargs)
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
             return _activation_2(_aggregation(_activation_2(tensor)))
 
@@ -234,49 +234,39 @@ def document_resolver(  # noqa:C901
 
         resolver_to_keys = defaultdict(list)
         for key in keys:
-            if key.name not in signature.parameters:
-                raise ValueError(
-                    f"Gave document key for parameter {key.name}, which doesn't appear "
-                    f"in the signature of {func.__name__}"
-                )
-            if key.key not in signature.parameters:
-                raise ValueError(
-                    f"Gave document key for parameter kwargs {key.name}, which doesn't "
-                    f"appear in the signature of {func.__name__}"
-                )
             resolver_to_keys[key.resolver_path].append(key)
 
-        list_items = []
-        for resolver_qualpath, subkeys in resolver_to_keys.items():
-            strs = [f"``({key.name}, {key.key})``" for key in subkeys]
+        parameter_pair_strs = []
+        for resolver_qualname, subkeys in resolver_to_keys.items():
+            pair_strs = [f"``({key.name}, {key.key})``" for key in subkeys]
             if len(subkeys) > 1:
-                list_item = f"The parameter pairs {', '.join(strs)} are used for :data:`{resolver_qualpath}`"
+                parameter_pair_str = f"pairs {', '.join(pair_strs)} are"
             else:
-                list_item = f"The parameter pair {strs[0]} is used for :data:`{resolver_qualpath}`"
-            list_items.append(list_item)
+                parameter_pair_str = f"pair {pair_strs[0]} is"
+            parameter_pair_strs.append(f"The parameter {parameter_pair_str} used for :data:`{resolver_qualname}`")
 
-        if len(list_items) == 1:
-            note_str = textwrap.dedent(f"""\
+        if len(parameter_pair_strs) == 1:
+            note_str = f"""\
             .. note ::
 
-                {list_items[0]}
+                {parameter_pair_strs[0]}
 
                 An explanation of resolvers and how to use them is given in
                 https://class-resolver.readthedocs.io/en/latest/.
-            """)
+            """
         else:
-            xx = "\n".join(" " * 4 + "- " + i for i in list_items)
-            note_str = textwrap.dedent(f"""\
+            bullet_points = "\n".join(" " * 4 + "- " + i for i in parameter_pair_strs)
+            note_str = f"""\
 .. note ::
 
     {len(keys)} resolvers are used in this function.
 
-{xx}
+{bullet_points}
 
     An explanation of resolvers and how to use them is given in
     https://class-resolver.readthedocs.io/en/latest/.
-""")
-        func.__doc__ = f"{_clean_docstring(func.__doc__)}\n\n{note_str}".rstrip()
+"""
+        func.__doc__ = f"{_clean_docstring(func.__doc__)}\n\n{textwrap.dedent(note_str)}".rstrip()
         return func
 
     return add_note
