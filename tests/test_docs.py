@@ -7,7 +7,7 @@ from typing import Any
 
 from torch import Tensor, nn
 
-from class_resolver import ResolverKey, update_docstring_with_resolvers
+from class_resolver import ResolverKey, update_docstring_with_resolver_keys
 from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 from class_resolver.docs import _clean_docstring
 
@@ -50,7 +50,7 @@ DS5 = """\
 """
 
 
-TEST_RESOLVER_1 = update_docstring_with_resolvers(
+TEST_RESOLVER_1 = update_docstring_with_resolver_keys(
     ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
 )
 
@@ -87,7 +87,7 @@ def f2(activation, activation_kwargs):
     """
 
 
-@update_docstring_with_resolvers(
+@update_docstring_with_resolver_keys(
     ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
     ResolverKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
 )
@@ -136,7 +136,7 @@ Apply an activation then aggregation.
 """.rstrip()
 
 
-@update_docstring_with_resolvers(
+@update_docstring_with_resolver_keys(
     ResolverKey("activation_1", "class_resolver.contrib.torch.activation_resolver"),
     ResolverKey("activation_2", "class_resolver.contrib.torch.activation_resolver"),
     ResolverKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
@@ -211,7 +211,7 @@ class DecoratorTests(unittest.TestCase):
         old_doc = self.f.__doc__
         for params in [("model", "model_resolver"), ("model", "model_resolver", "model_kwargs")]:
             with self.subTest(params=params):
-                decorator = update_docstring_with_resolvers(ResolverKey(*params))
+                decorator = update_docstring_with_resolver_keys(ResolverKey(*params))
                 f_dec = decorator(self.f)
                 # note: the decorator modifies the doc string in-place...
                 # check that the doc string got extended
@@ -224,10 +224,10 @@ class DecoratorTests(unittest.TestCase):
         """Test errors when decorating."""
         # missing docstring
         with self.assertRaises(ValueError):
-            update_docstring_with_resolvers(ResolverKey("model", "model_resolver"))(self.f_no_doc)
+            update_docstring_with_resolver_keys(ResolverKey("model", "model_resolver"))(self.f_no_doc)
         # non-existing parameter name
         with self.assertRaises(ValueError):
-            update_docstring_with_resolvers(ResolverKey("interaction", "model_resolver"))(self.f)
+            update_docstring_with_resolver_keys(ResolverKey("interaction", "model_resolver"))(self.f)
 
 
 class TestDocumentResolver(unittest.TestCase):
@@ -242,19 +242,19 @@ class TestDocumentResolver(unittest.TestCase):
     def test_no_params(self):
         """Test when no keys are passed."""
         with self.assertRaises(ValueError):
-            update_docstring_with_resolvers()
+            update_docstring_with_resolver_keys()
 
     def test_duplicate_params(self):
         """Test when no keys are passed."""
         key = ResolverKey("a", "b")
         with self.assertRaises(ValueError):
-            update_docstring_with_resolvers(key, key)
+            update_docstring_with_resolver_keys(key, key)
 
     def test_missing_params(self):
         """Test when trying to document a parameter that does not exist."""
         with self.assertRaises(ValueError):
 
-            @update_docstring_with_resolvers(ResolverKey("some-other-param", "y"))
+            @update_docstring_with_resolver_keys(ResolverKey("some-other-param", "y"))
             def f(x):
                 """Do the thing."""
 

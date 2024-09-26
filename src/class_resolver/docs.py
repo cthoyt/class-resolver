@@ -11,7 +11,7 @@ from typing import Callable, TypeVar
 from .base import BaseResolver
 
 __all__ = [
-    "update_docstring_with_resolvers",
+    "update_docstring_with_resolver_keys",
     "ResolverKey",
 ]
 
@@ -36,7 +36,7 @@ class ResolverKey:
         resolver: str | BaseResolver,
         key: str | None = None,
     ) -> None:
-        """Initialize the key for :func:`update_docstring_with_resolvers`."""
+        """Initialize the key for :func:`update_docstring_with_resolver_keys`."""
         self.name = name
         self.key = f"{self.name}_kwargs" if key is None else key
 
@@ -89,7 +89,7 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
+def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable[[F], F]:
     """
     Build a decorator to add information about resolved parameter pairs.
 
@@ -100,10 +100,10 @@ def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
 
         from typing import Any
         from torch import Tensor, nn
-        from class_resolver import update_docstring_with_resolvers, ResolverKey
+        from class_resolver import update_docstring_with_resolver_keys, ResolverKey
         from class_resolver.contrib.torch import activation_resolver
 
-        @update_docstring_with_resolvers(
+        @update_docstring_with_resolver_keys(
             ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver")
         )
         def f(
@@ -121,10 +121,10 @@ def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
 
         from typing import Any
         from torch import Tensor, nn
-        from class_resolver import update_docstring_with_resolvers
+        from class_resolver import update_docstring_with_resolver_keys
         from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 
-        @update_docstring_with_resolvers(
+        @update_docstring_with_resolver_keys(
             ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
             ResolverKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
         )
@@ -139,29 +139,6 @@ def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
             return _aggregation(_activation(tensor))
 
-    If you have the resolvers handy, you can directly pass them.
-
-    .. code-block:: python
-
-        from typing import Any
-        from torch import Tensor, nn
-        from class_resolver import update_docstring_with_resolvers
-        from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
-
-        @update_docstring_with_resolvers(
-            ResolverKey("activation", activation_resolver),
-            ResolverKey("aggregation", aggregation_resolver),
-        )
-        def f(
-            tensor: Tensor,
-            activation: None | str | type[nn.Module] | nn.Module,
-            activation_kwargs: dict[str, Any] | None,
-            aggregation: None | str | type[nn.Module] | nn.Module,
-            aggregation_kwargs: dict[str, Any] | None,
-        ):
-            _activation = activation_resolver.make(activation, activation_kwargs)
-            _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
-            return _aggregation(_activation(tensor))
 
     It might be the case that you have two different arguments that use the same resolver.
     No prob!
@@ -170,13 +147,13 @@ def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
 
         from typing import Any
         from torch import Tensor, nn
-        from class_resolver import update_docstring_with_resolvers
+        from class_resolver import update_docstring_with_resolver_keys
         from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 
-        @update_docstring_with_resolvers(
-            ResolverKey("activation_1", activation_resolver),
-            ResolverKey("activation_2", activation_resolver),
-            ResolverKey("aggregation", aggregation_resolver),
+        @update_docstring_with_resolver_keys(
+            ResolverKey("activation_1", "class_resolver.contrib.torch.activation_resolver"),
+            ResolverKey("activation_2", "class_resolver.contrib.torch.activation_resolver"),
+            ResolverKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
         )
         def f(
             tensor: Tensor,
@@ -192,7 +169,7 @@ def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
             return _activation_2(_aggregation(_activation_2(tensor)))
 
-    :param keys:
+    :param resolver_keys:
         A variadic list of keys, each describing:
 
         1. the names of the parameter
@@ -206,13 +183,13 @@ def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
         When either no parameter name was provided, there was a duplicate parameter name.
     """
     # input validation
-    if not keys:
+    if not resolver_keys:
         raise ValueError("Must provided at least one parameter name.")
 
     # check for duplicates
-    expanded_params = set(e for key in keys for e in (key.name, key.key))
-    if len(expanded_params) < 2 * len(keys):
-        raise ValueError(f"There are duplicates in (the expanded) {keys=}")
+    expanded_params = set(e for key in resolver_keys for e in (key.name, key.key))
+    if len(expanded_params) < 2 * len(resolver_keys):
+        raise ValueError(f"There are duplicates in (the expanded) {resolver_keys=}")
 
     # TODO: we could do some more sanitization, e.g., trying to match types, ...
 
@@ -236,7 +213,7 @@ def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
             raise ValueError("docstring is empty")
 
         resolver_to_keys = defaultdict(list)
-        for key in keys:
+        for key in resolver_keys:
             resolver_to_keys[key.resolver_path].append(key)
 
         parameter_pair_strs = []
@@ -262,7 +239,7 @@ def update_docstring_with_resolvers(*keys: ResolverKey) -> Callable[[F], F]:
             note_str = f"""\
 .. note ::
 
-    {len(keys)} resolvers are used in this function.
+    {len(resolver_keys)} resolvers are used in this function.
 
 {bullet_points}
 

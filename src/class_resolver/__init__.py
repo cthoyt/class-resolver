@@ -50,7 +50,7 @@ from .base import (
     RegistrationNameConflict,
     RegistrationSynonymConflict,
 )
-from .docs import ResolverKey, update_docstring_with_resolvers
+from .docs import ResolverKey, update_docstring_with_resolver_keys
 from .func import FunctionResolver
 from .utils import (
     Hint,
@@ -90,7 +90,7 @@ __all__ = [
     "get_cls",
     "get_subclasses",
     "normalize_string",
-    "update_docstring_with_resolvers",
+    "update_docstring_with_resolver_keys",
     "ResolverKey",
     # Exceptions
     "RegistrationError",
