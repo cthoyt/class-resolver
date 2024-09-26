@@ -4,7 +4,7 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver import document_resolver, DocKey
+from class_resolver import DocKey, document_resolver
 from class_resolver.utils import (
     get_subclasses,
     is_private,
@@ -97,7 +97,6 @@ class DecoratorTests(unittest.TestCase):
             ("model", "model_resolver", "model_kwargs")
         ]:
             with self.subTest(params=params):
-                print(params)
                 decorator = document_resolver(DocKey(*params))
                 f_dec = decorator(self.f)
                 # note: the decorator modifies the doc string in-place...

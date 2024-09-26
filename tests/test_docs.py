@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import unittest
-from textwrap import dedent
 from typing import Any
 
 from torch import Tensor, nn
@@ -11,17 +10,56 @@ from torch import Tensor, nn
 from class_resolver import DocKey, document_resolver
 from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 
+TEST_RESOLVER_1 = document_resolver(
+    DocKey("activation", "class_resolver.contrib.torch.activation_resolver"),
+)
+
+EXPECTED_FUNCTION_1_DOC = """\
+Apply an activation then aggregation.
+
+:param activation: An activation function (stateful)
+:param activation_kwargs: Keyword arguments for activation function
+:return: An aggregation
+
+.. note ::
+
+    The parameter pairs ``(activation, activation_kwargs)`` is used for :data:`class_resolver.contrib.torch.activation_resolver`
+
+    An explanation of resolvers and how to use them is given in
+    https://class-resolver.readthedocs.io/en/latest/.
+"""
+
+
+@TEST_RESOLVER_1
+def f1(activation, activation_kwargs):
+    """Apply an activation then aggregation.
+
+    :param activation: An activation function (stateful)
+    :param activation_kwargs: Keyword arguments for activation function
+    :return: An aggregation
+    """
+
+
+@TEST_RESOLVER_1
+def f2(activation, activation_kwargs):
+    """Apply an activation then aggregation.
+
+    :param activation: An activation function (stateful)
+    :param activation_kwargs: Keyword arguments for activation function
+    :return: An aggregation
+    """
+
 
 @document_resolver(
     DocKey("activation", "class_resolver.contrib.torch.activation_resolver"),
     DocKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
 )
-def f(
-    tensor: Tensor,
-    activation: None | str | type[nn.Module] | nn.Module,
-    activation_kwargs: dict[str, Any] | None,
-    aggregation: None | str | type[nn.Module] | nn.Module,
-    aggregation_kwargs: dict[str, Any] | None,
+def f3(
+        tensor: Tensor,
+        activation: None | str | type[nn.Module] | nn.Module,
+        activation_kwargs: dict[str, Any] | None,
+        aggregation: None | str | type[nn.Module] | nn.Module,
+        aggregation_kwargs: dict[str, Any] | None,
 ):
     """Apply an activation then aggregation.
 
@@ -38,7 +76,7 @@ def f(
     return _aggregation(_activation(tensor))
 
 
-EXPECTED = """\
+EXPECTED_FUNCTION_3_DOC = """\
 Apply an activation then aggregation.
 
     :param tensor: An input tensor
@@ -65,6 +103,14 @@ Apply an activation then aggregation.
 class TestDocumentResolver(unittest.TestCase):
     """Test documenting resolvers."""
 
-    def test_f(self):
+    def test_f1(self):
         """Test the correct docstring is produced."""
-        self.assertEqual(EXPECTED, dedent(f.__doc__))
+        self.assertEqual(EXPECTED_FUNCTION_1_DOC, f1.__doc__)
+
+    def test_f2(self):
+        """Test the correct docstring is produced."""
+        self.assertEqual(EXPECTED_FUNCTION_1_DOC, f2.__doc__)
+
+    def test_f3(self):
+        """Test the correct docstring is produced."""
+        self.assertEqual(EXPECTED_FUNCTION_3_DOC, f3.__doc__)
