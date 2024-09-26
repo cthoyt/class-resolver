@@ -235,6 +235,10 @@ class TestResolver(unittest.TestCase):
         )
 
     @unittest.skipIf(tune is None, "ray[tune] was not installed properly")
+    @unittest.skipIf(
+        tune is not None and getattr(tune, "suggest", None) is None,
+        "a newer version of ray[tune] is installed that does not have the tune.suggest module",
+    )
     def test_variant_generation(self) -> None:
         """Test whether ray tune can generate variants from the search space."""
         search_space = self.resolver.ray_tune_search_space(
