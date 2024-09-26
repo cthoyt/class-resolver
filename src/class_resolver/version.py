@@ -4,4 +4,4 @@ __all__ = [
     "VERSION",
 ]
 
-VERSION = "0.5.1"
+VERSION = "0.5.2-dev"
