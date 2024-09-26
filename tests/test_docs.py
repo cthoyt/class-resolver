@@ -23,11 +23,11 @@ Apply an activation then aggregation.
 
 .. note ::
 
-    The parameter pairs ``(activation, activation_kwargs)`` is used for :data:`class_resolver.contrib.torch.activation_resolver`
+    The parameter pair ``(activation, activation_kwargs)`` is used for :data:`class_resolver.contrib.torch.activation_resolver`
 
     An explanation of resolvers and how to use them is given in
     https://class-resolver.readthedocs.io/en/latest/.
-"""
+""".rstrip()
 
 
 @TEST_RESOLVER_1
@@ -55,11 +55,11 @@ def f2(activation, activation_kwargs):
     DocKey("aggregation", "class_resolver.contrib.torch.aggregation_resolver"),
 )
 def f3(
-        tensor: Tensor,
-        activation: None | str | type[nn.Module] | nn.Module,
-        activation_kwargs: dict[str, Any] | None,
-        aggregation: None | str | type[nn.Module] | nn.Module,
-        aggregation_kwargs: dict[str, Any] | None,
+    tensor: Tensor,
+    activation: None | str | type[nn.Module] | nn.Module,
+    activation_kwargs: dict[str, Any] | None,
+    aggregation: None | str | type[nn.Module] | nn.Module,
+    aggregation_kwargs: dict[str, Any] | None,
 ):
     """Apply an activation then aggregation.
 
@@ -79,25 +79,24 @@ def f3(
 EXPECTED_FUNCTION_3_DOC = """\
 Apply an activation then aggregation.
 
-    :param tensor: An input tensor
-    :param activation: An activation function (stateful)
-    :param activation_kwargs: Keyword arguments for activation function
-    :param aggregation: An aggregation function (stateful)
-    :param aggregation_kwargs: Keyword arguments for aggregation function
+:param tensor: An input tensor
+:param activation: An activation function (stateful)
+:param activation_kwargs: Keyword arguments for activation function
+:param aggregation: An aggregation function (stateful)
+:param aggregation_kwargs: Keyword arguments for aggregation function
 
-    :return: An aggregation
+:return: An aggregation
 
-    .. note ::
+.. note ::
 
-        2 resolvers are used in this function.
+    2 resolvers are used in this function.
 
-        - The parameter pairs ``(activation, activation_kwargs)`` are used for :data:`class_resolver.contrib.torch.activation_resolver`
-        - The parameter pairs ``(aggregation, aggregation_kwargs)`` are used for :data:`class_resolver.contrib.torch.aggregation_resolver`
+    - The parameter pair ``(activation, activation_kwargs)`` is used for :data:`class_resolver.contrib.torch.activation_resolver`
+    - The parameter pair ``(aggregation, aggregation_kwargs)`` is used for :data:`class_resolver.contrib.torch.aggregation_resolver`
 
-        An explanation of resolvers and how to use them is given in
-        https://class-resolver.readthedocs.io/en/latest/.
-
-"""
+    An explanation of resolvers and how to use them is given in
+    https://class-resolver.readthedocs.io/en/latest/.
+""".rstrip()
 
 
 class TestDocumentResolver(unittest.TestCase):

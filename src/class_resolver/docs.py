@@ -52,7 +52,38 @@ class DocKey:
             raise TypeError
 
 
-def document_resolver(
+def _clean_docstring(s: str) -> str:
+    """Clean a docstring.
+
+    :param s: Input docstring
+    :return: Cleaned docstring
+    :raise ValueError: if the docstring is improperly formatted
+
+    This method does the following
+
+    1. strip
+    2. pop off first line
+    3. ensure second line is blank
+    4. dedent on all remaining lines
+    5. chunk em back together
+    """
+    s = s.strip()
+    lines = s.splitlines()
+    if len(lines) == 1:
+        return lines[0]
+    if len(lines) == 2:
+        if not lines[1].strip():
+            return lines[0]
+        else:
+            raise ValueError("not sure how to clean a two line docstring")
+    first, second, *rest = lines
+    if second.strip():
+        raise ValueError
+    rest = textwrap.dedent("\n".join(rest))
+    return f"{first.strip()}\n\n{rest}"
+
+
+def document_resolver(  # noqa:C901
     *keys: DocKey,
 ) -> Callable[[F], F]:
     """
@@ -216,24 +247,35 @@ def document_resolver(
 
         list_items = []
         for resolver_qualpath, subkeys in resolver_to_keys.items():
-            pairs_str = ", ".join(f"``({key.name}, {key.key})``" for key in subkeys)
-            list_item = f"- The parameter pairs {pairs_str} are used for :data:`{resolver_qualpath}`"
+            strs = [f"``({key.name}, {key.key})``" for key in subkeys]
+            if len(subkeys) > 1:
+                list_item = f"The parameter pairs {', '.join(strs)} are used for :data:`{resolver_qualpath}`"
+            else:
+                list_item = f"The parameter pair {strs[0]} is used for :data:`{resolver_qualpath}`"
             list_items.append(list_item)
 
-        note_str = textwrap.dedent(
-            f"""\
+        if len(list_items) == 1:
+            note_str = textwrap.dedent(f"""\
             .. note ::
 
-                {len(keys)} resolvers are used in this function.
-                {"\n".join(list_items)}
+                {list_items[0]}
 
                 An explanation of resolvers and how to use them is given in
                 https://class-resolver.readthedocs.io/en/latest/.
-            """
-        )
-        note_str = textwrap.indent(text=note_str, prefix=" " * 8, predicate=bool)
-        # TODO: this is in-place
-        func.__doc__ = f"{func.__doc__.lstrip()}\n\n{note_str}"
+            """)
+        else:
+            xx = "\n".join(" " * 4 + "- " + i for i in list_items)
+            note_str = textwrap.dedent(f"""\
+.. note ::
+
+    {len(keys)} resolvers are used in this function.
+
+{xx}
+
+    An explanation of resolvers and how to use them is given in
+    https://class-resolver.readthedocs.io/en/latest/.
+""")
+        func.__doc__ = f"{_clean_docstring(func.__doc__)}\n\n{note_str}".rstrip()
         return func
 
     return add_note
