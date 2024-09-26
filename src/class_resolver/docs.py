@@ -24,13 +24,12 @@ class DocKey:
     name: str
     key: str
     resolver_path: str
-    resolver: BaseResolver
+    resolver: BaseResolver | None
 
     def __init__(
         self,
         name: str,
         resolver: str | BaseResolver,
-        *,
         key: str | None = None,
     ) -> None:
         """Initialize the key for :func:`document_resolver`."""
@@ -39,9 +38,14 @@ class DocKey:
 
         if isinstance(resolver, str):
             self.resolver_path = resolver
-            module_name, variable_name = resolver.rsplit(".", 1)
-            module = importlib.import_module(module_name)
-            self.resolver = getattr(module, variable_name)
+            try:
+                module_name, variable_name = resolver.rsplit(".", 1)
+                module = importlib.import_module(module_name)
+                resolver_inst = getattr(module, variable_name)
+            except (ImportError, ValueError):
+                self.resolver = None
+            else:
+                self.resolver = resolver_inst
         elif isinstance(resolver, BaseResolver):
             raise NotImplementedError
         else:
@@ -221,14 +225,13 @@ def document_resolver(
             .. note ::
 
                 {len(keys)} resolvers are used in this function.
-
                 {"\n".join(list_items)}
 
                 An explanation of resolvers and how to use them is given in
                 https://class-resolver.readthedocs.io/en/latest/.
             """
         )
-        note_str = textwrap.indent(text=note_str, prefix="        ", predicate=bool)
+        note_str = textwrap.indent(text=note_str, prefix=" " * 8, predicate=bool)
         # TODO: this is in-place
         func.__doc__ = f"{func.__doc__.lstrip()}\n\n{note_str}"
         return func

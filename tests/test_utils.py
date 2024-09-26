@@ -4,7 +4,7 @@ import enum
 import unittest
 from collections import Counter, defaultdict
 
-from class_resolver import document_resolver
+from class_resolver import document_resolver, DocKey
 from class_resolver.utils import (
     get_subclasses,
     is_private,
@@ -92,34 +92,26 @@ class DecoratorTests(unittest.TestCase):
     def test_decorator(self):
         """Test decorator."""
         old_doc = self.f.__doc__
-        for params in [["model"], [("model", "model_kwargs")]]:
-            decorator = document_resolver(*params, resolver_name="model_resolver")
-            f_dec = decorator(self.f)
-            # note: the decorator modifies the doc string in-place...
-            # check that the doc string got extended
-            self.assertNotEqual(f_dec.__doc__, old_doc)
-            self.assertTrue(f_dec.__doc__.startswith(old_doc))
-            # revert for next time
-            self.f.__doc__ = old_doc
-
-    def test_error(self):
-        """Test error handling."""
         for params in [
-            # empty
-            [],
-            # one-element tuple
-            [[("model",)]],
-            # three element tuple
-            [[("model", "model_kwargs", "model_kwargs2")]],
+            ("model", "model_resolver"),
+            ("model", "model_resolver", "model_kwargs")
         ]:
-            with self.assertRaises(ValueError):
-                document_resolver(*params, resolver_name="model_resolver")
+            with self.subTest(params=params):
+                print(params)
+                decorator = document_resolver(DocKey(*params))
+                f_dec = decorator(self.f)
+                # note: the decorator modifies the doc string in-place...
+                # check that the doc string got extended
+                self.assertNotEqual(f_dec.__doc__, old_doc)
+                self.assertTrue(f_dec.__doc__.startswith(old_doc))
+                # revert for next time
+                self.f.__doc__ = old_doc
 
     def test_error_decoration(self):
         """Test errors when decorating."""
         # missing docstring
         with self.assertRaises(ValueError):
-            document_resolver("model", resolver_name="model_resolver")(self.f_no_doc)
+            document_resolver(DocKey("model", "model_resolver"))(self.f_no_doc)
         # non-existing parameter name
         with self.assertRaises(ValueError):
-            document_resolver("interaction", resolver_name="model_resolver")(self.f)
+            document_resolver(DocKey("interaction", "model_resolver"))(self.f)
