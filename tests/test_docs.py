@@ -36,7 +36,6 @@ def f1(activation, activation_kwargs):
 
     :param activation: An activation function (stateful)
     :param activation_kwargs: Keyword arguments for activation function
-    :return: An aggregation
     """
 
 
@@ -46,7 +45,6 @@ def f2(activation, activation_kwargs):
 
     :param activation: An activation function (stateful)
     :param activation_kwargs: Keyword arguments for activation function
-    :return: An aggregation
     """
 
 

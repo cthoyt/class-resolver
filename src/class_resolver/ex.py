@@ -42,6 +42,4 @@ def f(
 
 
 if __name__ == "__main__":
-    from textwrap import dedent
-
-    print(dedent(f.__doc__))  # noqa:T201
+    print(f.__doc__)  # noqa:T201

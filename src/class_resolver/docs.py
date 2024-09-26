@@ -57,7 +57,7 @@ def _clean_docstring(s: str) -> str:
 
     :param s: Input docstring
     :return: Cleaned docstring
-    :raise ValueError: if the docstring is improperly formatted
+    :raises ValueError: if the docstring is improperly formatted
 
     This method does the following
 
@@ -79,8 +79,9 @@ def _clean_docstring(s: str) -> str:
     first, second, *rest = lines
     if second.strip():
         raise ValueError
-    rest = textwrap.dedent("\n".join(rest))
-    return f"{first.strip()}\n\n{rest}"
+    rest_j = "\n".join(rest)
+    rest_j = textwrap.dedent(rest_j)
+    return f"{first.strip()}\n\n{rest_j}"
 
 
 def document_resolver(  # noqa:C901
