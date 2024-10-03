@@ -360,10 +360,11 @@ class ClassResolver(BaseResolver[type[X], X]):
 
     def make_table(
         self,
+        key_fmt: str = ":``{key}``",
         cls_fmt: str = ":class:`~{cls}`",
         header: tuple[str, str] = ("key", "class"),
         table_fmt: str = "rst",
-        **kwargs,
+        **kwargs: Any,
     ) -> str:
         """
         Render the table of options in a format suitable for Sphinx documentation.
@@ -383,16 +384,11 @@ class ClassResolver(BaseResolver[type[X], X]):
         import tabulate
 
         # TODO: synonyms?
-
-        return tabulate.tabulate(
-            (
-                (norm_key, cls_fmt.format(cls=f"{cls.__module__}.{cls.__qualname__}"))
-                for norm_key, cls in self.lookup_dict.items()
-            ),
-            headers=header,
-            tablefmt=table_fmt,
-            **kwargs,
-        )
+        rows = [
+            (key_fmt.format(key=norm_key), cls_fmt.format(cls=f"{cls.__module__}.{cls.__qualname__}"))
+            for norm_key, cls in self.lookup_dict.items()
+        ]
+        return tabulate.tabulate(rows, headers=header, tablefmt=table_fmt, **kwargs)
 
 
 #: An alias to ClassResolver for backwards compatibility
