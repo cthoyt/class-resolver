@@ -252,6 +252,11 @@ class BaseResolver(ABC, Generic[X, Y]):
                         choices_str += f"\n     - {key} (synonyms: {synonyms_k})"
                     else:
                         choices_str += f"\n     - {key}"
+
+                # note that the original implementation in click.Choice
+                # does a check for the param being an argument. In class-resolver,
+                # this is never an option, so it's not kept here
+
                 # Use square braces to indicate an option or optional argument.
                 return f"[{choices_str}\n  ]"
 
