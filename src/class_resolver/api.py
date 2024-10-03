@@ -360,7 +360,7 @@ class ClassResolver(BaseResolver[type[X], X]):
 
     def make_table(
         self,
-        key_fmt: str = ":``{key}``",
+        key_fmt: str = "``{key}``",
         cls_fmt: str = ":class:`~{cls}`",
         header: tuple[str, str] = ("key", "class"),
         table_fmt: str = "rst",
