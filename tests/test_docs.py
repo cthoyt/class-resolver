@@ -295,5 +295,6 @@ class TestTable(unittest.TestCase):
             cls = cls.strip()
             self.assertTrue(cls.startswith(":class:`~"))
             cls = cls.removeprefix(":class:`~").removesuffix("`")
+            key = key.strip("`")
             o_cls = activation_resolver.lookup(key.strip())
             self.assertEqual(f"{o_cls.__module__}.{o_cls.__qualname__}", cls)
