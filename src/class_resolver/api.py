@@ -358,6 +358,25 @@ class ClassResolver(BaseResolver[type[X], X]):
             for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
         ]
 
+    def make_rst_table(self, **kwargs) -> str:
+        """
+        Render the table of options in a format suitable for Sphinx documentation.
+
+        :param kwargs:
+            additional keyword-based parameters passed to :func:`tabulate.tabulate`.
+        """
+        import tabulate
+
+        return tabulate.tabulate(
+            (
+                (norm_key, f":class:`~{cls.__module__}.{cls.__qualname__}`",)
+                for norm_key, cls in self.lookup_dict()
+            ),
+            headers=["key", "class"],
+            tablefmt="rst",
+            **kwargs
+        )
+
 
 #: An alias to ClassResolver for backwards compatibility
 Resolver = ClassResolver

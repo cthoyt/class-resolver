@@ -86,6 +86,9 @@ numpy = [
 sklearn = [
     "scikit-learn"
 ]
+tabulate = [
+    "tabulate"
+]
 
 # See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
 [project.urls]
