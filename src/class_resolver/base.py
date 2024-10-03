@@ -229,6 +229,37 @@ class BaseResolver(ABC, Generic[X, Y]):
         else:
             raise ValueError("no default given either from resolver or explicitly")
 
+    def _get_reverse_synonyms(self):
+        xx = {k: [] for k in self.lookup_dict.items()}
+        for k, v in self.synonyms.items():
+            key = self.normalize(self.extract_name(v))
+            xx[key].append(k)
+        return xx
+
+    def _get_click_choice(self) -> "click.Choice":
+        import click
+
+        rev = self._get_reverse_synonyms()
+
+        class HackedChoice(click.Choice):
+            def get_metavar(self, param: "click.Parameter") -> str:
+                choices_str = ""
+                for key, synonyms in rev.items():
+                    if synonyms:
+                        synonyms_k = "|".join(synonyms)
+                        choices_str += f"     - {key} ({synonyms_k})"
+                    else:
+                        choices_str += f"     - {key}"
+
+                # Use curly braces to indicate a required argument.
+                if param.required and param.param_type_name == "argument":
+                    return f"{{{choices_str}}}"
+
+                # Use square braces to indicate an option or optional argument.
+                return f"[{choices_str}]"
+
+        return HackedChoice(list(self.lookup_dict), case_sensitive=False)
+
     def get_option(
         self,
         *flags: str,
@@ -251,7 +282,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         # TODO are there better ways to type options?
         return click.option(  # type:ignore
             *flags,
-            type=click.Choice(list(self.lookup_dict), case_sensitive=False),
+            type=self._get_click_choice(),
             default=[key] if kwargs.get("multiple") else key,
             show_default=True,
             callback=None if as_string else make_callback(self.lookup),
