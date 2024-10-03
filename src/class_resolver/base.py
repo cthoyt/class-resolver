@@ -245,6 +245,7 @@ class BaseResolver(ABC, Generic[X, Y]):
             """An extended choice that is aware of synonyms."""
 
             def get_metavar(self, param: "click.Parameter") -> str:
+                """Get the text that shows the choices, including synonyms."""
                 choices_str = ""
                 for key, synonyms in rev.items():
                     if synonyms:
