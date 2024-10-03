@@ -230,11 +230,11 @@ class BaseResolver(ABC, Generic[X, Y]):
             raise ValueError("no default given either from resolver or explicitly")
 
     def _get_reverse_synonyms(self):
-        xx = {k: [] for k in self.lookup_dict.items()}
-        for k, v in self.synonyms.items():
-            key = self.normalize(self.extract_name(v))
-            xx[key].append(k)
-        return xx
+        key_to_synonyms: dict[str, list[str]] = {k: [] for k in self.lookup_dict}
+        for synonym, cls in self.synonyms.items():
+            key = self.normalize(cls.__name__)
+            key_to_synonyms[key].append(synonym)
+        return key_to_synonyms
 
     def _get_click_choice(self) -> "click.Choice":
         import click
@@ -247,16 +247,16 @@ class BaseResolver(ABC, Generic[X, Y]):
                 for key, synonyms in rev.items():
                     if synonyms:
                         synonyms_k = "|".join(synonyms)
-                        choices_str += f"     - {key} ({synonyms_k})"
+                        choices_str += f"\n     - {key} (synonyms: {synonyms_k})"
                     else:
-                        choices_str += f"     - {key}"
+                        choices_str += f"\n     - {key}"
 
                 # Use curly braces to indicate a required argument.
                 if param.required and param.param_type_name == "argument":
                     return f"{{{choices_str}}}"
 
                 # Use square braces to indicate an option or optional argument.
-                return f"[{choices_str}]"
+                return f"[{choices_str}\n  ]"
 
         return HackedChoice(list(self.lookup_dict), case_sensitive=False)
 
