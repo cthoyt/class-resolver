@@ -358,6 +358,41 @@ class ClassResolver(BaseResolver[type[X], X]):
             for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
         ]
 
+    def make_table(
+        self,
+        key_fmt: str = "``{key}``",
+        cls_fmt: str = ":class:`~{cls}`",
+        header: tuple[str, str] = ("key", "class"),
+        table_fmt: str = "rst",
+        **kwargs: Any,
+    ) -> str:
+        """
+        Render the table of options in a format suitable for Sphinx documentation.
+
+        :param key_fmt:
+            A format string with a placeholder ``key`` which is filled with the normalized key
+            for the class
+        :param cls_fmt:
+            A format string with a place-holder ``cls`` which is filled by the fully qualified import name.
+        :param header:
+            The header of the table.
+        :param table_fmt:
+            The table format; passed to :func:`tabulate.tabulate`.
+        :param kwargs:
+            Additional keyword-based parameters passed to :func:`tabulate.tabulate`.
+
+        :return:
+            A string containing the formatted table.
+        """
+        import tabulate
+
+        # TODO: synonyms?
+        rows = [
+            (key_fmt.format(key=norm_key), cls_fmt.format(cls=f"{cls.__module__}.{cls.__qualname__}"))
+            for norm_key, cls in self.lookup_dict.items()
+        ]
+        return tabulate.tabulate(rows, headers=header, tablefmt=table_fmt, **kwargs)
+
 
 #: An alias to ClassResolver for backwards compatibility
 Resolver = ClassResolver

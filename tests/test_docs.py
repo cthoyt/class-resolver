@@ -273,3 +273,28 @@ class TestDocumentResolver(unittest.TestCase):
     def test_f4(self):
         """Test the correct docstring is produced."""
         self.assertEqual(EXPECTED_FUNCTION_4_DOC, f4.__doc__)
+
+
+class TestTable(unittest.TestCase):
+    """Test building tables for resolvers."""
+
+    def test_activation_resolver(self):
+        """Test activation resolver table."""
+        tab = activation_resolver.make_table()
+        lines = tab.splitlines()
+        # these are the separator "=== ===" lines
+        for index in (0, 2, -1):
+            self.assertEqual(set(lines[index]), {" ", "="})
+        # the header
+        self.assertEqual({x.strip() for x in lines[1].split()}, {"key", "class"})
+        # check content rows
+        for line in lines[3:-1]:
+            parts = line.split()
+            self.assertEqual(len(parts), 2)
+            key, cls = parts
+            cls = cls.strip()
+            self.assertTrue(cls.startswith(":class:`~"))
+            cls = cls.removeprefix(":class:`~").removesuffix("`")
+            key = key.strip("`")
+            o_cls = activation_resolver.lookup(key.strip())
+            self.assertEqual(f"{o_cls.__module__}.{o_cls.__qualname__}", cls)
