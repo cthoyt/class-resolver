@@ -376,6 +376,9 @@ class ClassResolver(BaseResolver[type[X], X]):
             The table format; passed to :func:`tabulate.tabulate`.
         :param kwargs:
             Additional keyword-based parameters passed to :func:`tabulate.tabulate`.
+
+        :return:
+            A string containing the formatted table.
         """
         import tabulate
 
