@@ -358,12 +358,24 @@ class ClassResolver(BaseResolver[type[X], X]):
             for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
         ]
 
-    def make_rst_table(self, **kwargs) -> str:
+    def make_table(
+        self,
+        cls_fmt: str = ":class:`~{cls}`",
+        header: tuple[str, str] = ("key", "class"),
+        table_fmt: str = "rst",
+        **kwargs,
+    ) -> str:
         """
         Render the table of options in a format suitable for Sphinx documentation.
 
+        :param cls_fmt:
+            A format string with a place-holder `cls` which is filled by the fully qualified import name.
+        :param header:
+            The header of the table.
+        :param table_fmt:
+            The table format; passed to :func:`tabulate.tabulate`.
         :param kwargs:
-            additional keyword-based parameters passed to :func:`tabulate.tabulate`.
+            Additional keyword-based parameters passed to :func:`tabulate.tabulate`.
         """
         import tabulate
 
@@ -371,14 +383,11 @@ class ClassResolver(BaseResolver[type[X], X]):
 
         return tabulate.tabulate(
             (
-                (
-                    norm_key,
-                    f":class:`~{cls.__module__}.{cls.__qualname__}`",
-                )
+                (norm_key, cls_fmt.format(cls=f"{cls.__module__}.{cls.__qualname__}"))
                 for norm_key, cls in self.lookup_dict.items()
             ),
-            headers=["key", "class"],
-            tablefmt="rst",
+            headers=header,
+            tablefmt=table_fmt,
             **kwargs,
         )
 

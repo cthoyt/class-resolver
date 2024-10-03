@@ -280,7 +280,7 @@ class TestTable(unittest.TestCase):
 
     def test_activation_resolver(self):
         """Test activation resolver table."""
-        tab = activation_resolver.make_rst_table()
+        tab = activation_resolver.make_table()
         lines = tab.splitlines()
         # these are the separator "=== ===" lines
         for index in (0, 2, -1):
