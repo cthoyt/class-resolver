@@ -241,7 +241,9 @@ class BaseResolver(ABC, Generic[X, Y]):
 
         rev = self._get_reverse_synonyms()
 
-        class HackedChoice(click.Choice):
+        class _Choice(click.Choice):
+            """An extended choice that is aware of synonyms."""
+
             def get_metavar(self, param: "click.Parameter") -> str:
                 choices_str = ""
                 for key, synonyms in rev.items():
@@ -250,15 +252,10 @@ class BaseResolver(ABC, Generic[X, Y]):
                         choices_str += f"\n     - {key} (synonyms: {synonyms_k})"
                     else:
                         choices_str += f"\n     - {key}"
-
-                # Use curly braces to indicate a required argument.
-                if param.required and param.param_type_name == "argument":
-                    return f"{{{choices_str}}}"
-
                 # Use square braces to indicate an option or optional argument.
                 return f"[{choices_str}\n  ]"
 
-        return HackedChoice(list(self.lookup_dict), case_sensitive=False)
+        return _Choice(sorted(self.options), case_sensitive=False)
 
     def get_option(
         self,
