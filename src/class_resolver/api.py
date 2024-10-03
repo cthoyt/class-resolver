@@ -369,8 +369,11 @@ class ClassResolver(BaseResolver[type[X], X]):
         """
         Render the table of options in a format suitable for Sphinx documentation.
 
+        :param key_fmt:
+            A format string with a placeholder ``key`` which is filled with the normalized key
+            for the class
         :param cls_fmt:
-            A format string with a place-holder `cls` which is filled by the fully qualified import name.
+            A format string with a place-holder ``cls`` which is filled by the fully qualified import name.
         :param header:
             The header of the table.
         :param table_fmt:
