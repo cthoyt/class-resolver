@@ -371,12 +371,15 @@ class ClassResolver(BaseResolver[type[X], X]):
 
         return tabulate.tabulate(
             (
-                (norm_key, f":class:`~{cls.__module__}.{cls.__qualname__}`",)
+                (
+                    norm_key,
+                    f":class:`~{cls.__module__}.{cls.__qualname__}`",
+                )
                 for norm_key, cls in self.lookup_dict.items()
             ),
             headers=["key", "class"],
             tablefmt="rst",
-            **kwargs
+            **kwargs,
         )
 
 
