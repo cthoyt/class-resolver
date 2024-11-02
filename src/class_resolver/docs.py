@@ -53,6 +53,11 @@ class ResolverKey:
                 resolver_inst = getattr(module, variable_name)
             except (ImportError, ValueError):
                 self.resolver = None
+            except AttributeError as e:
+                if "partially initialized module" not in str(e):
+                    raise
+                # this happens in a circular import case. just let it go
+                self.resolver = None
             else:
                 self.resolver = resolver_inst
         elif isinstance(resolver, BaseResolver):

@@ -257,6 +257,11 @@ class TestDocumentResolver(unittest.TestCase):
         with self.assertRaises(TypeError):
             ResolverKey("", None)
 
+    def test_missing_object(self):
+        """Test raising an error when the object doesn't exist in the module."""
+        with self.assertRaises(AttributeError):
+            (ResolverKey("activation", "class_resolver.contrib.torch.nope_nope_nope"),)
+
     def test_no_params(self):
         """Test when no keys are passed."""
         with self.assertRaises(ValueError):
