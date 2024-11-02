@@ -15,6 +15,7 @@ sampler_resolver = ClassResolver.from_subclasses(
     default=TPESampler,
     suffix="Sampler",
     exclude_private=False,
+    location="class_resolver.contrib.optuna.sampler_resolver",
 )
 """A resolver for :class:`optuna.samplers.BaseSampler` subclasses.
 
@@ -49,6 +50,7 @@ pruner_resolver = ClassResolver.from_subclasses(
     default=MedianPruner,
     suffix="Pruner",
     exclude_private=False,
+    location="class_resolver.contrib.optuna.pruner_resolver",
 )
 """A resolver for :class:`optuna.pruners.BasePruner` subclasses.
 

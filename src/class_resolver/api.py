@@ -95,6 +95,7 @@ class ClassResolver(BaseResolver[type[X], X]):
         synonyms: Mapping[str, type[X]] | None = None,
         synonym_attribute: str | None = "synonyms",
         base_as_suffix: bool = True,
+        location: str | None = None,
     ) -> None:
         """Initialize the resolver.
 
@@ -107,6 +108,7 @@ class ClassResolver(BaseResolver[type[X], X]):
         :param synonym_attribute: The attribute to look in each class for synonyms. Explicitly set to None
             to turn off synonym lookup.
         :param base_as_suffix: Should the base class's name be used as the suffix if none is given? Defaults to true.
+        :param location: The location used to document the resolver in sphinx
         """
         self.base = base
         self.synonyms_attribute = synonym_attribute
@@ -120,6 +122,7 @@ class ClassResolver(BaseResolver[type[X], X]):
             synonyms=synonyms,
             default=default,
             suffix=suffix,
+            location=location,
         )
 
     def extract_name(self, element: type[X]) -> str:
