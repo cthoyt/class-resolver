@@ -91,6 +91,14 @@ class BaseResolver(ABC, Generic[X, Y]):
     #: The shared suffix fo all classes derived from the base class
     suffix: str | None
 
+    #: The string used to document the resolver in a sphinx item.
+    #: For example, a resolver for aggregations is available in class-resovler
+    #: that can be imported from ``class_resolver.contrib.numpy.aggregation_resolver``.
+    #: It can be documented with sphinx using ``:data:`class_resolver.contrib.numpy.aggregation_resolve```,
+    #: which creates this kind of link :data:`class_resolver.contrib.numpy.aggregation_resolve`
+    #: (assuming you have intersphinx set up properly).
+    location: str | None
+
     def __init__(
         self,
         elements: Iterable[X] | None = None,
@@ -98,6 +106,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         default: X | None = None,
         synonyms: Mapping[str, X] | None = None,
         suffix: str | None = None,
+        location: str | None = None,
     ):
         """Initialize the resolver.
 
@@ -105,6 +114,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         :param default: The optional default element
         :param synonyms: The optional synonym dictionary
         :param suffix: The optional shared suffix of all instances
+        :param location: The location used to document the resolver in sphinx
         """
         self.default = default
         self.synonyms = dict(synonyms or {})
@@ -113,6 +123,8 @@ class BaseResolver(ABC, Generic[X, Y]):
         if elements is not None:
             for element in elements:
                 self.register(element)
+
+        self.location = location
 
     def __iter__(self) -> Iterator[X]:
         """Iterate over the registered elements."""
