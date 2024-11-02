@@ -244,7 +244,7 @@ class BaseResolver(ABC, Generic[X, Y]):
             key_to_synonyms[key].append(synonym)
         return key_to_synonyms
 
-    def _get_click_choice(self) -> "click.Choice":
+    def _get_click_choice(self) -> click.Choice:
         import click
 
         rev = self._get_reverse_synonyms()
@@ -252,7 +252,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         class _Choice(click.Choice):
             """An extended choice that is aware of synonyms."""
 
-            def get_metavar(self, param: "click.Parameter") -> str:
+            def get_metavar(self, param: click.Parameter) -> str:
                 """Get the text that shows the choices, including synonyms."""
                 choices_str = ""
                 for key, synonyms in rev.items():
