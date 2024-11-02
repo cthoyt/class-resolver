@@ -237,7 +237,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         else:
             raise ValueError("no default given either from resolver or explicitly")
 
-    def _get_reverse_synonyms(self):
+    def _get_reverse_synonyms(self) -> dict[str, list[str]]:
         key_to_synonyms: dict[str, list[str]] = {k: [] for k in self.lookup_dict}
         for synonym, cls in self.synonyms.items():
             key = self.normalize(cls.__name__)
