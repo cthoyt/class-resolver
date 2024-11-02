@@ -1,16 +1,12 @@
 """Resolve classes."""
 
+from __future__ import annotations
+
 import inspect
 import logging
 from collections.abc import Collection, Mapping, Sequence
 from textwrap import dedent
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from .base import BaseResolver
 from .utils import (
@@ -87,17 +83,17 @@ class ClassResolver(BaseResolver[type[X], X]):
     #: The shared suffix fo all classes derived from the base class
     suffix: str
     #: The variable name to look up synonyms in classes that are registered with this resolver
-    synonyms_attribute: Optional[str]
+    synonyms_attribute: str | None
 
     def __init__(
         self,
-        classes: Optional[Collection[type[X]]] = None,
+        classes: Collection[type[X]] | None = None,
         *,
         base: type[X],
-        default: Optional[type[X]] = None,
-        suffix: Optional[str] = None,
-        synonyms: Optional[Mapping[str, type[X]]] = None,
-        synonym_attribute: Optional[str] = "synonyms",
+        default: type[X] | None = None,
+        suffix: str | None = None,
+        synonyms: Mapping[str, type[X]] | None = None,
+        synonym_attribute: str | None = "synonyms",
         base_as_suffix: bool = True,
     ) -> None:
         """Initialize the resolver.
@@ -141,11 +137,11 @@ class ClassResolver(BaseResolver[type[X], X]):
         cls,
         base: type[X],
         *,
-        skip: Optional[Collection[type[X]]] = None,
+        skip: Collection[type[X]] | None = None,
         exclude_private: bool = True,
         exclude_external: bool = True,
         **kwargs: Any,
-    ) -> "ClassResolver[X]":
+    ) -> ClassResolver[X]:
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
@@ -177,7 +173,7 @@ class ClassResolver(BaseResolver[type[X], X]):
         """Normalize the class name."""
         return self.normalize(cls.__name__)
 
-    def lookup(self, query: HintOrType[X], default: Optional[type[X]] = None) -> type[X]:
+    def lookup(self, query: HintOrType[X], default: type[X] | None = None) -> type[X]:
         """Lookup a class."""
         return get_cls(
             query,
@@ -200,7 +196,7 @@ class ClassResolver(BaseResolver[type[X], X]):
     def make(
         self,
         query: HintOrType[X],
-        pos_kwargs: Optional[Mapping[str, Any]] = None,
+        pos_kwargs: Mapping[str, Any] | None = None,
         **kwargs: Any,
     ) -> X:
         """Instantiate a class with optional kwargs."""
@@ -241,8 +237,8 @@ class ClassResolver(BaseResolver[type[X], X]):
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
 
     def ray_tune_search_space(
-        self, kwargs_search_space: Optional[Mapping[str, Any]] = None
-    ) -> Union[Mapping[str, Any], "ray.tune.search.sample.Categorical"]:
+        self, kwargs_search_space: Mapping[str, Any] | None = None
+    ) -> Mapping[str, Any] | ray.tune.search.sample.Categorical:
         """Return a search space for ray.tune.
 
         ray.tune is a package for distributed hyperparameter optimization. The search space for this search is defined
@@ -328,7 +324,7 @@ class ClassResolver(BaseResolver[type[X], X]):
         :returns: A list of X instances
         """
         _query_list: Sequence[HintType[X]]
-        _kwargs_list: Sequence[Optional[Mapping[str, Any]]]
+        _kwargs_list: Sequence[Mapping[str, Any] | None]
 
         # Prepare the query list
         if queries is not None:
@@ -402,9 +398,9 @@ def get_cls(
     query: HintOrType[X],
     base: type[X],
     lookup_dict: Mapping[str, type[X]],
-    lookup_dict_synonyms: Optional[Mapping[str, type[X]]] = None,
-    default: Optional[type[X]] = None,
-    suffix: Optional[str] = None,
+    lookup_dict_synonyms: Mapping[str, type[X]] | None = None,
+    default: type[X] | None = None,
+    suffix: str | None = None,
 ) -> type[X]:
     """Get a class by string, default, or implementation."""
     if query is None:
