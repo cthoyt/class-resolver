@@ -19,6 +19,7 @@ message_passing_resolver = ClassResolver.from_subclasses(
     base=MessagePassing,
     suffix="Conv",
     default=SimpleConv,
+    location="class_resolver.contrib.torch_geometric.message_passing_resolver",
 )
 """A resolver for message passing layers.
 
@@ -28,8 +29,8 @@ message_passing_resolver = ClassResolver.from_subclasses(
 aggregation_resolver = ClassResolver.from_subclasses(
     base=Aggregation,
     default=MeanAggregation,
+    location="class_resolver.contrib.torch_geometric.aggregation_resolver",
 )
-
 """A resolver for aggregation layers.
 
 This includes the following:

@@ -7,7 +7,7 @@ from typing import Any
 
 from torch import Tensor, nn
 
-from class_resolver import ResolverKey, update_docstring_with_resolver_keys
+from class_resolver import FunctionResolver, ResolverKey, update_docstring_with_resolver_keys
 from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 from class_resolver.docs import _clean_docstring
 
@@ -52,6 +52,10 @@ DS5 = """\
 
 TEST_RESOLVER_1 = update_docstring_with_resolver_keys(
     ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
+)
+
+TEST_RESOLVER_2 = update_docstring_with_resolver_keys(
+    ResolverKey("activation", activation_resolver),
 )
 
 EXPECTED_FUNCTION_1_DOC = """\
@@ -193,6 +197,15 @@ Apply an activation then aggregation.
 """.rstrip()
 
 
+@TEST_RESOLVER_2
+def f5(activation, activation_kwargs):
+    """Apply an activation then aggregation.
+
+    :param activation: An activation function (stateful)
+    :param activation_kwargs: Keyword arguments for activation function
+    """
+
+
 class DecoratorTests(unittest.TestCase):
     """Decorator tests."""
 
@@ -239,6 +252,11 @@ class TestDocumentResolver(unittest.TestCase):
             with self.subTest(docstring=ds):
                 self.assertEqual(TARGET, _clean_docstring(ds))
 
+    def test_bad_type(self):
+        """Raise the appropriate error."""
+        with self.assertRaises(TypeError):
+            ResolverKey("", None)
+
     def test_no_params(self):
         """Test when no keys are passed."""
         with self.assertRaises(ValueError):
@@ -258,6 +276,12 @@ class TestDocumentResolver(unittest.TestCase):
             def f(x):
                 """Do the thing."""
 
+    def test_no_location(self):
+        """Test when there's no explicit location given."""
+        r = FunctionResolver([])
+        with self.assertRaises(NotImplementedError):
+            ResolverKey("xx", r)
+
     def test_f1(self):
         """Test the correct docstring is produced."""
         self.assertEqual(EXPECTED_FUNCTION_1_DOC, f1.__doc__)
@@ -273,6 +297,10 @@ class TestDocumentResolver(unittest.TestCase):
     def test_f4(self):
         """Test the correct docstring is produced."""
         self.assertEqual(EXPECTED_FUNCTION_4_DOC, f4.__doc__)
+
+    def test_f5(self):
+        """Test the correct docstring is produced."""
+        self.assertEqual(EXPECTED_FUNCTION_1_DOC, f5.__doc__)
 
 
 class TestTable(unittest.TestCase):

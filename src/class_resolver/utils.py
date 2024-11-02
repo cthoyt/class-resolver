@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 __all__ = [
     # Type Hints
     "X",
+    "Y",
     "Hint",
     "HintOrType",
     "HintType",
