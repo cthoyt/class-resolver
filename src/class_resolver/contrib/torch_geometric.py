@@ -31,7 +31,6 @@ aggregation_resolver = ClassResolver.from_subclasses(
     default=MeanAggregation,
     location="class_resolver.contrib.torch_geometric.aggregation_resolver",
 )
-
 """A resolver for aggregation layers.
 
 This includes the following:

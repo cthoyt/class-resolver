@@ -252,6 +252,11 @@ class TestDocumentResolver(unittest.TestCase):
             with self.subTest(docstring=ds):
                 self.assertEqual(TARGET, _clean_docstring(ds))
 
+    def test_bad_type(self):
+        """Raise the appropriate error."""
+        with self.assertRaises(TypeError):
+            ResolverKey("", None)
+
     def test_no_params(self):
         """Test when no keys are passed."""
         with self.assertRaises(ValueError):
