@@ -19,7 +19,12 @@ F = TypeVar("F", bound=Callable)
 
 
 def _get_qualpath_from_object(resolver: BaseResolver) -> str:
-    raise NotImplementedError
+    if resolver.location:
+        return resolver.location
+    raise NotImplementedError(
+        "Can not get a qualified name for auto-generation of sphinx documentation "
+        "for a resolver that doesn't have the `location` variable set"
+    )
 
 
 class ResolverKey:

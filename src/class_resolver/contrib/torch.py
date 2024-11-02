@@ -34,6 +34,7 @@ optimizer_resolver = ClassResolver.from_subclasses(
     Optimizer,
     default=Adam,
     base_as_suffix=False,
+    location="class_resolver.contrib.torch.optimizer_resolver",
 )
 """A resolver for :class:`torch.optim.Optimizer` classes.
 
@@ -80,6 +81,7 @@ activation_resolver = ClassResolver(
     base=nn.Module,
     default=activation.ReLU,
     base_as_suffix=False,
+    location="class_resolver.contrib.torch.activation_resolver",
 )
 """A resolver for :mod:`torch.nn.modules.activation` classes.
 
@@ -120,6 +122,7 @@ margin_activation_resolver = ClassResolver(
         hard=nn.ReLU,
         soft=nn.Softplus,
     ),
+    location="class_resolver.contrib.torch.margin_activation_resolver",
 )
 """A resolver for a subset of :mod:`torch.nn.modules.activation` classes.
 
@@ -131,6 +134,7 @@ for certain scenarios where a margin-style activation is appropriate.
 initializer_resolver = FunctionResolver(
     [func for name, func in vars(init).items() if not name.startswith("_") and name.endswith("_")],
     default=init.normal_,
+    location="class_resolver.contrib.torch.initializer_resolver",
 )
 """A resolver for :mod:`torch.nn.init` functions.
 
@@ -168,6 +172,7 @@ lr_scheduler_resolver = ClassResolver.from_subclasses(
     LRScheduler,
     default=ExponentialLR,
     suffix="LR",
+    location="class_resolver.contrib.torch.lr_scheduler_resolver",
 )
 """A resolver for learning rate schedulers.
 
@@ -211,6 +216,7 @@ lr_scheduler_resolver.register(ReduceLROnPlateau, raise_on_conflict=False)
 aggregation_resolver = FunctionResolver(
     [torch.sum, torch.max, torch.min, torch.mean, torch.logsumexp, torch.median],
     default=torch.mean,
+    location="class_resolver.contrib.torch.aggregation_resolver",
 )
 """A resolver for common aggregation functions in PyTorch including the following functions:
 

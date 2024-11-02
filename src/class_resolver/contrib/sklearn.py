@@ -42,6 +42,7 @@ classifier_resolver: ClassResolver[BaseEstimator] = ClassResolver(
     base=BaseEstimator,
     base_as_suffix=False,
     default=LogisticRegression,
+    location="class_resolver.contrib.sklearn.classifier_resolver",
 )
 """A resolver for classifiers.
 
