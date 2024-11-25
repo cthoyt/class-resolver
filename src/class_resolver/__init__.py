@@ -49,6 +49,7 @@ from .base import (
     RegistrationError,
     RegistrationNameConflict,
     RegistrationSynonymConflict,
+    SimpleResolver,
 )
 from .docs import ResolverKey, update_docstring_with_resolver_keys
 from .func import FunctionResolver
@@ -86,6 +87,7 @@ __all__ = [
     "Resolver",
     "ClassResolver",
     "FunctionResolver",
+    "SimpleResolver",
     # Utilities
     "get_cls",
     "get_subclasses",

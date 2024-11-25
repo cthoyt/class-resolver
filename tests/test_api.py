@@ -16,6 +16,7 @@ from class_resolver import (
     RegistrationNameConflict,
     RegistrationSynonymConflict,
     Resolver,
+    SimpleResolver,
     UnexpectedKeywordError,
 )
 
@@ -487,3 +488,30 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(TypeError) as e:
             resolver.make("a")
         self.assertEqual("surprise!", str(e.exception))
+
+
+class TestSimpleResolver(unittest.TestCase):
+    """Tests for the simple resolver."""
+
+    def setUp(self) -> None:
+        """Create test instance."""
+        self.instance = SimpleResolver([0, 1, 2, 3])
+
+    def test_make(self):
+        """Test making valid objects."""
+        for i in range(4):
+            self.assertEqual(self.instance.make(i), i)
+            self.assertEqual(self.instance.make(str(i)), i)
+
+    def test_make_invalid(self):
+        """Test making invalid choices."""
+        with self.assertRaises(ValueError):
+            self.instance.make(-1)
+        with self.assertRaises(ValueError):
+            self.instance.make(4)
+
+    def test_default(self):
+        """Test make's interaction with default."""
+        with self.assertRaises(ValueError):
+            self.instance.make(None)
+        self.assertEqual(self.instance.make(None, default=2), 2)
