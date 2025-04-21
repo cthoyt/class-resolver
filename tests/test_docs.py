@@ -9,7 +9,7 @@ import torch
 from torch import Tensor, nn
 
 from class_resolver import FunctionResolver, OptionalKwargs, ResolverKey, update_docstring_with_resolver_keys
-from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
+from class_resolver.contrib.torch import TorchAggregationFunc, activation_resolver, aggregation_resolver
 from class_resolver.docs import _clean_docstring
 
 TARGET = """This method does some stuff
@@ -117,6 +117,7 @@ def f3(
     """
     _activation = activation_resolver.make(activation, activation_kwargs)
     _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
+    _aggregation: TorchAggregationFunc = aggregation_resolver.make(aggregation, aggregation_kwargs)
     return _aggregation(_activation(tensor))
 
 
@@ -172,6 +173,7 @@ def f4(
     _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
     _activation_2 = activation_resolver.make(activation_2, activation_2_kwargs)
     _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
+    _aggregation: TorchAggregationFunc = aggregation_resolver.make(aggregation, aggregation_kwargs)
     return _activation_2(_aggregation(_activation_2(tensor)))
 
 
