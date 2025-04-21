@@ -151,6 +151,7 @@ def make_callback(f: Callable[[X], Y]) -> Callable[[click.Context, click.Paramet
     return _callback
 
 
+# docstr-coverage:excused `overload`
 @overload
 def normalize_with_default(
     choice: None,
@@ -160,6 +161,7 @@ def normalize_with_default(
 ) -> tuple[None, OptionalKwargs]: ...
 
 
+# docstr-coverage:excused `overload`
 @overload
 def normalize_with_default(
     choice: None,
@@ -169,6 +171,7 @@ def normalize_with_default(
 ) -> tuple[Y, OptionalKwargs]: ...
 
 
+# docstr-coverage:excused `overload`
 @overload
 def normalize_with_default(
     choice: X,
