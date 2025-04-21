@@ -1,15 +1,11 @@
 """Tests for the torch-geometric contribution module."""
 
+import importlib.util
 import unittest
-
-try:
-    import torch_geometric
-except ImportError:  # pragma: no cover
-    torch_geometric = None  # pragma: no cover
 
 
 @unittest.skipUnless(
-    torch_geometric,
+    importlib.util.find_spec("torch_geometric"),
     "Can not test torch_geometric contrib without ``pip install torch torch-geometric``.",
 )
 class TestTorch(unittest.TestCase):

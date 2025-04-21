@@ -118,10 +118,10 @@ margin_activation_resolver = ClassResolver(
     },
     base=nn.Module,
     default=nn.ReLU,
-    synonyms=dict(
-        hard=nn.ReLU,
-        soft=nn.Softplus,
-    ),
+    synonyms={
+        "hard": nn.ReLU,
+        "soft": nn.Softplus,
+    },
     location="class_resolver.contrib.torch.margin_activation_resolver",
 )
 """A resolver for a subset of :mod:`torch.nn.modules.activation` classes.

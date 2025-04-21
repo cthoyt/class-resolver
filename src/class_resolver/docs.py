@@ -203,7 +203,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
         raise ValueError("Must provided at least one parameter name.")
 
     # check for duplicates
-    expanded_params = set(e for key in resolver_keys for e in (key.name, key.key))
+    expanded_params = {e for key in resolver_keys for e in (key.name, key.key)}
     if len(expanded_params) < 2 * len(resolver_keys):
         raise ValueError(f"There are duplicates in (the expanded) {resolver_keys=}")
 

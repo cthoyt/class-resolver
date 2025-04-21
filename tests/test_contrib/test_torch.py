@@ -1,14 +1,13 @@
 """Tests for the torch contribution module."""
 
+import importlib.util
 import unittest
 
-try:
-    import torch
-except ImportError:  # pragma: no cover
-    torch = None  # pragma: no cover
 
-
-@unittest.skipUnless(torch, "Can not test torch contrib without ``pip install torch``.")
+@unittest.skipUnless(
+    importlib.util.find_spec("torch"),
+    "Can not test torch contrib without ``pip install torch``.",
+)
 class TestTorch(unittest.TestCase):
     """Test for the torch contribution module."""
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import sys
 import unittest
 from collections import Counter, defaultdict
 from collections.abc import Sequence
@@ -43,10 +44,12 @@ class TestUtilities(unittest.TestCase):
         self.assertNotIn(PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
         self.assertNotIn(PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
 
-        self.assertIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False)))
-        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True)))
-        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
-        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
+        if sys.version_info < (3, 13):
+            # in Python 3.13, this class gets renamed and the test doesn't work anymore
+            self.assertIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False)))
+            self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True)))
+            self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
+            self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
 
     def test_normalize_with_defaults(self) -> None:
         """Tests for normalize with defaults."""
@@ -55,8 +58,8 @@ class TestUtilities(unittest.TestCase):
             normalize_with_default(choice=None, default=None)
 
         # choice is None -> use default *and* default_kwargs irrespective of kwargs
-        default_kwargs = dict(b=3)
-        for choice_kwargs in (None, dict(a=5)):
+        default_kwargs = {"b": 3}
+        for choice_kwargs in (None, {"a": 5}):
             cls, kwargs = normalize_with_default(
                 choice=None, kwargs=choice_kwargs, default=Counter, default_kwargs=default_kwargs
             )
@@ -65,9 +68,9 @@ class TestUtilities(unittest.TestCase):
 
     def test_normalize_with_defaults_2(self) -> None:
         """Tests for normalize with defaults."""
-        default_kwargs_tests: Sequence[None | dict[str, int]] = [None, dict(b=3)]
+        default_kwargs_tests: Sequence[None | dict[str, int]] = [None, {"b": 3}]
         # choice is not None -> return choice and kwargs
-        choice_kwargs = dict(a=5)
+        choice_kwargs = {"a": 5}
         for default_kwargs in default_kwargs_tests:
             cls, kwargs = normalize_with_default(
                 choice=dict, kwargs=choice_kwargs, default=Counter, default_kwargs=default_kwargs

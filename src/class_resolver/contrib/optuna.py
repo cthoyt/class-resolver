@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 sampler_resolver = ClassResolver.from_subclasses(
-    BaseSampler,
+    BaseSampler,  # type:ignore[type-abstract]
     default=TPESampler,
     suffix="Sampler",
     exclude_private=False,
@@ -46,7 +46,7 @@ instantiated with :mod:`class_resolver`.
 """
 
 pruner_resolver = ClassResolver.from_subclasses(
-    BasePruner,
+    BasePruner,  # type:ignore[type-abstract]
     default=MedianPruner,
     suffix="Pruner",
     exclude_private=False,
