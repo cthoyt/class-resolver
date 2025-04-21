@@ -126,7 +126,7 @@ Apply an activation then aggregation.
 :param aggregation: An aggregation function (stateful)
 :param aggregation_kwargs: Keyword arguments for aggregation function
 
-:return: An aggregation
+:returns: An aggregation
 
 .. note ::
 
@@ -183,7 +183,7 @@ Apply an activation then aggregation.
 :param activation_2: An activation function (stateful)
 :param activation_2_kwargs: Keyword arguments for activation function
 
-:return: An aggregation
+:returns: An aggregation
 
 .. note ::
 
