@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import unittest
-from typing import Any
+from typing import Any, cast
 
 from torch import Tensor, nn
 
@@ -221,15 +221,16 @@ class DecoratorTests(unittest.TestCase):
 
     def test_decorator(self) -> None:
         """Test decorator."""
-        old_doc = self.f.__doc__
+        old_doc = cast(str, self.f.__doc__)
         for params in [("model", "model_resolver"), ("model", "model_resolver", "model_kwargs")]:
             with self.subTest(params=params):
                 decorator = update_docstring_with_resolver_keys(ResolverKey(*params))
                 f_dec = decorator(self.f)
+                self.assertIsNotNone(f_dec.__doc__)
                 # note: the decorator modifies the doc string in-place...
                 # check that the doc string got extended
                 self.assertNotEqual(f_dec.__doc__, old_doc)
-                self.assertTrue(f_dec.__doc__.startswith(old_doc))
+                self.assertTrue(cast(str, f_dec.__doc__).startswith(old_doc))
                 # revert for next time
                 self.f.__doc__ = old_doc
 
@@ -255,7 +256,7 @@ class TestDocumentResolver(unittest.TestCase):
     def test_bad_type(self) -> None:
         """Raise the appropriate error."""
         with self.assertRaises(TypeError):
-            ResolverKey("", None)
+            ResolverKey("", None)  # type:ignore
 
     def test_missing_object(self) -> None:
         """Test raising an error when the object doesn't exist in the module."""

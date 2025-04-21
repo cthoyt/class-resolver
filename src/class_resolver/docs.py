@@ -8,6 +8,8 @@ import textwrap
 from collections import defaultdict
 from typing import Callable, TypeVar
 
+from typing_extensions import ParamSpec
+
 from .base import BaseResolver
 
 __all__ = [
@@ -15,7 +17,11 @@ __all__ = [
     "update_docstring_with_resolver_keys",
 ]
 
-F = TypeVar("F", bound=Callable)
+X = TypeVar("X")
+Y = TypeVar("Y")
+T = TypeVar("T")
+P = ParamSpec("P")
+F = Callable[P, T]
 
 
 def _get_qualpath_from_object(resolver: BaseResolver) -> str:
