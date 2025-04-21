@@ -160,12 +160,39 @@ def make_callback(f: Callable[[X], Y]) -> Callable[[click.Context, click.Paramet
     return _callback
 
 
+@overload
 def normalize_with_default(
-    choice: HintOrType[X],
+    choice: None,
+    kwargs: OptionalKwargs = ...,
+    default: None = ...,
+    default_kwargs: OptionalKwargs = ...,
+) -> tuple[None, OptionalKwargs]: ...
+
+
+@overload
+def normalize_with_default(
+    choice: None,
+    kwargs: OptionalKwargs = ...,
+    default: Y = ...,
+    default_kwargs: OptionalKwargs = ...,
+) -> tuple[Y, OptionalKwargs]: ...
+
+
+@overload
+def normalize_with_default(
+    choice: X,
+    kwargs: OptionalKwargs = ...,
+    default: Y | None = ...,
+    default_kwargs: OptionalKwargs = ...,
+) -> tuple[X | None, OptionalKwargs]: ...
+
+
+def normalize_with_default(
+    choice: X | None,
     kwargs: OptionalKwargs = None,
-    default: HintOrType[X] = None,
+    default: Y | None = None,
     default_kwargs: OptionalKwargs = None,
-) -> tuple[HintOrType[X], OptionalKwargs]:
+) -> tuple[X | Y | None, OptionalKwargs]:
     """
     Normalize a choice for class resolver, with default options.
 
