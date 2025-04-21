@@ -102,7 +102,7 @@ def f3(
     tensor: Tensor,
     activation: None | str | type[nn.Module] | nn.Module,
     activation_kwargs: dict[str, Any] | None,
-    aggregation: None | str | type[nn.Module] | nn.Module,
+    aggregation: TorchAggregationFunc,
     aggregation_kwargs: dict[str, Any] | None,
 ) -> Tensor:
     """Apply an activation then aggregation.
@@ -116,7 +116,6 @@ def f3(
     :returns: An aggregation
     """
     _activation = activation_resolver.make(activation, activation_kwargs)
-    _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
     _aggregation: TorchAggregationFunc = aggregation_resolver.make(aggregation, aggregation_kwargs)
     return _aggregation(_activation(tensor))
 
@@ -153,7 +152,7 @@ def f4(
     tensor: Tensor,
     activation_1: None | str | type[nn.Module] | nn.Module,
     activation_1_kwargs: dict[str, Any] | None,
-    aggregation: None | str | type[nn.Module] | nn.Module,
+    aggregation: None | str | TorchAggregationFunc,
     aggregation_kwargs: dict[str, Any] | None,
     activation_2: None | str | type[nn.Module] | nn.Module,
     activation_2_kwargs: dict[str, Any] | None,
@@ -173,8 +172,7 @@ def f4(
     _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
     _activation_2 = activation_resolver.make(activation_2, activation_2_kwargs)
     _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
-    _aggregation: TorchAggregationFunc = aggregation_resolver.make(aggregation, aggregation_kwargs)
-    return _activation_2(_aggregation(_activation_2(tensor)))
+    return cast(Tensor, _activation_2(_aggregation(_activation_2(tensor))))
 
 
 EXPECTED_FUNCTION_4_DOC = """\
