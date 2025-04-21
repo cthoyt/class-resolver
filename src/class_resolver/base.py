@@ -273,9 +273,14 @@ class BaseResolver(ABC, Generic[X, Y]):
             delimiter = ", "
 
         rev = self._get_reverse_synonyms()
+        norm_func = self.normalize
 
         class _Choice(click.Choice):
             """An extended choice that is aware of synonyms."""
+
+            def convert(self, value: Any, param: click.Parameter | None, ctx: click.Context | None) -> Any:
+                """Normalize."""
+                return super().convert(norm_func(value), param=param, ctx=ctx)
 
             def get_metavar(self, param: click.Parameter) -> str:
                 """Get the text that shows the choices, including synonyms."""
