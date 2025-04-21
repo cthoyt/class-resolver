@@ -184,7 +184,7 @@ def normalize_with_default(
 def normalize_with_default(
     choice: X | None,
     kwargs: OptionalKwargs = None,
-    default: Optional[Y] = None,
+    default: Y | None = None,
     default_kwargs: OptionalKwargs = None,
 ) -> tuple[X | Y | None, OptionalKwargs]:
     """
