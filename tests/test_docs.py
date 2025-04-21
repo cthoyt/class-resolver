@@ -110,7 +110,7 @@ def f3(
     :param aggregation: An aggregation function (stateful)
     :param aggregation_kwargs: Keyword arguments for aggregation function
 
-    :return: An aggregation
+    :returns: An aggregation
     """
     _activation = activation_resolver.make(activation, activation_kwargs)
     _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
@@ -164,7 +164,7 @@ def f4(
     :param activation_2: An activation function (stateful)
     :param activation_2_kwargs: Keyword arguments for activation function
 
-    :return: An aggregation
+    :returns: An aggregation
     """
     _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
     _activation_2 = activation_resolver.make(activation_2, activation_2_kwargs)
