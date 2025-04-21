@@ -30,7 +30,7 @@ class FunctionResolver(Generic[P, T], BaseResolver[Callable[P, T], Callable[P, T
         if query is None:
             return self._default(default)
         elif callable(query):
-            return query  # type: ignore
+            return query
         elif isinstance(query, str):
             key = self.normalize(query)
             if key in self.lookup_dict:
@@ -47,5 +47,5 @@ class FunctionResolver(Generic[P, T], BaseResolver[Callable[P, T], Callable[P, T
         """Make a function with partial bindings to the given kwargs."""
         func = self.lookup(query)
         if pos_kwargs or kwargs:
-            return partial(func, **(pos_kwargs or {}), **kwargs)  # type: ignore
+            return partial(func, **(pos_kwargs or {}), **kwargs)
         return func

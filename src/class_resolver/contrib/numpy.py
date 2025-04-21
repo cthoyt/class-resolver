@@ -3,6 +3,7 @@
 from typing import Callable
 
 import numpy as np
+from numpy.typing import ArrayLike
 from typing_extensions import TypeAlias
 
 from ..func import FunctionResolver
@@ -11,7 +12,7 @@ __all__ = [
     "aggregation_resolver",
 ]
 
-NumpyAggregationFunc: TypeAlias = Callable
+NumpyAggregationFunc: TypeAlias = Callable[..., ArrayLike]
 
 _AGGREGATION_FUNCTIONS: list[NumpyAggregationFunc] = [np.sum, np.max, np.min, np.mean, np.median]
 

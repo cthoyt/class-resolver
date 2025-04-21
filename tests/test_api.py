@@ -264,7 +264,7 @@ class TestResolver(unittest.TestCase):
     def test_click_option(self) -> None:
         """Test the click option."""
 
-        @click.command()  # type:ignore
+        @click.command()
         @self.resolver.get_option("--opt", default="a")
         def cli(opt: Base) -> None:
             """Run the test CLI."""
@@ -299,7 +299,7 @@ class TestResolver(unittest.TestCase):
     def test_click_option_str(self) -> None:
         """Test the click option."""
 
-        @click.command()  # type:ignore
+        @click.command()
         @self.resolver.get_option("--opt", default="a", as_string=True)
         def cli(opt: str) -> None:
             """Run the test CLI."""
@@ -312,7 +312,7 @@ class TestResolver(unittest.TestCase):
         """Test generating an option with a default."""
         resolver = Resolver([A, B, C, E], base=Base, default=A)
 
-        @click.command()  # type:ignore
+        @click.command()
         @resolver.get_option("--opt", as_string=True)
         def cli(opt: str) -> None:
             """Run the test CLI."""
@@ -324,7 +324,7 @@ class TestResolver(unittest.TestCase):
     def test_click_option_multiple(self) -> None:
         """Test the click option with multiple arguments."""
 
-        @click.command()  # type:ignore
+        @click.command()
         @self.resolver.get_option("--opt", default="a", as_string=True, multiple=True)
         def cli(opt: Sequence[str]) -> None:
             """Run the test CLI."""

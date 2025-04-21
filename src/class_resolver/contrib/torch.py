@@ -216,7 +216,7 @@ then parametrized to accept a LRScheduler hint.
 # this is for torch<2.1 compat
 lr_scheduler_resolver.register(ReduceLROnPlateau, raise_on_conflict=False)
 
-TorchAggregationFunc: TypeAlias = Callable
+TorchAggregationFunc: TypeAlias = Callable[..., torch.Tensor]
 
 _AGGREGATION_FUNCTIONS: list[TorchAggregationFunc] = [
     torch.sum,

@@ -341,8 +341,7 @@ class BaseResolver(ABC, Generic[X, Y]):
 
         import click
 
-        # TODO are there better ways to type options?
-        return click.option(  # type:ignore
+        return click.option(
             *flags,
             type=self._get_click_choice(prefix=prefix, delimiter=delimiter, suffix=suffix),
             default=[key] if kwargs.get("multiple") else key,

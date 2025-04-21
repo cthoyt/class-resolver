@@ -9,7 +9,7 @@ import torch
 from torch import Tensor, nn
 
 from class_resolver import FunctionResolver, OptionalKwargs, ResolverKey, update_docstring_with_resolver_keys
-from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
+from class_resolver.contrib.torch import TorchAggregationFunc, activation_resolver, aggregation_resolver
 from class_resolver.docs import _clean_docstring
 
 TARGET = """This method does some stuff
@@ -102,7 +102,7 @@ def f3(
     tensor: Tensor,
     activation: None | str | type[nn.Module] | nn.Module,
     activation_kwargs: dict[str, Any] | None,
-    aggregation: None | str | type[nn.Module] | nn.Module,
+    aggregation: TorchAggregationFunc,
     aggregation_kwargs: dict[str, Any] | None,
 ) -> Tensor:
     """Apply an activation then aggregation.
@@ -152,7 +152,7 @@ def f4(
     tensor: Tensor,
     activation_1: None | str | type[nn.Module] | nn.Module,
     activation_1_kwargs: dict[str, Any] | None,
-    aggregation: None | str | type[nn.Module] | nn.Module,
+    aggregation: None | str | TorchAggregationFunc,
     aggregation_kwargs: dict[str, Any] | None,
     activation_2: None | str | type[nn.Module] | nn.Module,
     activation_2_kwargs: dict[str, Any] | None,
@@ -172,7 +172,7 @@ def f4(
     _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
     _activation_2 = activation_resolver.make(activation_2, activation_2_kwargs)
     _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
-    return _activation_2(_aggregation(_activation_2(tensor)))
+    return cast(Tensor, _activation_2(_aggregation(_activation_2(tensor))))
 
 
 EXPECTED_FUNCTION_4_DOC = """\
@@ -274,7 +274,7 @@ class TestDocumentResolver(unittest.TestCase):
 
     def test_duplicate_params(self) -> None:
         """Test when no keys are passed."""
-        key: ResolverKey = ResolverKey("a", "b")
+        key = ResolverKey("a", "b")
         with self.assertRaises(ValueError):
             update_docstring_with_resolver_keys(key, key)
 
