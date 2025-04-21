@@ -1,5 +1,7 @@
 """Test utilities."""
 
+from __future__ import annotations
+
 import enum
 import unittest
 from collections import Counter, defaultdict
