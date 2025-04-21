@@ -288,7 +288,7 @@ class TestDocumentResolver(unittest.TestCase):
 
     def test_no_location(self) -> None:
         """Test when there's no explicit location given."""
-        r = FunctionResolver([])
+        r: FunctionResolver[Any, Any] = FunctionResolver([])
         with self.assertRaises(NotImplementedError):
             ResolverKey("xx", r)
 

@@ -4,12 +4,15 @@ The ``class-resolver`` provides several class resolvers and function resolvers
 to make it possible to more easily parametrize models and training loops.
 """  # noqa: D205
 
+from typing import Callable
+
 import torch
 from torch import nn
 from torch.nn import init
 from torch.nn.modules import activation
 from torch.optim import Adam, Optimizer
 from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau
+from typing_extensions import TypeAlias
 
 try:
     # when torch >= 2.0
@@ -72,7 +75,7 @@ ACTIVATION_SKIP = {
     activation.Softmax2d,
 }
 
-activation_resolver = ClassResolver(
+activation_resolver: ClassResolver[nn.Module] = ClassResolver(
     classes=[
         module
         for module in vars(activation).values()
@@ -111,7 +114,7 @@ activation_resolver = ClassResolver(
             return self.layers(x)
 """
 
-margin_activation_resolver = ClassResolver(
+margin_activation_resolver: ClassResolver[nn.Module] = ClassResolver(
     classes={
         nn.ReLU,
         nn.Softplus,
@@ -213,8 +216,19 @@ then parametrized to accept a LRScheduler hint.
 # this is for torch<2.1 compat
 lr_scheduler_resolver.register(ReduceLROnPlateau, raise_on_conflict=False)
 
+TorchAggregationFunc: TypeAlias = Callable
+
+_AGGREGATION_FUNCTIONS: list[TorchAggregationFunc] = [
+    torch.sum,
+    torch.max,
+    torch.min,
+    torch.mean,
+    torch.logsumexp,
+    torch.median,
+]
+
 aggregation_resolver = FunctionResolver(
-    [torch.sum, torch.max, torch.min, torch.mean, torch.logsumexp, torch.median],
+    _AGGREGATION_FUNCTIONS,
     default=torch.mean,
     location="class_resolver.contrib.torch.aggregation_resolver",
 )
