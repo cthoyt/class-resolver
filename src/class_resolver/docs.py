@@ -6,7 +6,9 @@ import importlib
 import inspect
 import textwrap
 from collections import defaultdict
-from typing import Callable, TypeVar
+from typing import Callable, Generic, TypeVar
+
+from typing_extensions import ParamSpec
 
 from .base import BaseResolver
 
@@ -15,10 +17,14 @@ __all__ = [
     "update_docstring_with_resolver_keys",
 ]
 
-F = TypeVar("F", bound=Callable)
+X = TypeVar("X")
+Y = TypeVar("Y")
+T = TypeVar("T")
+P = ParamSpec("P")
+F = Callable[P, T]
 
 
-def _get_qualpath_from_object(resolver: BaseResolver) -> str:
+def _get_qualpath_from_object(resolver: BaseResolver[X, Y]) -> str:
     if resolver.location:
         return resolver.location
     raise NotImplementedError(
@@ -27,18 +33,18 @@ def _get_qualpath_from_object(resolver: BaseResolver) -> str:
     )
 
 
-class ResolverKey:
+class ResolverKey(Generic[X, Y]):
     """An object storing information about how a resolver is used in a signature."""
 
     name: str
     key: str
     resolver_path: str
-    resolver: BaseResolver | None
+    resolver: BaseResolver[X, Y] | None
 
     def __init__(
         self,
         name: str,
-        resolver: str | BaseResolver,
+        resolver: str | BaseResolver[X, Y],
         key: str | None = None,
     ) -> None:
         """Initialize the key for :func:`update_docstring_with_resolver_keys`."""
@@ -116,13 +122,13 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
 
 
         @update_docstring_with_resolver_keys(
-            ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver")
+            ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
         )
         def f(
             tensor: Tensor,
             activation: None | str | type[nn.Module] | nn.Module,
             activation_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation = activation_resolver.make(activation, activation_kwargs)
             return _activation(tensor)
 
@@ -146,7 +152,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
             activation_kwargs: dict[str, Any] | None,
             aggregation: None | str | type[nn.Module] | nn.Module,
             aggregation_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation = activation_resolver.make(activation, activation_kwargs)
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
             return _aggregation(_activation(tensor))
@@ -175,7 +181,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
             aggregation_kwargs: dict[str, Any] | None,
             activation_2: None | str | type[nn.Module] | nn.Module,
             activation_2_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
             _activation_2 = activation_resolver.make(activation_2, activation_2_kwargs)
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)

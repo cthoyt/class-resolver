@@ -5,14 +5,7 @@ from __future__ import annotations
 import collections.abc
 import logging
 from collections.abc import Iterable, Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union, overload
 
 if TYPE_CHECKING:
     import click  # pragma: no cover
@@ -158,12 +151,42 @@ def make_callback(f: Callable[[X], Y]) -> Callable[[click.Context, click.Paramet
     return _callback
 
 
+# docstr-coverage:excused `overload`
+@overload
 def normalize_with_default(
-    choice: HintOrType[X],
+    choice: None,
+    kwargs: OptionalKwargs = ...,
+    default: None = ...,
+    default_kwargs: OptionalKwargs = ...,
+) -> tuple[None, OptionalKwargs]: ...
+
+
+# docstr-coverage:excused `overload`
+@overload
+def normalize_with_default(
+    choice: None,
+    kwargs: OptionalKwargs = ...,
+    default: Y = ...,
+    default_kwargs: OptionalKwargs = ...,
+) -> tuple[Y, OptionalKwargs]: ...
+
+
+# docstr-coverage:excused `overload`
+@overload
+def normalize_with_default(
+    choice: X,
+    kwargs: OptionalKwargs = ...,
+    default: Y | None = ...,
+    default_kwargs: OptionalKwargs = ...,
+) -> tuple[X, OptionalKwargs]: ...
+
+
+def normalize_with_default(
+    choice: X | None,
     kwargs: OptionalKwargs = None,
-    default: HintOrType[X] = None,
+    default: Y | None = None,
     default_kwargs: OptionalKwargs = None,
-) -> tuple[HintOrType[X], OptionalKwargs]:
+) -> tuple[X | Y | None, OptionalKwargs]:
     """
     Normalize a choice for class resolver, with default options.
 
@@ -182,15 +205,14 @@ def normalize_with_default(
     :return:
         a pair (hint, optional kwargs).
     """
-    if choice is None:
-        if default is None:
-            raise ValueError("If choice is None, a default has to be provided.")
-        choice = default
-        if kwargs is not None:
-            logger.warning(
-                f"No choice was provided, but kwargs={kwargs} is not None. Will use the default choice={default} "
-                f"with its default_kwargs={default_kwargs}. If you want the explicitly provided kwargs to be used,"
-                f" explicitly provide choice={default} instead of None."
-            )
-        kwargs = default_kwargs
-    return choice, kwargs
+    if choice is not None:
+        return choice, kwargs or default_kwargs
+    if default is None:
+        raise ValueError("If choice is None, a default has to be provided.")
+    if kwargs is not None:
+        logger.warning(
+            f"No choice was provided, but kwargs={kwargs} is not None. Will use the default choice={default} "
+            f"with its default_kwargs={default_kwargs}. If you want the explicitly provided kwargs to be used,"
+            f" explicitly provide choice={default} instead of None."
+        )
+    return default, default_kwargs
