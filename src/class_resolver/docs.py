@@ -122,13 +122,13 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
 
 
         @update_docstring_with_resolver_keys(
-            ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver")
+            ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
         )
         def f(
             tensor: Tensor,
             activation: None | str | type[nn.Module] | nn.Module,
             activation_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation = activation_resolver.make(activation, activation_kwargs)
             return _activation(tensor)
 
@@ -152,7 +152,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
             activation_kwargs: dict[str, Any] | None,
             aggregation: None | str | type[nn.Module] | nn.Module,
             aggregation_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation = activation_resolver.make(activation, activation_kwargs)
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
             return _aggregation(_activation(tensor))
@@ -181,7 +181,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
             aggregation_kwargs: dict[str, Any] | None,
             activation_2: None | str | type[nn.Module] | nn.Module,
             activation_2_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
             _activation_2 = activation_resolver.make(activation_2, activation_2_kwargs)
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
