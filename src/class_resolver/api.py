@@ -23,15 +23,11 @@ if TYPE_CHECKING:
     import ray.tune.search.sample
 
 __all__ = [
-    # Type Hints
-    # Classes
     "ClassResolver",
-    "Resolver",
-    # Utilities
-    "get_cls",
-    # Exceptions
     "KeywordArgumentError",
+    "Resolver",
     "UnexpectedKeywordError",
+    "get_cls",
 ]
 
 X = TypeVar("X")
@@ -102,12 +98,13 @@ class ClassResolver(BaseResolver[type[X], X]):
         :param classes: A list of classes
         :param base: The base class
         :param default: The default class
-        :param suffix: The optional shared suffix of all instances. If not none, will override
-            ``base_as_suffix``.
+        :param suffix: The optional shared suffix of all instances. If not none, will
+            override ``base_as_suffix``.
         :param synonyms: The optional synonym dictionary
-        :param synonym_attribute: The attribute to look in each class for synonyms. Explicitly set to None
-            to turn off synonym lookup.
-        :param base_as_suffix: Should the base class's name be used as the suffix if none is given? Defaults to true.
+        :param synonym_attribute: The attribute to look in each class for synonyms.
+            Explicitly set to None to turn off synonym lookup.
+        :param base_as_suffix: Should the base class's name be used as the suffix if
+            none is given? Defaults to true.
         :param location: The location used to document the resolver in sphinx
         """
         self.base = base
@@ -148,14 +145,16 @@ class ClassResolver(BaseResolver[type[X], X]):
         """Make a resolver from the subclasses of a given class.
 
         :param base: The base class whose subclasses will be indexed
-        :param skip: Any subclasses to skip (usually good to hardcode intermediate base classes)
+        :param skip: Any subclasses to skip (usually good to hardcode intermediate base
+            classes)
         :param exclude_private: If true, will skip any class that comes from a module
-            starting with an underscore (i.e., a private module). This is typically
-            done when having shadow duplicate classes implemented in C
+            starting with an underscore (i.e., a private module). This is typically done
+            when having shadow duplicate classes implemented in C
         :param exclude_external: If true, will exclude any class that does not originate
             from the same package as the base class.
         :param kwargs: remaining keyword arguments to pass to :func:`Resolver.__init__`
-        :return: A resolver instance
+
+        :returns: A resolver instance
         """
         skip = set(skip) if skip else set()
         return cls(
@@ -227,12 +226,15 @@ class ClassResolver(BaseResolver[type[X], X]):
     ) -> X:
         """Instantiate a class, by looking up query/pos_kwargs from a dictionary.
 
-        :param data: A dictionary that contains entry ``key`` and entry ``{key}_{kwargs_suffix}``.
-        :param key: The key in the dictionary whose value will be put in the ``query`` argument of :func:`make`.
-        :param kwargs_suffix: The suffix after ``key`` to look up the data. For example, if ``key='model'``
-            and ``kwargs_suffix='kwargs'`` (the default value), then the kwargs from :func:`make` are looked up
-            via ``data['model_kwargs']``.
+        :param data: A dictionary that contains entry ``key`` and entry
+            ``{key}_{kwargs_suffix}``.
+        :param key: The key in the dictionary whose value will be put in the ``query``
+            argument of :func:`make`.
+        :param kwargs_suffix: The suffix after ``key`` to look up the data. For example,
+            if ``key='model'`` and ``kwargs_suffix='kwargs'`` (the default value), then
+            the kwargs from :func:`make` are looked up via ``data['model_kwargs']``.
         :param o_kwargs: Additional kwargs to be passed to :func:`make`
+
         :returns: An instance of the X datatype parametrized by this resolver
         """
         query = data.get(key, None)
@@ -244,19 +246,21 @@ class ClassResolver(BaseResolver[type[X], X]):
     ) -> Mapping[str, Any] | ray.tune.search.sample.Categorical:
         """Return a search space for ray.tune.
 
-        ray.tune is a package for distributed hyperparameter optimization. The search space for this search is defined
-        as a (nested) dictionary, which can contain special values `tune.{choice,uniform,...}`. For these values, the
-        search algorithm will sample a specific configuration.
+        ray.tune is a package for distributed hyperparameter optimization. The search
+        space for this search is defined as a (nested) dictionary, which can contain
+        special values `tune.{choice,uniform,...}`. For these values, the search
+        algorithm will sample a specific configuration.
 
-        This method can be used to create a tune.choice sampler for the choices available to the resolver. By default,
-        this is equivalent to
+        This method can be used to create a tune.choice sampler for the choices
+        available to the resolver. By default, this is equivalent to
 
         .. code-block:: python
 
             ray.tune.choice(self.options)
 
-        If additional `kwargs_search_space` are passed, they are assumed to be a sub-search space for the constructor
-        parameters passed via `pos_kwargs`.  The resulting sub-search thus looks as follows:
+        If additional `kwargs_search_space` are passed, they are assumed to be a
+        sub-search space for the constructor parameters passed via `pos_kwargs`. The
+        resulting sub-search thus looks as follows:
 
         .. code-block:: python
 
@@ -265,16 +269,15 @@ class ClassResolver(BaseResolver[type[X], X]):
                 **kwargs_search_space,
             )
 
-        :param kwargs_search_space:
-            Additional sub search space for the constructor's parameters.
+        :param kwargs_search_space: Additional sub search space for the constructor's
+            parameters.
 
-        :return:
-            A ray.tune compatible search space.
+        :returns: A ray.tune compatible search space.
 
-        :raises ImportError:
-            If ray.tune is not installed.
+        :raises ImportError: If ray.tune is not installed.
 
-        .. seealso ::
+        .. seealso::
+
             https://docs.ray.io/en/master/tune/index.html
         """
         try:
@@ -319,12 +322,15 @@ class ClassResolver(BaseResolver[type[X], X]):
             1. none (will result in the default X),
             2. a single X, as either a class, instance, or string for class name
             3. a sequence of X's, as either a class, instance, or string for class name
-        :param kwargs: Either none (will use all defaults), a single dictionary
-            (will be used for all instances), or a list of dictionaries with the same length
-            as ``queries``
-        :param common_kwargs: additional keyword-based parameters passed to all instantiated instances.
-        :raises ValueError: If the number of queries and kwargs has a mismatch
+        :param kwargs: Either none (will use all defaults), a single dictionary (will be
+            used for all instances), or a list of dictionaries with the same length as
+            ``queries``
+        :param common_kwargs: additional keyword-based parameters passed to all
+            instantiated instances.
+
         :returns: A list of X instances
+
+        :raises ValueError: If the number of queries and kwargs has a mismatch
         """
         _query_list: Sequence[HintType[X]]
         _kwargs_list: Sequence[Mapping[str, Any] | None]
@@ -365,23 +371,18 @@ class ClassResolver(BaseResolver[type[X], X]):
         table_fmt: str = "rst",
         **kwargs: Any,
     ) -> str:
-        """
-        Render the table of options in a format suitable for Sphinx documentation.
+        """Render the table of options in a format suitable for Sphinx documentation.
 
-        :param key_fmt:
-            A format string with a placeholder ``key`` which is filled with the normalized key
-            for the class
-        :param cls_fmt:
-            A format string with a place-holder ``cls`` which is filled by the fully qualified import name.
-        :param header:
-            The header of the table.
-        :param table_fmt:
-            The table format; passed to :func:`tabulate.tabulate`.
-        :param kwargs:
-            Additional keyword-based parameters passed to :func:`tabulate.tabulate`.
+        :param key_fmt: A format string with a placeholder ``key`` which is filled with
+            the normalized key for the class
+        :param cls_fmt: A format string with a place-holder ``cls`` which is filled by
+            the fully qualified import name.
+        :param header: The header of the table.
+        :param table_fmt: The table format; passed to :func:`tabulate.tabulate`.
+        :param kwargs: Additional keyword-based parameters passed to
+            :func:`tabulate.tabulate`.
 
-        :return:
-            A string containing the formatted table.
+        :returns: A string containing the formatted table.
         """
         import tabulate
 

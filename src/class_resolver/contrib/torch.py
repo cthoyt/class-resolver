@@ -22,12 +22,12 @@ from ..api import ClassResolver
 from ..func import FunctionResolver
 
 __all__ = [
-    "optimizer_resolver",
     "activation_resolver",
-    "margin_activation_resolver",
+    "aggregation_resolver",
     "initializer_resolver",
     "lr_scheduler_resolver",
-    "aggregation_resolver",
+    "margin_activation_resolver",
+    "optimizer_resolver",
 ]
 
 optimizer_resolver = ClassResolver.from_subclasses(

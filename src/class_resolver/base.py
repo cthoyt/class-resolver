@@ -36,7 +36,8 @@ class RegistrationError(KeyError, Generic[X], ABC):
         """Initialize the registration error.
 
         :param resolver: The resolver where the registration error occurred
-        :param key: The key (either in the ``lookup_dict`` or ``synonyms``) where the conflict occurred
+        :param key: The key (either in the ``lookup_dict`` or ``synonyms``) where the
+            conflict occurred
         :param proposed: The proposed overwrite on the given key
         :param label: The origin of the error (either "name" or "synonym")
         """
@@ -79,8 +80,8 @@ class BaseResolver(ABC, Generic[X, Y]):
     This class is parametrized by two variables:
 
     - ``X`` is the type of element in the resolver
-    - ``Y`` is the type that gets made by the ``make`` function. This is typically
-      the same as ``X``, but might be different from ``X``, such as in the class resolver.
+    - ``Y`` is the type that gets made by the ``make`` function. This is typically the
+      same as ``X``, but might be different from ``X``, such as in the class resolver.
     """
 
     default: X | None
@@ -157,14 +158,14 @@ class BaseResolver(ABC, Generic[X, Y]):
 
         :param element: The element to register
         :param synonyms: An optional iterable of synonyms to add for the element
-        :param raise_on_conflict: Determines the behavior when a conflict is encountered on either
-            the normalized element name or a synonym. If true, will raise an exception. If false, will
-            simply disregard the entry.
+        :param raise_on_conflict: Determines the behavior when a conflict is encountered
+            on either the normalized element name or a synonym. If true, will raise an
+            exception. If false, will simply disregard the entry.
 
-        :raises RegistrationNameConflict: If ``raise_on_conflict`` is true
-            and there's a conflict with the lookup dict
-        :raises RegistrationSynonymConflict: If ``raise_on_conflict`` is true
-            and there's a conflict with the synonym dict
+        :raises RegistrationNameConflict: If ``raise_on_conflict`` is true and there's a
+            conflict with the lookup dict
+        :raises RegistrationSynonymConflict: If ``raise_on_conflict`` is true and
+            there's a conflict with the synonym dict
         :raises ValueError: If any given synonyms are empty strings
         """
         key = self.normalize(self.extract_name(element))
@@ -196,11 +197,11 @@ class BaseResolver(ABC, Generic[X, Y]):
     def docdata(self, query: Hint[X], *path: str, default: X | None = None) -> Any:
         """Lookup an element and get its docdata.
 
-        :param query: The hint for looking something up in the resolver
-            passed to :func:`lookup`
-        :param path: An optional path for traversing the resulting docdata
-            dictionary
+        :param query: The hint for looking something up in the resolver passed to
+            :func:`lookup`
+        :param path: An optional path for traversing the resulting docdata dictionary
         :param default: The default value to pass to :func:`lookup`
+
         :returns: The optional docdata retrieved with :func:`docdata.get_docdata`
         """
         from docdata import get_docdata
@@ -293,10 +294,11 @@ class BaseResolver(ABC, Generic[X, Y]):
     def optuna_lookup(self, trial: optuna.Trial, name: str) -> X:
         """Suggest an element from this resolver for hyper-parameter optimization in Optuna.
 
-        :param trial: A trial object from :mod:`optuna`. Note that this object shouldn't be constructed
-            by the developer, and should only get constructed inside the optuna framework when
-            using :meth:`optuna.Study.optimize`.
+        :param trial: A trial object from :mod:`optuna`. Note that this object shouldn't
+            be constructed by the developer, and should only get constructed inside the
+            optuna framework when using :meth:`optuna.Study.optimize`.
         :param name: The name of the `param` within an optuna study.
+
         :returns: An element chosen by optuna, then run through :func:`lookup`.
 
         In the following example, Optuna is used to determine the best classification

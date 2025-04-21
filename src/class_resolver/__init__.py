@@ -1,9 +1,10 @@
 """The :mod:`class_resolver` package helps you look up related classes and functions to parametrize your code.
 
 Getting Started
----------------
-An example might be when you have several implementations of the same algorithm
-(e.g., fast, greedy one and a slow but correct one) and want to write a function
+===============
+
+An example might be when you have several implementations of the same algorithm (e.g.,
+fast, greedy one and a slow but correct one) and want to write a function
 ``run_algorithm`` that can be easily switched between them with a string corresponding
 to the name of the implementation
 
@@ -11,17 +12,19 @@ to the name of the implementation
 
     from class_resolver import ClassResolver, Hint
 
+
     class Algorithm:
-        def run(self, data):
-            ...
+        def run(self, data): ...
 
-    class GreedyAlgorithm(Algorithm):
-        ...
 
-    class CorrectAlgorithm(Algorithm):
-        ...
+    class GreedyAlgorithm(Algorithm): ...
+
+
+    class CorrectAlgorithm(Algorithm): ...
+
 
     algorithm_resolver = ClassResolver.from_subclasses(Algorithm)
+
 
     def run_algorithm(data, *, algorithm: Hint[Algorithm] = "greedy"):
         algorithm = algorithm_resolver.make(algorithm)
@@ -32,15 +35,19 @@ and ``"correct"`` for ``CorrectAlgorithm``. That's because it knows the name of 
 class is ``Algorithm`` and it can infer what you mean.
 
 Pass a string, class, or instance
----------------------------------
-The ``Hint[Algorithm]`` signifies that the ``algorithm_resolver.make(...)`` function is very powerful. You can pass
-it one of the following:
+=================================
 
-1. A string, like ``"GreedyAlgorithm"`` or ``"Greedy"`` or ``"greedy"`` and it deals with casing and the suffix
-2. A class like ``GreedyAlgorithm``, ``CorrectAlgorithm``, or any potential subclass of ``Algorithm``
+The ``Hint[Algorithm]`` signifies that the ``algorithm_resolver.make(...)`` function is
+very powerful. You can pass it one of the following:
+
+1. A string, like ``"GreedyAlgorithm"`` or ``"Greedy"`` or ``"greedy"`` and it deals
+   with casing and the suffix
+2. A class like ``GreedyAlgorithm``, ``CorrectAlgorithm``, or any potential subclass of
+   ``Algorithm``
 3. An instance of an ``Algorithm``, in case you have one pre-defined.
-4. ``None``, if you defined the ``default=...` when you called ``ClassResolver.from_subclasses`` like in
-   ``ClassResolver.from_subclasses(Algorithm, default=GreedyAlgorithm``.
+4. ``None``, if you defined the ``default=...` when you called
+   ``ClassResolver.from_subclasses`` like in ``ClassResolver.from_subclasses(Algorithm,
+   default=GreedyAlgorithm``.
 """
 
 from .api import ClassResolver, KeywordArgumentError, Resolver, UnexpectedKeywordError, get_cls
@@ -70,32 +77,28 @@ from .version import VERSION
 
 __all__ = [
     "VERSION",
-    # Type Hints
-    "InstOrType",
-    "Lookup",
-    "LookupType",
-    "LookupOrType",
-    "Hint",
-    "HintType",
-    "HintOrType",
-    "OptionalKwargs",
-    "OneOrManyHintOrType",
-    "OneOrManyOptionalKwargs",
-    # Classes
     "BaseResolver",
-    "Resolver",
     "ClassResolver",
     "FunctionResolver",
-    # Utilities
+    "Hint",
+    "HintOrType",
+    "HintType",
+    "InstOrType",
+    "KeywordArgumentError",
+    "Lookup",
+    "LookupOrType",
+    "LookupType",
+    "OneOrManyHintOrType",
+    "OneOrManyOptionalKwargs",
+    "OptionalKwargs",
+    "RegistrationError",
+    "RegistrationNameConflict",
+    "RegistrationSynonymConflict",
+    "Resolver",
+    "ResolverKey",
+    "UnexpectedKeywordError",
     "get_cls",
     "get_subclasses",
     "normalize_string",
     "update_docstring_with_resolver_keys",
-    "ResolverKey",
-    # Exceptions
-    "RegistrationError",
-    "RegistrationNameConflict",
-    "RegistrationSynonymConflict",
-    "KeywordArgumentError",
-    "UnexpectedKeywordError",
 ]

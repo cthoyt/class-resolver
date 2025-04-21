@@ -6,8 +6,8 @@ from optuna.samplers import BaseSampler, TPESampler
 from ..api import ClassResolver
 
 __all__ = [
-    "sampler_resolver",
     "pruner_resolver",
+    "sampler_resolver",
 ]
 
 sampler_resolver = ClassResolver.from_subclasses(
