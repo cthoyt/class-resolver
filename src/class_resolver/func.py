@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 
-from typing_extensions import ParamSpec, TypeAlias
+from typing_extensions import ParamSpec
 
 from .base import BaseResolver
 from .utils import Hint, OptionalKwargs
@@ -16,10 +16,9 @@ __all__ = [
 
 P = ParamSpec("P")
 T = TypeVar("T")
-X: TypeAlias = Callable[P, T]
 
 
-class FunctionResolver(BaseResolver[Callable[P, T], Callable[P, T]]):
+class FunctionResolver(Generic[P, T], BaseResolver[Callable[P, T], Callable[P, T]]):
     """A resolver for functions."""
 
     def extract_name(self, element: Callable[P, T]) -> str:
@@ -44,12 +43,7 @@ class FunctionResolver(BaseResolver[Callable[P, T], Callable[P, T]]):
         else:
             raise TypeError(f"Invalid function: {type(query)} - {query}")
 
-    def make(
-        self,
-        query: Hint[Callable[P, T]],
-        pos_kwargs: OptionalKwargs = None,
-        **kwargs: Any,
-    ) -> Callable[P, T]:
+    def make(self, query: Hint[Callable[P, T]], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Callable[P, T]:
         """Make a function with partial bindings to the given kwargs."""
         func: Callable[P, T] = self.lookup(query)
         if pos_kwargs or kwargs:

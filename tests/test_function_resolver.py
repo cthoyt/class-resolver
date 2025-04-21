@@ -2,7 +2,7 @@
 
 import operator
 import unittest
-from typing import Any
+from typing import Callable
 
 from class_resolver import FunctionResolver
 
@@ -22,9 +22,12 @@ def add_three(x: int) -> int:
     return x + 3
 
 
-def add_y(x: int, *, y: int) -> int:
+def add_y(x: int, *, y: int = 0) -> int:
     """Add y to the number."""
     return x + y
+
+
+FUNCTIONS: list[Callable[[int], int]] = [add_one, add_two, add_y]
 
 
 class TestFunctionResolver(unittest.TestCase):
@@ -32,7 +35,7 @@ class TestFunctionResolver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up the resolver class."""
-        self.resolver = FunctionResolver([add_one, add_two, add_y])
+        self.resolver = FunctionResolver(FUNCTIONS)
 
     def test_contents(self) -> None:
         """Test the functions."""
@@ -98,7 +101,9 @@ class TestFunctionResolver(unittest.TestCase):
 
     def test_entrypoints(self) -> None:
         """Test loading from entrypoints."""
-        resolver: FunctionResolver[Any, Any] = FunctionResolver.from_entrypoint("class_resolver_demo")
+        # such as operator.add
+        # FIXME type annotation here
+        resolver = FunctionResolver.from_entrypoint("class_resolver_demo")  # type:ignore
         self.assertEqual({"add", "sub", "mul"}, set(resolver.lookup_dict))
         self.assertEqual(set(), set(resolver.synonyms))
         self.assertNotIn("expected_failure", resolver.lookup_dict)
