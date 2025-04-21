@@ -116,7 +116,7 @@ def f3(
     :returns: An aggregation
     """
     _activation = activation_resolver.make(activation, activation_kwargs)
-    _aggregation: TorchAggregationFunc = aggregation_resolver.make(aggregation, aggregation_kwargs)
+    _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
     return _aggregation(_activation(tensor))
 
 
