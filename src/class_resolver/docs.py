@@ -6,7 +6,7 @@ import importlib
 import inspect
 import textwrap
 from collections import defaultdict
-from typing import Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -107,7 +107,9 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey[X, Y]) -> Callable[[F], F]:
+def update_docstring_with_resolver_keys(
+    *resolver_keys: ResolverKey[Any, Any],
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Build a decorator to add information about resolved parameter pairs.
 
     The decorator is intended for methods with follow the ``param`` + ``param_kwargs``
@@ -210,7 +212,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey[X, Y]) -> Ca
 
     # TODO: we could do some more sanitization, e.g., trying to match types, ...
 
-    def add_note(func: F) -> F:
+    def add_note(func: Callable[P, T]) -> Callable[P, T]:
         """Extend the function's docstring with a note about resolved parameters.
 
         :param func: the function to decorate.

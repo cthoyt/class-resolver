@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -16,17 +16,16 @@ __all__ = [
 
 P = ParamSpec("P")
 T = TypeVar("T")
-X = Callable[P, T]
 
 
-class FunctionResolver(BaseResolver[X, X]):
+class FunctionResolver(Generic[P, T], BaseResolver[Callable[P, T], Callable[P, T]]):
     """A resolver for functions."""
 
-    def extract_name(self, element: X) -> str:
+    def extract_name(self, element: Callable[P, T]) -> str:
         """Get the name for an element."""
         return element.__name__
 
-    def lookup(self, query: Hint[X], default: X | None = None) -> X:
+    def lookup(self, query: Hint[Callable[P, T]], default: Callable[P, T] | None = None) -> Callable[P, T]:
         """Lookup a function."""
         if query is None:
             return self._default(default)
@@ -44,9 +43,14 @@ class FunctionResolver(BaseResolver[X, X]):
         else:
             raise TypeError(f"Invalid function: {type(query)} - {query}")
 
-    def make(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> X:
+    def make(
+        self,
+        query: Hint[Callable[P, T]],
+        pos_kwargs: OptionalKwargs = None,
+        **kwargs: Any,
+    ) -> Callable[P, T]:
         """Make a function with partial bindings to the given kwargs."""
-        func: X = self.lookup(query)
+        func: Callable[P, T] = self.lookup(query)
         if pos_kwargs or kwargs:
             return partial(func, **(pos_kwargs or {}), **kwargs)
         return func
