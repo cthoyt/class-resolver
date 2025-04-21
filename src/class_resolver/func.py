@@ -5,6 +5,8 @@ from __future__ import annotations
 from functools import partial
 from typing import Any, Callable, TypeVar
 
+from typing_extensions import ParamSpec
+
 from .base import BaseResolver
 from .utils import Hint, OptionalKwargs
 
@@ -12,7 +14,9 @@ __all__ = [
     "FunctionResolver",
 ]
 
-X = TypeVar("X", bound=Callable[..., Any])
+P = ParamSpec("P")
+T = TypeVar("T")
+X = Callable[P, T]
 
 
 class FunctionResolver(BaseResolver[X, X]):
