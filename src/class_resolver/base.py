@@ -6,7 +6,9 @@ import logging
 import sys
 from abc import ABC, abstractmethod
 from collections.abc import Collection, Iterable, Iterator, Mapping
-from typing import TYPE_CHECKING, Any, Callable, Generic
+from typing import TYPE_CHECKING, Any, Callable, Generic, overload
+
+from typing_extensions import Self
 
 from typing_extensions import Self
 
@@ -34,7 +36,7 @@ logger = logging.getLogger(__name__)
 class RegistrationError(KeyError, Generic[X], ABC):
     """Raised when trying to add a new element to a resolver with a pre-existing lookup key."""
 
-    def __init__(self, resolver: BaseResolver[X, Y], key: str, proposed: X, label: str):
+    def __init__(self, resolver: BaseResolver[X, Any], key: str, proposed: X, label: str) -> None:
         """Initialize the registration error.
 
         :param resolver: The resolver where the registration error occurred
@@ -86,6 +88,7 @@ class BaseResolver(ABC, Generic[X, Y]):
       same as ``X``, but might be different from ``X``, such as in the class resolver.
     """
 
+    #: The default value for the resolver, if given during construction
     default: X | None
     #: The mapping from synonyms to the classes indexed by this resolver
     synonyms: dict[str, X]
@@ -110,7 +113,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         synonyms: Mapping[str, X] | None = None,
         suffix: str | None = None,
         location: str | None = None,
-    ):
+    ) -> None:
         """Initialize the resolver.
 
         :param elements: The elements to register
@@ -223,7 +226,15 @@ class BaseResolver(ABC, Generic[X, Y]):
     ) -> Y:
         """Make an element."""
 
-    def make_safe(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Y | None:
+    # docstr-coverage:excused `overload`
+    @overload
+    def make_safe(self, query: None, pos_kwargs: OptionalKwargs = ..., **kwargs: Any) -> None: ...
+
+    # docstr-coverage:excused `overload`
+    @overload
+    def make_safe(self, query: X | str, pos_kwargs: OptionalKwargs = ..., **kwargs: Any) -> Y: ...
+
+    def make_safe(self, query: X | str | None, pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Y | None:
         """Run make, but pass through a none query."""
         if query is None:
             return None

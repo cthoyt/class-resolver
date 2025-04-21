@@ -6,7 +6,7 @@ import importlib
 import inspect
 import textwrap
 from collections import defaultdict
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -17,14 +17,11 @@ __all__ = [
     "update_docstring_with_resolver_keys",
 ]
 
-X = TypeVar("X")
-Y = TypeVar("Y")
 T = TypeVar("T")
 P = ParamSpec("P")
-F = Callable[P, T]
 
 
-def _get_qualpath_from_object(resolver: BaseResolver[X, Y]) -> str:
+def _get_qualpath_from_object(resolver: BaseResolver[Any, Any]) -> str:
     if resolver.location:
         return resolver.location
     raise NotImplementedError(
@@ -33,18 +30,20 @@ def _get_qualpath_from_object(resolver: BaseResolver[X, Y]) -> str:
     )
 
 
-class ResolverKey(Generic[X, Y]):
+class ResolverKey:
     """An object storing information about how a resolver is used in a signature."""
 
     name: str
     key: str
     resolver_path: str
-    resolver: BaseResolver[X, Y] | None
+    # note that resolver keys don't depend at all on the
+    # types in the resolver
+    resolver: BaseResolver[Any, Any] | None
 
     def __init__(
         self,
         name: str,
-        resolver: str | BaseResolver[X, Y],
+        resolver: str | BaseResolver[Any, Any],
         key: str | None = None,
     ) -> None:
         """Initialize the key for :func:`update_docstring_with_resolver_keys`."""
@@ -107,9 +106,7 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def update_docstring_with_resolver_keys(
-    *resolver_keys: ResolverKey[Any, Any],
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Build a decorator to add information about resolved parameter pairs.
 
     The decorator is intended for methods with follow the ``param`` + ``param_kwargs``
