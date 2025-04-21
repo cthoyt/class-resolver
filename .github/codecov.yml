@@ -1,0 +1,4 @@
+# see https://docs.codecov.com/v4.6/docs/codecov-yaml
+ignore:
+  - "src/class_resolver/__main__.py"
+  - "src/class_resolver/cli.py"

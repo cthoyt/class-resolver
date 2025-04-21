@@ -1,15 +1,14 @@
-"""Configuration file for the Sphinx documentation builder."""
-#
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
+"""Configuration file for the Sphinx documentation builder.
 
-# -- Path setup --------------------------------------------------------------
+This file does only contain a selection of the most common options. For a full list see
+the documentation: http://www.sphinx-doc.org/en/master/config
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
+-- Path setup --------------------------------------------------------------
+
+If extensions (or modules to document with autodoc) are in another directory, add these
+directories to ``sys.path`` here. If the directory is relative to the documentation
+root, use ``os.path.abspath`` to make it absolute, like shown here.
+"""
 
 import os
 import re
@@ -17,12 +16,6 @@ import sys
 from datetime import date
 
 sys.path.insert(0, os.path.abspath("../../src"))
-
-autodoc_mock_imports = [
-    "torch",
-    "optuna",
-    "ray",
-]
 
 # -- Project information -----------------------------------------------------
 
@@ -42,6 +35,19 @@ version = parsed_version.expand(r"\g<major>.\g<minor>.\g<patch>")
 
 if parsed_version.group("release"):
     tags.add("prerelease")  # noqa:F821
+
+
+# See https://about.readthedocs.com/blog/2024/07/addons-by-default/
+# Define the canonical URL if you are using a custom domain on Read the Docs
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
+
+# See https://about.readthedocs.com/blog/2024/07/addons-by-default/
+# Tell Jinja2 templates the build is running on Read the Docs
+if os.environ.get("READTHEDOCS", "") == "True":
+    if "html_context" not in globals():
+        html_context = {}
+    html_context["READTHEDOCS"] = True
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -68,7 +74,9 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx_automodapi.automodapi",
+    "sphinx_automodapi.smart_resolver",
 ]
+
 
 # generate autosummary pages
 autosummary_generate = True
@@ -80,7 +88,9 @@ templates_path = ["_templates"]
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+}
 
 # The master toctree document.
 master_doc = "index"
@@ -137,7 +147,7 @@ if os.path.exists("logo.png"):
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "Class Resolverdoc"
+htmlhelp_basename = "class_resolver_doc"
 
 # -- Options for LaTeX output ------------------------------------------------
 
@@ -225,6 +235,7 @@ texinfo_documents = [
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
+# Note: don't add trailing slashes, since sphinx adds "/objects.inv" to the end
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "torch": ("https://pytorch.org/docs/stable", None),
@@ -232,6 +243,18 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "optuna": ("https://optuna.readthedocs.io/en/latest", None),
     "sklearn": ("https://scikit-learn.org/stable", None),
+    "pandas": ("https://pandas.pydata.org/docs", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
 }
 
 autoclass_content = "both"
+
+# Don't sort alphabetically, explained at:
+# https://stackoverflow.com/questions/37209921/python-how-not-to-sort-sphinx-output-in-alphabetical-order
+autodoc_member_order = "bysource"
+
+todo_include_todos = True
+todo_emit_warnings = True
+
+# Output SVG inheritance diagrams
+graphviz_output_format = "svg"
