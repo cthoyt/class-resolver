@@ -19,9 +19,6 @@ from .utils import (
     upgrade_to_sequence,
 )
 
-if TYPE_CHECKING:
-    import ray.tune.search.sample
-
 __all__ = [
     "ClassResolver",
     "KeywordArgumentError",
@@ -240,74 +237,6 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
         query = data.get(key, None)
         pos_kwargs = data.get(f"{key}_{kwargs_suffix}", {})
         return self.make(query=query, pos_kwargs=pos_kwargs, **o_kwargs)
-
-    def ray_tune_search_space(
-        self, kwargs_search_space: Mapping[str, Any] | None = None
-    ) -> Mapping[str, Any] | ray.tune.search.sample.Categorical:
-        """Return a search space for ray.tune.
-
-        ray.tune is a package for distributed hyperparameter optimization. The search
-        space for this search is defined as a (nested) dictionary, which can contain
-        special values `tune.{choice,uniform,...}`. For these values, the search
-        algorithm will sample a specific configuration.
-
-        This method can be used to create a tune.choice sampler for the choices
-        available to the resolver. By default, this is equivalent to
-
-        .. code-block:: python
-
-            ray.tune.choice(self.options)
-
-        If additional `kwargs_search_space` are passed, they are assumed to be a
-        sub-search space for the constructor parameters passed via `pos_kwargs`. The
-        resulting sub-search thus looks as follows:
-
-        .. code-block:: python
-
-            ray.tune.choice(
-                query=self.options,
-                **kwargs_search_space,
-            )
-
-        :param kwargs_search_space: Additional sub search space for the constructor's
-            parameters.
-
-        :returns: A ray.tune compatible search space.
-
-        :raises ImportError: If ray.tune is not installed.
-
-        .. seealso::
-
-            https://docs.ray.io/en/master/tune/index.html
-        """
-        try:
-            import ray.tune
-        except ImportError:
-            raise ImportError(
-                dedent(
-                    """
-                To use ray_tune_search_space please install ray tune first.
-
-                You can do so by selecting the appropriate install option for the package
-
-                    pip install class-resolver[ray]
-
-                or by manually installing ray tune
-
-                    pip install ray[tune]
-                """,
-                )
-            ) from None
-
-        query = ray.tune.choice(list(self.options))
-
-        if kwargs_search_space is None:
-            return query
-
-        return dict(
-            query=query,
-            **kwargs_search_space,
-        )
 
     def make_many(
         self,
