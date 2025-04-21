@@ -10,8 +10,6 @@ from typing import TYPE_CHECKING, Any, Callable, Generic, overload
 
 from typing_extensions import Self
 
-from typing_extensions import Self
-
 if sys.version_info[:2] >= (3, 10):
     from importlib.metadata import entry_points
 else:
