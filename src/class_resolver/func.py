@@ -45,7 +45,7 @@ class FunctionResolver(Generic[P, T], BaseResolver[Callable[P, T], Callable[P, T
 
     def make(self, query: Hint[Callable[P, T]], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Callable[P, T]:
         """Make a function with partial bindings to the given kwargs."""
-        func: Callable[P, T] = self.lookup(query)
+        func = self.lookup(query)
         if pos_kwargs or kwargs:
             return partial(func, **(pos_kwargs or {}), **kwargs)
         return func
