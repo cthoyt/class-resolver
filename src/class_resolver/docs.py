@@ -6,7 +6,7 @@ import importlib
 import inspect
 import textwrap
 from collections import defaultdict
-from typing import Callable, TypeVar
+from typing import Callable, Generic, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -24,7 +24,7 @@ P = ParamSpec("P")
 F = Callable[P, T]
 
 
-def _get_qualpath_from_object(resolver: BaseResolver) -> str:
+def _get_qualpath_from_object(resolver: BaseResolver[X, Y]) -> str:
     if resolver.location:
         return resolver.location
     raise NotImplementedError(
@@ -33,18 +33,18 @@ def _get_qualpath_from_object(resolver: BaseResolver) -> str:
     )
 
 
-class ResolverKey:
+class ResolverKey(Generic[X, Y]):
     """An object storing information about how a resolver is used in a signature."""
 
     name: str
     key: str
     resolver_path: str
-    resolver: BaseResolver | None
+    resolver: BaseResolver[X, Y] | None
 
     def __init__(
         self,
         name: str,
-        resolver: str | BaseResolver,
+        resolver: str | BaseResolver[X, Y],
         key: str | None = None,
     ) -> None:
         """Initialize the key for :func:`update_docstring_with_resolver_keys`."""

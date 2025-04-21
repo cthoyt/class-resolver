@@ -7,7 +7,7 @@ from typing import Any, cast
 
 from torch import Tensor, nn
 
-from class_resolver import FunctionResolver, ResolverKey, update_docstring_with_resolver_keys
+from class_resolver import FunctionResolver, OptionalKwargs, ResolverKey, update_docstring_with_resolver_keys
 from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
 from class_resolver.docs import _clean_docstring
 
@@ -74,7 +74,7 @@ Apply an activation then aggregation.
 
 
 @TEST_RESOLVER_1
-def f1(activation, activation_kwargs):
+def f1(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: OptionalKwargs) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -83,7 +83,7 @@ def f1(activation, activation_kwargs):
 
 
 @TEST_RESOLVER_1
-def f2(activation, activation_kwargs):
+def f2(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: OptionalKwargs) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -198,7 +198,7 @@ Apply an activation then aggregation.
 
 
 @TEST_RESOLVER_2
-def f5(activation, activation_kwargs) -> Tensor:
+def f5(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: OptionalKwargs) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -210,13 +210,13 @@ class DecoratorTests(unittest.TestCase):
     """Decorator tests."""
 
     @staticmethod
-    def f(model, model_kwargs) -> None:
+    def f(model: Any, model_kwargs: OptionalKwargs) -> None:
         """Do something, and also use model."""
         pass
 
     # docstr-coverage:excused `testing missing docstr on purpose`
     @staticmethod
-    def f_no_doc(model, model_kwargs) -> None:  # noqa: D102
+    def f_no_doc(model: Any, model_kwargs: OptionalKwargs) -> None:  # noqa: D102
         pass
 
     def test_decorator(self) -> None:
@@ -270,7 +270,7 @@ class TestDocumentResolver(unittest.TestCase):
 
     def test_duplicate_params(self) -> None:
         """Test when no keys are passed."""
-        key = ResolverKey("a", "b")
+        key: ResolverKey = ResolverKey("a", "b")
         with self.assertRaises(ValueError):
             update_docstring_with_resolver_keys(key, key)
 
@@ -279,7 +279,7 @@ class TestDocumentResolver(unittest.TestCase):
         with self.assertRaises(ValueError):
 
             @update_docstring_with_resolver_keys(ResolverKey("some-other-param", "y"))
-            def f(x):
+            def f(x: str) -> None:
                 """Do the thing."""
 
     def test_no_location(self) -> None:
