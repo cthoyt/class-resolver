@@ -270,7 +270,7 @@ class TestDocumentResolver(unittest.TestCase):
 
     def test_duplicate_params(self) -> None:
         """Test when no keys are passed."""
-        key: ResolverKey[Any, Any] = ResolverKey("a", "b")
+        key = ResolverKey("a", "b")
         with self.assertRaises(ValueError):
             update_docstring_with_resolver_keys(key, key)
 
@@ -284,7 +284,7 @@ class TestDocumentResolver(unittest.TestCase):
 
     def test_no_location(self) -> None:
         """Test when there's no explicit location given."""
-        r: FunctionResolver[Any, Any] = FunctionResolver([])
+        r = FunctionResolver([])
         with self.assertRaises(NotImplementedError):
             ResolverKey("xx", r)
 

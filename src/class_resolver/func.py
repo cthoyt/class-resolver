@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, TypeVar
 
 from typing_extensions import ParamSpec, TypeAlias
 
@@ -19,7 +19,7 @@ T = TypeVar("T")
 X: TypeAlias = Callable[P, T]
 
 
-class FunctionResolver(Generic[P, T], BaseResolver[Callable[P, T], Callable[P, T]]):
+class FunctionResolver(BaseResolver[Callable[P, T], Callable[P, T]]):
     """A resolver for functions."""
 
     def extract_name(self, element: Callable[P, T]) -> str:
