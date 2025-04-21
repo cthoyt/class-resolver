@@ -1,7 +1,5 @@
 """Utilities for the resolver."""
 
-from __future__ import annotations
-
 import collections.abc
 import logging
 from collections.abc import Iterable, Mapping, Sequence
@@ -176,17 +174,17 @@ def normalize_with_default(
 def normalize_with_default(
     choice: X,
     kwargs: OptionalKwargs = ...,
-    default: Y | None = ...,
+    default: Optional[Y] = ...,
     default_kwargs: OptionalKwargs = ...,
-) -> tuple[X | None, OptionalKwargs]: ...
+) -> tuple[X, OptionalKwargs]: ...
 
 
 def normalize_with_default(
-    choice: X | None,
+    choice: Optional[X],
     kwargs: OptionalKwargs = None,
-    default: Y | None = None,
+    default: Optional[Y] = None,
     default_kwargs: OptionalKwargs = None,
-) -> tuple[X | Y | None, OptionalKwargs]:
+) -> tuple[Union[X, Y, None], OptionalKwargs]:
     """
     Normalize a choice for class resolver, with default options.
 
