@@ -2,6 +2,7 @@
 
 import operator
 import unittest
+from typing import Any
 
 from class_resolver import FunctionResolver
 
@@ -21,7 +22,7 @@ def add_three(x: int) -> int:
     return x + 3
 
 
-def add_y(x: int, y: int) -> int:
+def add_y(x: int, *, y: int) -> int:
     """Add y to the number."""
     return x + y
 
@@ -31,7 +32,7 @@ class TestFunctionResolver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up the resolver class."""
-        self.resolver = FunctionResolver([add_one, add_two, add_y])
+        self.resolver: FunctionResolver[Any, int] = FunctionResolver([add_one, add_two, add_three])
 
     def test_contents(self) -> None:
         """Test the functions."""
@@ -50,7 +51,7 @@ class TestFunctionResolver(unittest.TestCase):
 
     def test_default_lookup(self) -> None:
         """Test lookup with default."""
-        resolver = FunctionResolver([add_one, add_two, add_y], default=add_two)
+        resolver: FunctionResolver[Any, int] = FunctionResolver([add_one, add_two, add_three], default=add_two)
         self.assertEqual(add_one, resolver.lookup("add_one"))
         self.assertEqual(add_one, resolver.lookup("ADD_ONE"))
         self.assertEqual(add_two, resolver.lookup(None))
@@ -97,7 +98,7 @@ class TestFunctionResolver(unittest.TestCase):
 
     def test_entrypoints(self) -> None:
         """Test loading from entrypoints."""
-        resolver = FunctionResolver.from_entrypoint("class_resolver_demo")
+        resolver: FunctionResolver[Any, Any] = FunctionResolver.from_entrypoint("class_resolver_demo")
         self.assertEqual({"add", "sub", "mul"}, set(resolver.lookup_dict))
         self.assertEqual(set(), set(resolver.synonyms))
         self.assertNotIn("expected_failure", resolver.lookup_dict)

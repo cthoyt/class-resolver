@@ -8,6 +8,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Collection, Iterable, Iterator, Mapping
 from typing import TYPE_CHECKING, Any, Callable, Generic
 
+from typing_extensions import Self
+
 if sys.version_info[:2] >= (3, 10):
     from importlib.metadata import entry_points
 else:
@@ -286,7 +288,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         return elements
 
     @classmethod
-    def from_entrypoint(cls, group: str, **kwargs: Any) -> BaseResolver[X, Y]:
+    def from_entrypoint(cls, group: str, **kwargs: Any) -> Self:
         """Make a resolver from the elements registered at the given entrypoint."""
         elements = cls._from_entrypoint(group)
         return cls(elements, **kwargs)
