@@ -45,7 +45,7 @@ class TestUtilities(unittest.TestCase):
         self.assertNotIn(PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
 
         if sys.version_info < (3, 13):
-            # in Python 3.13, th
+            # in Python 3.13, this class gets renamed and the test doesn't work anymore
             self.assertIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False)))
             self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True)))
             self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
