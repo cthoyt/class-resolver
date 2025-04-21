@@ -3,6 +3,6 @@ message: "If you use this software, please cite it as below."
 title: "Class Resolver"
 authors:
   - name: "Charles Tapley Hoyt"
-version: 0.5.6-dev
+version: 0.6.0-dev
 doi:
 url: "https://github.com/cthoyt/class-resolver"
