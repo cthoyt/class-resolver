@@ -5,14 +5,7 @@ from __future__ import annotations
 import collections.abc
 import logging
 from collections.abc import Iterable, Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union, overload
 
 if TYPE_CHECKING:
     import click  # pragma: no cover
@@ -209,15 +202,14 @@ def normalize_with_default(
     :return:
         a pair (hint, optional kwargs).
     """
-    if choice is None:
-        if default is None:
-            raise ValueError("If choice is None, a default has to be provided.")
-        choice = default
-        if kwargs is not None:
-            logger.warning(
-                f"No choice was provided, but kwargs={kwargs} is not None. Will use the default choice={default} "
-                f"with its default_kwargs={default_kwargs}. If you want the explicitly provided kwargs to be used,"
-                f" explicitly provide choice={default} instead of None."
-            )
-        kwargs = default_kwargs
-    return choice, kwargs
+    if choice is not None:
+        return choice, kwargs or default_kwargs
+    if default is None:
+        raise ValueError("If choice is None, a default has to be provided.")
+    if kwargs is not None:
+        logger.warning(
+            f"No choice was provided, but kwargs={kwargs} is not None. Will use the default choice={default} "
+            f"with its default_kwargs={default_kwargs}. If you want the explicitly provided kwargs to be used,"
+            f" explicitly provide choice={default} instead of None."
+        )
+    return default, default_kwargs
