@@ -1,6 +1,9 @@
 """NumPy is a numerical package for Python."""
 
+from typing import Callable
+
 import numpy as np
+from typing_extensions import TypeAlias
 
 from ..func import FunctionResolver
 
@@ -8,8 +11,12 @@ __all__ = [
     "aggregation_resolver",
 ]
 
+NumpyAggregationFunc: TypeAlias = Callable
+
+_AGGREGATION_FUNCTIONS: list[NumpyAggregationFunc] = [np.sum, np.max, np.min, np.mean, np.median]
+
 aggregation_resolver = FunctionResolver(
-    [np.sum, np.max, np.min, np.mean, np.median],
+    _AGGREGATION_FUNCTIONS,
     default=np.mean,
     location="class_resolver.contrib.numpy.aggregation_resolver",
 )
