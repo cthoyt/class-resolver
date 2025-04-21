@@ -18,9 +18,6 @@ if TYPE_CHECKING:
     import click  # pragma: no cover
 
 __all__ = [
-    # Type Hints
-    "X",
-    "Y",
     "Hint",
     "HintOrType",
     "HintType",
@@ -28,16 +25,17 @@ __all__ = [
     "Lookup",
     "LookupOrType",
     "LookupType",
-    "OptionalKwargs",
     "OneOrManyHintOrType",
     "OneOrManyOptionalKwargs",
-    # Functions
+    "OptionalKwargs",
+    "X",
+    "Y",
     "get_subclasses",
-    "normalize_string",
-    "upgrade_to_sequence",
     "make_callback",
-    "same_module",
+    "normalize_string",
     "normalize_with_default",
+    "same_module",
+    "upgrade_to_sequence",
 ]
 
 logger = logging.getLogger(__name__)

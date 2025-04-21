@@ -95,8 +95,8 @@ class MLP(nn.Sequential):
 
 This MLP uses a hard-coded rectified linear unit as the non-linear activation
 function between layers. We can generalize this MLP to use a variety of
-non-linear activation functions by adding an argument to its
-`__init__()` function like in:
+non-linear activation functions by adding an argument to its `__init__()`
+function like in:
 
 ```python
 from itertools import chain
@@ -124,8 +124,8 @@ class MLP(nn.Sequential):
 ```
 
 The first issue with this implementation is it relies on a hard-coded set of
-conditional statements and is therefore hard to extend. It can be improved
-by using a dictionary lookup:
+conditional statements and is therefore hard to extend. It can be improved by
+using a dictionary lookup:
 
 ```python
 from itertools import chain
@@ -153,8 +153,8 @@ class MLP(nn.Sequential):
 
 This approach is rigid because it requires pre-instantiation of the activations.
 If we needed to vary the arguments to the `nn.HardTanh` class, the previous
-approach wouldn't work. We can change the implementation to lookup on the 
-class *before instantiation* then optionally pass some arguments:
+approach wouldn't work. We can change the implementation to lookup on the class
+_before instantiation_ then optionally pass some arguments:
 
 ```python
 from itertools import chain
@@ -170,9 +170,9 @@ activation_lookup: dict[str, type[nn.Module]] = {
 
 class MLP(nn.Sequential):
     def __init__(
-        self, 
-        dims: list[int], 
-        activation: str = "relu", 
+        self,
+        dims: list[int],
+        activation: str = "relu",
         activation_kwargs: None | dict[str, any] = None,
     ):
         activation_cls = activation_lookup[activation]
@@ -187,6 +187,7 @@ class MLP(nn.Sequential):
 ```
 
 This is pretty good, but it still has a few issues:
+
 1. you have to manually maintain the `activation_lookup` dictionary,
 2. you can't pass an instance or class through the `activation` keyword
 3. you have to get the casing just right
@@ -194,8 +195,8 @@ This is pretty good, but it still has a few issues:
    (error-prone) in any place that creates an MLP
 5. you have to re-write this logic for all of your classes
 
-Enter the `class_resolver` package, which takes care of all of these
-things using the following:
+Enter the `class_resolver` package, which takes care of all of these things
+using the following:
 
 ```python
 from itertools import chain
@@ -212,8 +213,8 @@ activation_resolver = ClassResolver(
 
 class MLP(nn.Sequential):
     def __init__(
-        self, 
-        dims: list[int], 
+        self,
+        dims: list[int],
         activation: Hint[nn.Module] = None,  # Hint = Union[None, str, nn.Module, type[nn.Module]]
         activation_kwargs: None | dict[str, any] = None,
     ):
@@ -239,8 +240,8 @@ from torch import nn
 
 class MLP(nn.Sequential):
     def __init__(
-        self, 
-        dims: list[int], 
+        self,
+        dims: list[int],
         activation: Hint[nn.Module] = None,
         activation_kwargs: None | dict[str, any] = None,
     ):
@@ -295,9 +296,10 @@ $ pip install -e .
 
 ## 🙏 Contributing
 
-Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
-[CONTRIBUTING.rst](https://github.com/cthoyt/class-resolver/blob/master/CONTRIBUTING.rst) for more
-information on getting involved.
+Contributions, whether filing an issue, making a pull request, or forking, are
+appreciated. See
+[CONTRIBUTING.rst](https://github.com/cthoyt/class-resolver/blob/master/CONTRIBUTING.rst)
+for more information on getting involved.
 
 ## 👋 Attribution
 
@@ -307,34 +309,38 @@ The code in this package is licensed under the MIT License.
 
 ### 🍪 Cookiecutter
 
-This package was created with [@audreyfeldroy](https://github.com/audreyfeldroy)'s
-[cookiecutter](https://github.com/cookiecutter/cookiecutter) package using [@cthoyt](https://github.com/cthoyt)'s
-[cookiecutter-snekpack](https://github.com/cthoyt/cookiecutter-snekpack) template.
+This package was created with
+[@audreyfeldroy](https://github.com/audreyfeldroy)'s
+[cookiecutter](https://github.com/cookiecutter/cookiecutter) package using
+[@cthoyt](https://github.com/cthoyt)'s
+[cookiecutter-snekpack](https://github.com/cthoyt/cookiecutter-snekpack)
+template.
 
 ## 🛠️ For Developers
 
 <details>
   <summary>See developer instructions</summary>
 
-
-The final section of the README is for if you want to get involved by making a code contribution.
+The final section of the README is for if you want to get involved by making a
+code contribution.
 
 ### ❓ Testing
 
-After cloning the repository and installing `tox` with `pip install tox`, the unit tests in the `tests/` folder can be
-run reproducibly with:
+After cloning the repository and installing `tox` with `pip install tox`, the
+unit tests in the `tests/` folder can be run reproducibly with:
 
 ```shell
 $ tox
 ```
 
-Additionally, these tests are automatically re-run with each commit in a [GitHub Action](https://github.com/{{cookiecutter.github_organization_name}}/{{cookiecutter.github_repository_name}}/actions?query=workflow%3ATests).
+Additionally, these tests are automatically re-run with each commit in a
+[GitHub Action](https://github.com/{{cookiecutter.github_organization_name}}/{{cookiecutter.github_repository_name}}/actions?query=workflow%3ATests).
 
 ### 📦 Making a Release
 
-After installing the package in development mode and installing
-`tox` with `pip install tox`, the commands for making a new release are contained within the `finish` environment
-in `tox.ini`. Run the following from the shell:
+After installing the package in development mode and installing `tox` with
+`pip install tox`, the commands for making a new release are contained within
+the `finish` environment in `tox.ini`. Run the following from the shell:
 
 ```shell
 $ tox -e finish
@@ -345,9 +351,10 @@ This script does the following:
 1. Uses BumpVersion to switch the version number in the `setup.cfg` and
    `src/{{cookiecutter.package_name}}/version.py` to not have the `-dev` suffix
 2. Packages the code in both a tar archive and a wheel
-3. Uploads to PyPI using `twine`. Be sure to have a `.pypirc` file configured to avoid the need for manual input at this
-   step
-4. Push to GitHub. You'll need to make a release going with the commit where the version was bumped.
-5. Bump the version to the next patch. If you made big changes and want to bump the version by minor, you can
-   use `tox -e bumpversion minor` after.
+3. Uploads to PyPI using `twine`. Be sure to have a `.pypirc` file configured to
+   avoid the need for manual input at this step
+4. Push to GitHub. You'll need to make a release going with the commit where the
+   version was bumped.
+5. Bump the version to the next patch. If you made big changes and want to bump
+the version by minor, you can use `tox -e bumpversion minor` after.
 </details>
