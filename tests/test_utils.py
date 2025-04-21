@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import sys
 import unittest
 from collections import Counter, defaultdict
 from collections.abc import Sequence
@@ -43,10 +44,12 @@ class TestUtilities(unittest.TestCase):
         self.assertNotIn(PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
         self.assertNotIn(PrivateDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
 
-        self.assertIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False)))
-        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True)))
-        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
-        self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
+        if sys.version_info < (3, 13):
+            # in Python 3.13, th
+            self.assertIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=False)))
+            self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=False, exclude_private=True)))
+            self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=False)))
+            self.assertNotIn(enum._EnumDict, set(get_subclasses(dict, exclude_external=True, exclude_private=True)))
 
     def test_normalize_with_defaults(self) -> None:
         """Tests for normalize with defaults."""
