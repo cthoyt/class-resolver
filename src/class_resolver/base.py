@@ -249,15 +249,88 @@ class BaseResolver(ABC, Generic[X, Y]):
         else:
             raise ValueError("no default given either from resolver or explicitly")
 
+    def _get_reverse_synonyms(self) -> dict[str, list[str]]:
+        key_to_synonyms: dict[str, list[str]] = {k: [] for k in self.lookup_dict}
+        for synonym, cls in self.synonyms.items():
+            key = self.normalize(self.extract_name(cls))
+            key_to_synonyms[key].append(synonym)
+        return key_to_synonyms
+
+    def _get_click_choice(
+        self, prefix: str | None = None, delimiter: str | None = None, suffix: str | None = None
+    ) -> click.Choice:
+        """Get a dynamically generated :class:`click.Choice` that shows values and synonyms.
+
+        :param prefix: The string shown after the opening square bracket, before the
+            list
+        :param suffix: The string shown before the closing square bracket, after the
+            list
+        :param delimiter: The delimiter between values. Defaults to a newline + 5 spaces
+
+        :returns: A dynamically generated choice class
+        """
+        import click
+
+        rev = self._get_reverse_synonyms()
+        norm_func = self.normalize
+
+        class _Choice(click.Choice):
+            """An extended choice that is aware of synonyms."""
+
+            def convert(self, value: Any, param: click.Parameter | None, ctx: click.Context | None) -> Any:
+                """Normalize."""
+                return super().convert(norm_func(value), param=param, ctx=ctx)
+
+            def get_metavar(self, param: click.Parameter) -> str:
+                """Get the text that shows the choices, including synonyms."""
+                choices_lst = []
+                for key, synonyms in rev.items():
+                    if synonyms:
+                        synonyms_k = " | ".join(synonyms)
+                        choices_lst.append(f"{key} (synonyms: {synonyms_k})")
+                    else:
+                        choices_lst.append(key)
+
+                # note that the original implementation in click.Choice
+                # does a check for the param being an argument. In class-resolver,
+                # this is never an option, so it's not kept here
+
+                choices_str = (delimiter or ", ").join(choices_lst)
+
+                # Use square braces to indicate an option or optional argument.
+                return f"[{prefix or ''}{choices_str}{suffix or ''}]"
+
+        return _Choice(sorted(self.options), case_sensitive=False)
+
     def get_option(
         self,
         *flags: str,
-        default: Hint[X] = None,
         as_string: bool = False,
+        default: Hint[X] = None,
         required: bool = False,
+        prefix: str | None = None,
+        delimiter: str | None = None,
+        suffix: str | None = None,
         **kwargs: Any,
     ) -> Callable[[click.decorators.FC], click.decorators.FC]:
-        """Get a click option for this resolver."""
+        """Get a click option for this resolver.
+
+        :param flags: Positional arguments that are passed to :func:`click.option`
+        :param as_string: Should the value returned by processing be a string, or the
+            instantiated element? Defaults to False, which returns the instantiated
+            element
+        :param default: The default value for the option.
+        :param required: Is a value for this option required? If so, it's good to give a
+            default.
+        :param prefix: The string shown after the opening square bracket, before the
+            list of possible values
+        :param suffix: The string shown before the closing square bracket, after the
+            list of possible values
+        :param delimiter: The delimiter between values
+        :param kwargs: Keyword arguments forwarded to :func:`click.option`.
+
+        :returns: An instantiated option that can be used in click CLI
+        """
         if not required:
             norm_default = self._default(default)
             looked_up = self.lookup(norm_default)
@@ -271,7 +344,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         # TODO are there better ways to type options?
         return click.option(  # type:ignore
             *flags,
-            type=click.Choice(list(self.lookup_dict), case_sensitive=False),
+            type=self._get_click_choice(prefix=prefix, delimiter=delimiter, suffix=suffix),
             default=[key] if kwargs.get("multiple") else key,
             show_default=True,
             callback=None if as_string else make_callback(self.lookup),
