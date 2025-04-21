@@ -6,7 +6,7 @@ import inspect
 import logging
 from collections.abc import Collection, Mapping, Sequence
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from .base import BaseResolver
 from .utils import (
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 class KeywordArgumentError(TypeError):
     """Thrown when missing a keyword-only argument."""
 
-    def __init__(self, cls: type, s: str):
+    def __init__(self, cls: type, s: str) -> None:
         """Initialize the error.
 
         :param cls: The class that was trying to be instantiated
@@ -54,7 +54,7 @@ class KeywordArgumentError(TypeError):
 class UnexpectedKeywordError(TypeError):
     """Thrown when no arguments were expected."""
 
-    def __init__(self, cls: type):
+    def __init__(self, cls: type) -> None:
         """Initialize the error.
 
         :param cls: The class that was trying to be instantiated
@@ -71,7 +71,7 @@ MISSING_ARGS = [
 ]
 
 
-class ClassResolver(BaseResolver[type[X], X]):
+class ClassResolver(Generic[X], BaseResolver[type[X], X]):
     """Resolve from a list of classes."""
 
     #: The base class
