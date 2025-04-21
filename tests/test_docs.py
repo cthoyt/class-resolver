@@ -5,6 +5,7 @@ from __future__ import annotations
 import unittest
 from typing import Any, cast
 
+import torch
 from torch import Tensor, nn
 
 from class_resolver import FunctionResolver, OptionalKwargs, ResolverKey, update_docstring_with_resolver_keys
@@ -80,6 +81,7 @@ def f1(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: 
     :param activation: An activation function (stateful)
     :param activation_kwargs: Keyword arguments for activation function
     """
+    return torch.as_tensor([1])
 
 
 @TEST_RESOLVER_1
@@ -89,6 +91,7 @@ def f2(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: 
     :param activation: An activation function (stateful)
     :param activation_kwargs: Keyword arguments for activation function
     """
+    return torch.as_tensor([1])
 
 
 @update_docstring_with_resolver_keys(
@@ -204,6 +207,7 @@ def f5(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: 
     :param activation: An activation function (stateful)
     :param activation_kwargs: Keyword arguments for activation function
     """
+    return torch.as_tensor([1])
 
 
 class DecoratorTests(unittest.TestCase):

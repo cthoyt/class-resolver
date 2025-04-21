@@ -1,5 +1,6 @@
 """Tests for the class resolver."""
 
+import importlib.util
 import unittest
 from collections.abc import Collection, Sequence
 from typing import Any, ClassVar, Optional, cast
@@ -17,16 +18,6 @@ from class_resolver import (
     Resolver,
     UnexpectedKeywordError,
 )
-
-try:
-    import optuna
-except ImportError:
-    optuna = None
-
-try:
-    import sklearn
-except ImportError:
-    sklearn = None
 
 
 class Base:
@@ -218,18 +209,18 @@ class TestResolver(unittest.TestCase):
             A(name=name),
             self.resolver.make_from_kwargs(
                 key="magic",
-                data=dict(
-                    ignored_entry=...,
-                    magic="a",
-                    magic_kwargs=dict(
-                        name=name,
-                    ),
-                ),
+                data={
+                    "ignored_entry": ...,
+                    "magic": "a",
+                    "magic_kwargs": {
+                        "name": name,
+                    },
+                },
             ),
         )
 
-    @unittest.skipIf(optuna is None, "optuna is not installed")
-    @unittest.skipIf(sklearn is None, "sklearn is not installed")
+    @unittest.skipUnless(importlib.util.find_spec("optuna"), "optuna is not installed")
+    @unittest.skipUnless(importlib.util.find_spec("optuna"), "sklearn is not installed")
     def test_optuna_suggest(self) -> None:
         """Test suggesting categorical for optuna."""
         import optuna
@@ -392,31 +383,29 @@ class TestResolver(unittest.TestCase):
             self.resolver.make_many(["a", "a", "a"], [{}, {}])
 
         # One class, one kwarg
-        instances = self.resolver.make_many("a", dict(name="name"))
+        instances = self.resolver.make_many("a", {"name": "name"})
         self.assertEqual([A(name="name")], instances)
-        instances = self.resolver.make_many("a", [dict(name="name")])
+        instances = self.resolver.make_many("a", [{"name": "name"}])
         self.assertEqual([A(name="name")], instances)
-        instances = self.resolver.make_many(["a"], dict(name="name"))
+        instances = self.resolver.make_many(["a"], {"name": "name"})
         self.assertEqual([A(name="name")], instances)
-        instances = self.resolver.make_many(["a"], [dict(name="name")])
+        instances = self.resolver.make_many(["a"], [{"name": "name"}])
         self.assertEqual([A(name="name")], instances)
 
         # Single class, multiple kwargs
-        instances = self.resolver.make_many("a", [dict(name="name1"), dict(name="name2")])
+        instances = self.resolver.make_many("a", [{"name": "name1"}, {"name": "name2"}])
         self.assertEqual([A(name="name1"), A(name="name2")], instances)
-        instances = self.resolver.make_many(["a"], [dict(name="name1"), dict(name="name2")])
+        instances = self.resolver.make_many(["a"], [{"name": "name1"}, {"name": "name2"}])
         self.assertEqual([A(name="name1"), A(name="name2")], instances)
 
         # Multiple class, one kwargs
-        instances = self.resolver.make_many(["a", "b", "c"], dict(name="name"))
+        instances = self.resolver.make_many(["a", "b", "c"], {"name": "name"})
         self.assertEqual([A(name="name"), B(name="name"), C(name="name")], instances)
-        instances = self.resolver.make_many(["a", "b", "c"], [dict(name="name")])
+        instances = self.resolver.make_many(["a", "b", "c"], [{"name": "name"}])
         self.assertEqual([A(name="name"), B(name="name"), C(name="name")], instances)
 
         # Multiple class, multiple kwargs
-        instances = self.resolver.make_many(
-            ["a", "b", "c"], [dict(name="name1"), dict(name="name2"), dict(name="name3")]
-        )
+        instances = self.resolver.make_many(["a", "b", "c"], [{"name": "name1"}, {"name": "name2"}, {"name": "name3"}])
         self.assertEqual([A(name="name1"), B(name="name2"), C(name="name3")], instances)
 
         # One class, No kwargs
@@ -433,7 +422,7 @@ class TestResolver(unittest.TestCase):
 
         # No class
         resolver = Resolver.from_subclasses(Base, default=A)
-        instances = resolver.make_many(None, dict(name="name"))
+        instances = resolver.make_many(None, {"name": "name"})
         self.assertEqual([A(name="name")], instances)
 
     def test_missing_kwarg(self) -> None:

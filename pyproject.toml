@@ -1,7 +1,6 @@
-# See https://setuptools.readthedocs.io/en/latest/build_meta.html
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.6.6,<0.7"]
+build-backend = "uv_build"
 
 [project]
 name = "class_resolver"
@@ -26,24 +25,28 @@ classifiers = [
     "Framework :: Pytest",
     "Framework :: tox",
     "Framework :: Sphinx",
+    "Natural Language :: English",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
+    "Typing :: Typed",
 ]
 keywords = [
-    "snekpack",
+    "snekpack", # please keep this keyword to credit the cookiecutter-snekpack template
     "cookiecutter",
     "development tool",
-    "configurability"
+    "configurability",
 ]
 
-# License Information. This can be any valid SPDX identifiers that can be resolved
-# with URLs like https://spdx.org/licenses/MIT
-# See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license
-license = { file = "LICENSE" }
+# License Information.
+# See PEP-639 at https://peps.python.org/pep-0639/#add-license-files-key
+license-files = [
+    "LICENSE",
+]
 
 requires-python = ">=3.9"
 dependencies = [
@@ -51,21 +54,61 @@ dependencies = [
     "typing-extensions",
 ]
 
-[project.optional-dependencies]
+# see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
+[dependency-groups]
 tests = [
     "pytest",
+    "coverage[toml]",
     "docdata",
-    "coverage",
-]
-click = [
-    "click"
 ]
 docs = [
-    # waiting on https://github.com/readthedocs/sphinx_rtd_theme/issues/1582
-    # to make sphinx 8 possible
-    "sphinx<8",
-    "sphinx-rtd-theme",
+    "sphinx>=8",
+    "sphinx-rtd-theme>=3.0",
     "sphinx_automodapi",
+]
+lint = [
+    "ruff",
+]
+typing = [
+    { include-group = "tests" },
+    "mypy",
+    "pydantic",
+    "types-tabulate",
+]
+docs-lint = [
+    { include-group = "docs" },
+    "doc8",
+]
+format-docs = [
+    { include-group = "docs" },
+    "docstrfmt",
+]
+doctests = [
+    "xdoctest",
+    "pygments",
+]
+pyroma = [
+    "pyroma",
+    "pygments",
+]
+# follow https://github.com/astral-sh/uv/issues/6298 for switching to a uv-based version bump workflow
+bump = [
+    "bump-my-version",
+]
+build = [
+    "uv",
+    "uv-build",
+]
+release = [
+    { include-group = "build" },
+    "uv",
+    "keyring",
+]
+
+# see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
+[project.optional-dependencies]
+click = [
+    "click"
 ]
 torch = [
     "torch"
@@ -89,11 +132,13 @@ tabulate = [
 ]
 
 # See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
+# and also https://packaging.python.org/en/latest/specifications/well-known-project-urls/
 [project.urls]
 "Bug Tracker" = "https://github.com/cthoyt/class-resolver/issues"
 Homepage = "https://github.com/cthoyt/class-resolver"
 Repository = "https://github.com/cthoyt/class-resolver.git"
 Documentation = "https://class_resolver.readthedocs.io"
+Funding = "https://github.com/sponsors/cthoyt"
 
 [project.entry-points.class_resolver_demo]
 add = "operator:add"
@@ -101,21 +146,16 @@ sub = "operator:sub"
 mul = "operator:mul"
 expected_failure = "operator:nope_this_is_not_real"
 
-[tool.setuptools]
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-# this implicitly sets `packages = ":find"`
-where = ["src"]  # list of folders that contain the packages (["."] by default)
-
-# See https://setuptools.pypa.io/en/latest/userguide/datafiles.html
-[tool.setuptools.package-data]
-"*" = ["*.*"]
 
 [tool.cruft]
 skip = [
     "**/__init__.py",
     "tests/*"
+]
+
+# MyPy, see https://mypy.readthedocs.io/en/stable/config_file.html
+[tool.mypy]
+plugins = [
 ]
 
 # Doc8, see https://doc8.readthedocs.io/en/stable/readme.html#ini-file-usage
@@ -125,7 +165,7 @@ max-line-length = 120
 # Pytest, see https://docs.pytest.org/en/stable/reference/customize.html#pyproject-toml
 [tool.pytest.ini_options]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')"
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
 
 # Coverage, see https://coverage.readthedocs.io/en/latest/config.html
@@ -137,6 +177,9 @@ source = [
 omit = [
     "tests/*",
     "docs/*",
+    "src/class_resolver/version.py",
+    "src/class_resolver/__main__.py",
+    "src/class_resolver/cli.py",
 ]
 
 [tool.coverage.paths]
@@ -170,6 +213,7 @@ extend-select = [
     "I", # isort
     "UP", # pyupgrade
     "D", # pydocstyle
+    "DOC", # pydoclint
     "B", # bugbear
     "S", # bandit
     "T20", # print
@@ -177,6 +221,7 @@ extend-select = [
     "ERA", # eradicate commented out code
     "NPY", # numpy checks
     "RUF", # ruff rules
+    "C4", # comprehensions
 ]
 ignore = [
     "D105", # Missing docstring in magic method
@@ -205,3 +250,47 @@ known-first-party = [
     "class_resolver",
     "tests",
 ]
+
+[tool.ruff.format]
+# see https://docs.astral.sh/ruff/settings/#format_docstring-code-format
+docstring-code-format = true
+
+[tool.bumpversion]
+current_version = "0.5.6-dev"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+(?P<build>[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?"
+serialize = [
+    "{major}.{minor}.{patch}-{release}+{build}",
+    "{major}.{minor}.{patch}+{build}",
+    "{major}.{minor}.{patch}-{release}",
+    "{major}.{minor}.{patch}",
+]
+commit = true
+tag = false
+
+[tool.bumpversion.parts.release]
+optional_value = "production"
+first_value = "dev"
+values = [
+    "dev",
+    "production",
+]
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "docs/source/conf.py"
+search = "release = \"{current_version}\""
+replace = "release = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "src/class_resolver/version.py"
+search = "VERSION = \"{current_version}\""
+replace = "VERSION = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search = "version: {current_version}"
+replace = "version: {new_version}"

@@ -1,14 +1,12 @@
 """Tests for the scikit-learn contribution module."""
 
+import importlib.util
 import unittest
 
-try:
-    import sklearn
-except ImportError:  # pragma: no cover
-    sklearn = None  # pragma: no cover
 
-
-@unittest.skipUnless(sklearn, "Can not test sklearn contrib without ``pip install scikit-learn``.")
+@unittest.skipUnless(
+    importlib.util.find_spec("sklearn"), "Can not test sklearn contrib without ``pip install scikit-learn``."
+)
 class TestSklearn(unittest.TestCase):
     """Test for the scikit-learn contribution module."""
 
