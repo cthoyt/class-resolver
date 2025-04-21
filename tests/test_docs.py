@@ -101,7 +101,7 @@ def f3(
     activation_kwargs: dict[str, Any] | None,
     aggregation: None | str | type[nn.Module] | nn.Module,
     aggregation_kwargs: dict[str, Any] | None,
-):
+) -> Tensor:
     """Apply an activation then aggregation.
 
     :param tensor: An input tensor
@@ -153,7 +153,7 @@ def f4(
     aggregation_kwargs: dict[str, Any] | None,
     activation_2: None | str | type[nn.Module] | nn.Module,
     activation_2_kwargs: dict[str, Any] | None,
-):
+) -> Tensor:
     """Apply an activation then aggregation.
 
     :param tensor: An input tensor
@@ -198,7 +198,7 @@ Apply an activation then aggregation.
 
 
 @TEST_RESOLVER_2
-def f5(activation, activation_kwargs):
+def f5(activation, activation_kwargs) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -219,7 +219,7 @@ class DecoratorTests(unittest.TestCase):
     def f_no_doc(model, model_kwargs) -> None:  # noqa: D102
         pass
 
-    def test_decorator(self):
+    def test_decorator(self) -> None:
         """Test decorator."""
         old_doc = self.f.__doc__
         for params in [("model", "model_resolver"), ("model", "model_resolver", "model_kwargs")]:
@@ -233,7 +233,7 @@ class DecoratorTests(unittest.TestCase):
                 # revert for next time
                 self.f.__doc__ = old_doc
 
-    def test_error_decoration(self):
+    def test_error_decoration(self) -> None:
         """Test errors when decorating."""
         # missing docstring
         with self.assertRaises(ValueError):
@@ -252,28 +252,28 @@ class TestDocumentResolver(unittest.TestCase):
             with self.subTest(docstring=ds):
                 self.assertEqual(TARGET, _clean_docstring(ds))
 
-    def test_bad_type(self):
+    def test_bad_type(self) -> None:
         """Raise the appropriate error."""
         with self.assertRaises(TypeError):
             ResolverKey("", None)
 
-    def test_missing_object(self):
+    def test_missing_object(self) -> None:
         """Test raising an error when the object doesn't exist in the module."""
         with self.assertRaises(AttributeError):
             (ResolverKey("activation", "class_resolver.contrib.torch.nope_nope_nope"),)
 
-    def test_no_params(self):
+    def test_no_params(self) -> None:
         """Test when no keys are passed."""
         with self.assertRaises(ValueError):
             update_docstring_with_resolver_keys()
 
-    def test_duplicate_params(self):
+    def test_duplicate_params(self) -> None:
         """Test when no keys are passed."""
         key = ResolverKey("a", "b")
         with self.assertRaises(ValueError):
             update_docstring_with_resolver_keys(key, key)
 
-    def test_missing_params(self):
+    def test_missing_params(self) -> None:
         """Test when trying to document a parameter that does not exist."""
         with self.assertRaises(ValueError):
 
@@ -281,29 +281,29 @@ class TestDocumentResolver(unittest.TestCase):
             def f(x):
                 """Do the thing."""
 
-    def test_no_location(self):
+    def test_no_location(self) -> None:
         """Test when there's no explicit location given."""
         r = FunctionResolver([])
         with self.assertRaises(NotImplementedError):
             ResolverKey("xx", r)
 
-    def test_f1(self):
+    def test_f1(self) -> None:
         """Test the correct docstring is produced."""
         self.assertEqual(EXPECTED_FUNCTION_1_DOC, f1.__doc__)
 
-    def test_f2(self):
+    def test_f2(self) -> None:
         """Test the correct docstring is produced."""
         self.assertEqual(EXPECTED_FUNCTION_1_DOC, f2.__doc__)
 
-    def test_f3(self):
+    def test_f3(self) -> None:
         """Test the correct docstring is produced."""
         self.assertEqual(EXPECTED_FUNCTION_3_DOC, f3.__doc__)
 
-    def test_f4(self):
+    def test_f4(self) -> None:
         """Test the correct docstring is produced."""
         self.assertEqual(EXPECTED_FUNCTION_4_DOC, f4.__doc__)
 
-    def test_f5(self):
+    def test_f5(self) -> None:
         """Test the correct docstring is produced."""
         self.assertEqual(EXPECTED_FUNCTION_1_DOC, f5.__doc__)
 
@@ -311,7 +311,7 @@ class TestDocumentResolver(unittest.TestCase):
 class TestTable(unittest.TestCase):
     """Test building tables for resolvers."""
 
-    def test_activation_resolver(self):
+    def test_activation_resolver(self) -> None:
         """Test activation resolver table."""
         tab = activation_resolver.make_table()
         lines = tab.splitlines()
