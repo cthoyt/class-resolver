@@ -5,8 +5,7 @@ from __future__ import annotations
 import inspect
 import logging
 from collections.abc import Collection, Mapping, Sequence
-from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from .base import BaseResolver
 from .utils import (

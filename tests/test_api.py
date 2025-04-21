@@ -1,6 +1,5 @@
 """Tests for the class resolver."""
 
-import itertools
 import unittest
 from collections.abc import Collection, Sequence
 from typing import Any, ClassVar, Optional, cast
