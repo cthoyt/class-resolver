@@ -6,19 +6,22 @@ import importlib
 import inspect
 import textwrap
 from collections import defaultdict
-from typing import Callable, TypeVar
+from typing import Any, Callable, TypeVar
+
+from typing_extensions import ParamSpec
 
 from .base import BaseResolver
 
 __all__ = [
-    "update_docstring_with_resolver_keys",
     "ResolverKey",
+    "update_docstring_with_resolver_keys",
 ]
 
-F = TypeVar("F", bound=Callable)
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
-def _get_qualpath_from_object(resolver: BaseResolver) -> str:
+def _get_qualpath_from_object(resolver: BaseResolver[Any, Any]) -> str:
     if resolver.location:
         return resolver.location
     raise NotImplementedError(
@@ -33,12 +36,14 @@ class ResolverKey:
     name: str
     key: str
     resolver_path: str
-    resolver: BaseResolver | None
+    # note that resolver keys don't depend at all on the
+    # types in the resolver
+    resolver: BaseResolver[Any, Any] | None
 
     def __init__(
         self,
         name: str,
-        resolver: str | BaseResolver,
+        resolver: str | BaseResolver[Any, Any],
         key: str | None = None,
     ) -> None:
         """Initialize the key for :func:`update_docstring_with_resolver_keys`."""
@@ -53,6 +58,11 @@ class ResolverKey:
                 resolver_inst = getattr(module, variable_name)
             except (ImportError, ValueError):
                 self.resolver = None
+            except AttributeError as e:
+                if "partially initialized module" not in str(e):
+                    raise
+                # this happens in a circular import case. just let it go
+                self.resolver = None
             else:
                 self.resolver = resolver_inst
         elif isinstance(resolver, BaseResolver):
@@ -66,7 +76,9 @@ def _clean_docstring(s: str) -> str:
     """Clean a docstring.
 
     :param s: Input docstring
-    :return: Cleaned docstring
+
+    :returns: Cleaned docstring
+
     :raises ValueError: if the docstring is improperly formatted
 
     This method does the following
@@ -94,12 +106,11 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable[[F], F]:
-    """
-    Build a decorator to add information about resolved parameter pairs.
+def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    """Build a decorator to add information about resolved parameter pairs.
 
-    The decorator is intended for methods with follow the ``param`` + ``param_kwargs`` pattern and internally use a
-    class resolver.
+    The decorator is intended for methods with follow the ``param`` + ``param_kwargs``
+    pattern and internally use a class resolver.
 
     .. code-block:: python
 
@@ -108,17 +119,17 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
         from class_resolver import update_docstring_with_resolver_keys, ResolverKey
         from class_resolver.contrib.torch import activation_resolver
 
+
         @update_docstring_with_resolver_keys(
-            ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver")
+            ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
         )
         def f(
             tensor: Tensor,
             activation: None | str | type[nn.Module] | nn.Module,
             activation_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation = activation_resolver.make(activation, activation_kwargs)
             return _activation(tensor)
-
 
     This also can be stacked for multiple resolvers.
 
@@ -128,6 +139,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
         from torch import Tensor, nn
         from class_resolver import update_docstring_with_resolver_keys
         from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
+
 
         @update_docstring_with_resolver_keys(
             ResolverKey("activation", "class_resolver.contrib.torch.activation_resolver"),
@@ -139,14 +151,13 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
             activation_kwargs: dict[str, Any] | None,
             aggregation: None | str | type[nn.Module] | nn.Module,
             aggregation_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation = activation_resolver.make(activation, activation_kwargs)
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
             return _aggregation(_activation(tensor))
 
-
-    It might be the case that you have two different arguments that use the same resolver.
-    No prob!
+    It might be the case that you have two different arguments that use the same
+    resolver. No prob!
 
     .. code-block:: python
 
@@ -154,6 +165,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
         from torch import Tensor, nn
         from class_resolver import update_docstring_with_resolver_keys
         from class_resolver.contrib.torch import activation_resolver, aggregation_resolver
+
 
         @update_docstring_with_resolver_keys(
             ResolverKey("activation_1", "class_resolver.contrib.torch.activation_resolver"),
@@ -168,24 +180,23 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
             aggregation_kwargs: dict[str, Any] | None,
             activation_2: None | str | type[nn.Module] | nn.Module,
             activation_2_kwargs: dict[str, Any] | None,
-        ):
+        ) -> Tensor:
             _activation_1 = activation_resolver.make(activation_1, activation_1_kwargs)
             _activation_2 = activation_resolver.make(activation_2, activation_2_kwargs)
             _aggregation = aggregation_resolver.make(aggregation, aggregation_kwargs)
             return _activation_2(_aggregation(_activation_2(tensor)))
 
-    :param resolver_keys:
-        A variadic list of keys, each describing:
+    :param resolver_keys: A variadic list of keys, each describing:
 
         1. the names of the parameter
         2. the resolver used to construct a reference via the ``:data:`` role.
-        3. the name of the parameter for giving keyword arguments. By default,
-           this is constructed by taking the name and post-pending ``_kwargs``.
+        3. the name of the parameter for giving keyword arguments. By default, this is
+           constructed by taking the name and post-pending ``_kwargs``.
 
-    :return:
-        a decorator which extends a function's docstring.
-    :raises ValueError:
-        When either no parameter name was provided, there was a duplicate parameter name.
+    :returns: a decorator which extends a function's docstring.
+
+    :raises ValueError: When either no parameter name was provided, there was a
+        duplicate parameter name.
     """
     # input validation
     if not resolver_keys:
@@ -198,18 +209,15 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
 
     # TODO: we could do some more sanitization, e.g., trying to match types, ...
 
-    def add_note(func: F) -> F:
-        """
-        Extend the function's docstring with a note about resolved parameters.
+    def add_note(func: Callable[P, T]) -> Callable[P, T]:
+        """Extend the function's docstring with a note about resolved parameters.
 
-        :param func:
-            the function to decorate.
+        :param func: the function to decorate.
 
-        :return:
-            the function with extended docstring.
+        :returns: the function with extended docstring.
 
-        :raises ValueError:
-            When the signature does not contain the resolved parameter names, or the docstring is missing.
+        :raises ValueError: When the signature does not contain the resolved parameter
+            names, or the docstring is missing.
         """
         signature = inspect.signature(func)
         if missing := expanded_params.difference(signature.parameters):

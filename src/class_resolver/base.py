@@ -6,7 +6,9 @@ import logging
 import sys
 from abc import ABC, abstractmethod
 from collections.abc import Collection, Iterable, Iterator, Mapping
-from typing import TYPE_CHECKING, Any, Callable, Generic
+from typing import TYPE_CHECKING, Any, Callable, Generic, overload
+
+from typing_extensions import Self
 
 if sys.version_info[:2] >= (3, 10):
     from importlib.metadata import entry_points
@@ -32,11 +34,12 @@ logger = logging.getLogger(__name__)
 class RegistrationError(KeyError, Generic[X], ABC):
     """Raised when trying to add a new element to a resolver with a pre-existing lookup key."""
 
-    def __init__(self, resolver: BaseResolver[X, Y], key: str, proposed: X, label: str):
+    def __init__(self, resolver: BaseResolver[X, Any], key: str, proposed: X, label: str) -> None:
         """Initialize the registration error.
 
         :param resolver: The resolver where the registration error occurred
-        :param key: The key (either in the ``lookup_dict`` or ``synonyms``) where the conflict occurred
+        :param key: The key (either in the ``lookup_dict`` or ``synonyms``) where the
+            conflict occurred
         :param proposed: The proposed overwrite on the given key
         :param label: The origin of the error (either "name" or "synonym")
         """
@@ -79,10 +82,11 @@ class BaseResolver(ABC, Generic[X, Y]):
     This class is parametrized by two variables:
 
     - ``X`` is the type of element in the resolver
-    - ``Y`` is the type that gets made by the ``make`` function. This is typically
-      the same as ``X``, but might be different from ``X``, such as in the class resolver.
+    - ``Y`` is the type that gets made by the ``make`` function. This is typically the
+      same as ``X``, but might be different from ``X``, such as in the class resolver.
     """
 
+    #: The default value for the resolver, if given during construction
     default: X | None
     #: The mapping from synonyms to the classes indexed by this resolver
     synonyms: dict[str, X]
@@ -107,7 +111,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         synonyms: Mapping[str, X] | None = None,
         suffix: str | None = None,
         location: str | None = None,
-    ):
+    ) -> None:
         """Initialize the resolver.
 
         :param elements: The elements to register
@@ -157,14 +161,14 @@ class BaseResolver(ABC, Generic[X, Y]):
 
         :param element: The element to register
         :param synonyms: An optional iterable of synonyms to add for the element
-        :param raise_on_conflict: Determines the behavior when a conflict is encountered on either
-            the normalized element name or a synonym. If true, will raise an exception. If false, will
-            simply disregard the entry.
+        :param raise_on_conflict: Determines the behavior when a conflict is encountered
+            on either the normalized element name or a synonym. If true, will raise an
+            exception. If false, will simply disregard the entry.
 
-        :raises RegistrationNameConflict: If ``raise_on_conflict`` is true
-            and there's a conflict with the lookup dict
-        :raises RegistrationSynonymConflict: If ``raise_on_conflict`` is true
-            and there's a conflict with the synonym dict
+        :raises RegistrationNameConflict: If ``raise_on_conflict`` is true and there's a
+            conflict with the lookup dict
+        :raises RegistrationSynonymConflict: If ``raise_on_conflict`` is true and
+            there's a conflict with the synonym dict
         :raises ValueError: If any given synonyms are empty strings
         """
         key = self.normalize(self.extract_name(element))
@@ -196,11 +200,11 @@ class BaseResolver(ABC, Generic[X, Y]):
     def docdata(self, query: Hint[X], *path: str, default: X | None = None) -> Any:
         """Lookup an element and get its docdata.
 
-        :param query: The hint for looking something up in the resolver
-            passed to :func:`lookup`
-        :param path: An optional path for traversing the resulting docdata
-            dictionary
+        :param query: The hint for looking something up in the resolver passed to
+            :func:`lookup`
+        :param path: An optional path for traversing the resulting docdata dictionary
         :param default: The default value to pass to :func:`lookup`
+
         :returns: The optional docdata retrieved with :func:`docdata.get_docdata`
         """
         from docdata import get_docdata
@@ -220,7 +224,15 @@ class BaseResolver(ABC, Generic[X, Y]):
     ) -> Y:
         """Make an element."""
 
-    def make_safe(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Y | None:
+    # docstr-coverage:excused `overload`
+    @overload
+    def make_safe(self, query: None, pos_kwargs: OptionalKwargs = ..., **kwargs: Any) -> None: ...
+
+    # docstr-coverage:excused `overload`
+    @overload
+    def make_safe(self, query: X | str, pos_kwargs: OptionalKwargs = ..., **kwargs: Any) -> Y: ...
+
+    def make_safe(self, query: X | str | None, pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Y | None:
         """Run make, but pass through a none query."""
         if query is None:
             return None
@@ -319,7 +331,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         return elements
 
     @classmethod
-    def from_entrypoint(cls, group: str, **kwargs: Any) -> BaseResolver[X, Y]:
+    def from_entrypoint(cls, group: str, **kwargs: Any) -> Self:
         """Make a resolver from the elements registered at the given entrypoint."""
         elements = cls._from_entrypoint(group)
         return cls(elements, **kwargs)
@@ -327,10 +339,11 @@ class BaseResolver(ABC, Generic[X, Y]):
     def optuna_lookup(self, trial: optuna.Trial, name: str) -> X:
         """Suggest an element from this resolver for hyper-parameter optimization in Optuna.
 
-        :param trial: A trial object from :mod:`optuna`. Note that this object shouldn't be constructed
-            by the developer, and should only get constructed inside the optuna framework when
-            using :meth:`optuna.Study.optimize`.
+        :param trial: A trial object from :mod:`optuna`. Note that this object shouldn't
+            be constructed by the developer, and should only get constructed inside the
+            optuna framework when using :meth:`optuna.Study.optimize`.
         :param name: The name of the `param` within an optuna study.
+
         :returns: An element chosen by optuna, then run through :func:`lookup`.
 
         In the following example, Optuna is used to determine the best classification

@@ -1,7 +1,8 @@
 Installation
 ============
-The most recent release can be installed from
-`PyPI <https://pypi.org/project/class_resolver>`_ with:
+
+The most recent release can be installed from `PyPI
+<https://pypi.org/project/class_resolver>`_ with:
 
 .. code-block:: shell
 

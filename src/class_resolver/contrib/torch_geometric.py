@@ -11,8 +11,8 @@ from torch_geometric.nn.conv import MessagePassing, SimpleConv
 from ..api import ClassResolver
 
 __all__ = [
-    "message_passing_resolver",
     "aggregation_resolver",
+    "message_passing_resolver",
 ]
 
 message_passing_resolver = ClassResolver.from_subclasses(

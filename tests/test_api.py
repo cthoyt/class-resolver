@@ -299,10 +299,10 @@ class TestResolver(unittest.TestCase):
 
         @click.command()  # type:ignore
         @self.resolver.get_option("--opt", default="a")
-        def cli(opt) -> None:
+        def cli(opt: Base) -> None:
             """Run the test CLI."""
             self.assertIsInstance(opt, type)
-            click.echo(opt.__name__, nl=False)
+            click.echo(opt.__name__, nl=False)  # type:ignore
 
         self._test_cli(cli)
 
@@ -330,7 +330,7 @@ class TestResolver(unittest.TestCase):
 
         @click.command()  # type:ignore
         @self.resolver.get_option("--opt", default="a", as_string=True)
-        def cli(opt: str):
+        def cli(opt: str) -> None:
             """Run the test CLI."""
             self.assertIsInstance(opt, str)
             click.echo(self.resolver.lookup(opt).__name__, nl=False)

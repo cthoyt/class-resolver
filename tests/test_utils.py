@@ -1,15 +1,13 @@
 """Test utilities."""
 
+from __future__ import annotations
+
 import enum
 import unittest
 from collections import Counter, defaultdict
+from collections.abc import Sequence
 
-from class_resolver.utils import (
-    get_subclasses,
-    is_private,
-    normalize_with_default,
-    same_module,
-)
+from class_resolver.utils import get_subclasses, is_private, normalize_with_default, same_module
 from tests._private_extras import PrivateDict
 
 
@@ -65,9 +63,12 @@ class TestUtilities(unittest.TestCase):
             self.assertIs(cls, Counter)
             self.assertIs(kwargs, default_kwargs)
 
+    def test_normalize_with_defaults_2(self) -> None:
+        """Tests for normalize with defaults."""
+        default_kwargs_tests: Sequence[None | dict[str, int]] = [None, dict(b=3)]
         # choice is not None -> return choice and kwargs
         choice_kwargs = dict(a=5)
-        for default_kwargs in (None, dict(b=3)):
+        for default_kwargs in default_kwargs_tests:
             cls, kwargs = normalize_with_default(
                 choice=dict, kwargs=choice_kwargs, default=Counter, default_kwargs=default_kwargs
             )
