@@ -17,14 +17,11 @@ __all__ = [
     "update_docstring_with_resolver_keys",
 ]
 
-X = TypeVar("X")
-Y = TypeVar("Y")
 T = TypeVar("T")
 P = ParamSpec("P")
-F = Callable[P, T]
 
 
-def _get_qualpath_from_object(resolver: BaseResolver[X, Y]) -> str:
+def _get_qualpath_from_object(resolver: BaseResolver[Any, Any]) -> str:
     if resolver.location:
         return resolver.location
     raise NotImplementedError(
@@ -109,7 +106,7 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable[[F], F]:
+def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Build a decorator to add information about resolved parameter pairs.
 
     The decorator is intended for methods with follow the ``param`` + ``param_kwargs``
@@ -212,7 +209,7 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
 
     # TODO: we could do some more sanitization, e.g., trying to match types, ...
 
-    def add_note(func: F) -> F:
+    def add_note(func: Callable[P, T]) -> Callable[P, T]:
         """Extend the function's docstring with a note about resolved parameters.
 
         :param func: the function to decorate.
