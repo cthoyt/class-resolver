@@ -6,7 +6,7 @@ import inspect
 import logging
 from collections.abc import Collection, Mapping, Sequence
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from .base import BaseResolver
 from .utils import (
@@ -71,7 +71,7 @@ MISSING_ARGS = [
 ]
 
 
-class ClassResolver(BaseResolver[type[X], X]):
+class ClassResolver(Generic[X], BaseResolver[type[X], X]):
     """Resolve from a list of classes."""
 
     #: The base class
