@@ -252,11 +252,13 @@ class BaseResolver(ABC, Generic[X, Y]):
     def _get_reverse_synonyms(self) -> dict[str, list[str]]:
         key_to_synonyms: dict[str, list[str]] = {k: [] for k in self.lookup_dict}
         for synonym, cls in self.synonyms.items():
-            key = self.normalize(cls.__name__)
+            key = self.normalize(self.extract_name(cls))
             key_to_synonyms[key].append(synonym)
         return key_to_synonyms
 
-    def _get_click_choice(self, prefix: str = "", delimiter: str | None = None, suffix: str = "") -> click.Choice:
+    def _get_click_choice(
+        self, prefix: str | None = None, delimiter: str | None = None, suffix: str | None = None
+    ) -> click.Choice:
         """Get a dynamically generated :class:`click.Choice` that shows values and synonyms.
 
         :param prefix: The string shown after the opening square bracket, before the
@@ -268,9 +270,6 @@ class BaseResolver(ABC, Generic[X, Y]):
         :returns: A dynamically generated choice class
         """
         import click
-
-        if delimiter is None:
-            delimiter = ", "
 
         rev = self._get_reverse_synonyms()
         norm_func = self.normalize
@@ -296,10 +295,10 @@ class BaseResolver(ABC, Generic[X, Y]):
                 # does a check for the param being an argument. In class-resolver,
                 # this is never an option, so it's not kept here
 
-                choices_str = delimiter.join(choices_lst)
+                choices_str = (delimiter or ", ").join(choices_lst)
 
                 # Use square braces to indicate an option or optional argument.
-                return f"[{prefix}{choices_str}{suffix}]"
+                return f"[{prefix or ''}{choices_str}{suffix or ''}]"
 
         return _Choice(sorted(self.options), case_sensitive=False)
 
