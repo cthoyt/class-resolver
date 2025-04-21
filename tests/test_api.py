@@ -302,7 +302,7 @@ class TestResolver(unittest.TestCase):
         def cli(opt: Base) -> None:
             """Run the test CLI."""
             self.assertIsInstance(opt, type)
-            click.echo(opt.__name__, nl=False)
+            click.echo(opt.__name__, nl=False)  # type:ignore
 
         self._test_cli(cli)
 
