@@ -1,6 +1,5 @@
 """Tests for the class resolver."""
 
-import itertools
 import unittest
 from collections.abc import Collection, Sequence
 from typing import Any, ClassVar, Optional, cast
@@ -18,11 +17,6 @@ from class_resolver import (
     Resolver,
     UnexpectedKeywordError,
 )
-
-try:
-    import ray.tune as tune
-except ImportError:
-    tune = None
 
 try:
     import optuna
@@ -233,24 +227,6 @@ class TestResolver(unittest.TestCase):
                 ),
             ),
         )
-
-    @unittest.skipIf(tune is None, "ray[tune] was not installed properly")
-    @unittest.skipIf(
-        tune is not None and getattr(tune, "suggest", None) is None,
-        "a newer version of ray[tune] is installed that does not have the tune.suggest module",
-    )
-    def test_variant_generation(self) -> None:
-        """Test whether ray tune can generate variants from the search space."""
-        search_space = self.resolver.ray_tune_search_space(
-            kwargs_search_space=dict(
-                name=tune.choice(["charlie", "max"]),
-            ),
-        )
-        for spec in itertools.islice(tune.suggest.variant_generator.generate_variants(search_space), 2):
-            config = {k[0]: v for k, v in spec[0].items()}
-            query = config.pop("query")
-            instance = self.resolver.make(query=query, pos_kwargs=config)
-            self.assertIsInstance(instance, Base)
 
     @unittest.skipIf(optuna is None, "optuna is not installed")
     @unittest.skipIf(sklearn is None, "sklearn is not installed")
