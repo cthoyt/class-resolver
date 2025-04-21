@@ -32,7 +32,7 @@ class TestFunctionResolver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up the resolver class."""
-        self.resolver: FunctionResolver[Any, int] = FunctionResolver([add_one, add_two, add_three])
+        self.resolver: FunctionResolver[Any, int] = FunctionResolver([add_one, add_two, add_y])
 
     def test_contents(self) -> None:
         """Test the functions."""
@@ -51,7 +51,7 @@ class TestFunctionResolver(unittest.TestCase):
 
     def test_default_lookup(self) -> None:
         """Test lookup with default."""
-        resolver: FunctionResolver[Any, int] = FunctionResolver([add_one, add_two, add_three], default=add_two)
+        resolver: FunctionResolver[Any, int] = FunctionResolver([add_one, add_two, add_y], default=add_two)
         self.assertEqual(add_one, resolver.lookup("add_one"))
         self.assertEqual(add_one, resolver.lookup("ADD_ONE"))
         self.assertEqual(add_two, resolver.lookup(None))
