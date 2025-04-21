@@ -73,7 +73,7 @@ typing = [
     { include-group = "tests" },
     "mypy",
     "pydantic",
-    # You will probably have to add additional type stubs here, especially if you're using tox-uv
+    "types-tabulate",
 ]
 docs-lint = [
     { include-group = "docs" },

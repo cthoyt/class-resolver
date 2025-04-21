@@ -1,14 +1,13 @@
 """Tests for the optuna contribution module."""
 
+import importlib.util
 import unittest
 
-try:
-    import optuna
-except ImportError:  # pragma: no cover
-    optuna = None  # pragma: no cover
 
-
-@unittest.skipUnless(optuna, "Can not test optuna contrib without ``pip install optuna``.")
+@unittest.skipUnless(
+    importlib.util.find_spec("optuna"),
+    "Can not test optuna contrib without ``pip install optuna``.",
+)
 class TestTorch(unittest.TestCase):
     """Test for the optuna contribution module."""
 

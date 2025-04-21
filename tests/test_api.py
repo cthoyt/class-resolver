@@ -1,5 +1,6 @@
 """Tests for the class resolver."""
 
+import importlib.util
 import unittest
 from collections.abc import Collection, Sequence
 from typing import Any, ClassVar, Optional, cast
@@ -17,16 +18,6 @@ from class_resolver import (
     Resolver,
     UnexpectedKeywordError,
 )
-
-try:
-    import optuna
-except ImportError:
-    optuna = None
-
-try:
-    import sklearn
-except ImportError:
-    sklearn = None
 
 
 class Base:
@@ -228,8 +219,8 @@ class TestResolver(unittest.TestCase):
             ),
         )
 
-    @unittest.skipIf(optuna is None, "optuna is not installed")
-    @unittest.skipIf(sklearn is None, "sklearn is not installed")
+    @unittest.skipUnless(importlib.util.find_spec("optuna"), "optuna is not installed")
+    @unittest.skipUnless(importlib.util.find_spec("optuna"), "sklearn is not installed")
     def test_optuna_suggest(self) -> None:
         """Test suggesting categorical for optuna."""
         import optuna
@@ -414,9 +405,7 @@ class TestResolver(unittest.TestCase):
         self.assertEqual([A(name="name"), B(name="name"), C(name="name")], instances)
 
         # Multiple class, multiple kwargs
-        instances = self.resolver.make_many(
-            ["a", "b", "c"], [{"name": "name1"}, {"name": "name2"}, {"name": "name3"}]
-        )
+        instances = self.resolver.make_many(["a", "b", "c"], [{"name": "name1"}, {"name": "name2"}, {"name": "name3"}])
         self.assertEqual([A(name="name1"), B(name="name2"), C(name="name3")], instances)
 
         # One class, No kwargs

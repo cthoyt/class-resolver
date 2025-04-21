@@ -1,14 +1,13 @@
 """Tests for the torch contribution module."""
 
+import importlib.util
 import unittest
 
-try:
-    import numpy
-except ImportError:  # pragma: no cover
-    numpy = None  # pragma: no cover
 
-
-@unittest.skipUnless(numpy, "Can not test numpy contrib without ``pip install numpy``.")
+@unittest.skipUnless(
+    importlib.util.find_spec("numpy"),
+    "Can not test numpy contrib without ``pip install numpy``.",
+)
 class TestNumpy(unittest.TestCase):
     """Test for the numpy contribution module."""
 
