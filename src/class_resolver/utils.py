@@ -111,7 +111,7 @@ def same_module(cls1: type, cls2: type) -> bool:
     return cls1.__module__.split(".")[0] == cls2.__module__.split(".")[0]
 
 
-def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
+def normalize_string(s: str, *, suffix: str | None = None) -> str:
     """Normalize a string for lookup."""
     s = s.lower().replace("-", "").replace("_", "").replace(" ", "")
     if suffix is not None and s.endswith(suffix.lower()):
@@ -119,7 +119,7 @@ def normalize_string(s: str, *, suffix: Optional[str] = None) -> str:
     return s.strip()
 
 
-def upgrade_to_sequence(x: Union[X, Sequence[X]]) -> Sequence[X]:
+def upgrade_to_sequence(x: X | Sequence[X]) -> Sequence[X]:
     """Ensure that the input is a sequence.
 
     :param x: A literal or sequence of literals (don't consider a string x as a sequence)
@@ -176,17 +176,17 @@ def normalize_with_default(
 def normalize_with_default(
     choice: X,
     kwargs: OptionalKwargs = ...,
-    default: Optional[Y] = ...,
+    default: Y | None = ...,
     default_kwargs: OptionalKwargs = ...,
 ) -> tuple[X, OptionalKwargs]: ...
 
 
 def normalize_with_default(
-    choice: Optional[X],
+    choice: X | None,
     kwargs: OptionalKwargs = None,
     default: Optional[Y] = None,
     default_kwargs: OptionalKwargs = None,
-) -> tuple[Union[X, Y, None], OptionalKwargs]:
+) -> tuple[X | Y | None, OptionalKwargs]:
     """
     Normalize a choice for class resolver, with default options.
 
