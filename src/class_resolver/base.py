@@ -256,7 +256,7 @@ class BaseResolver(ABC, Generic[X, Y]):
             key_to_synonyms[key].append(synonym)
         return key_to_synonyms
 
-    def _get_click_choice(self, prefix:str = "", delimiter: str | None =None, suffix: str = "") -> click.Choice:
+    def _get_click_choice(self, prefix: str = "", delimiter: str | None = None, suffix: str = "") -> click.Choice:
         """Get a dynamically generated :class:`click.Choice` that shows values and synonyms.
 
         :param prefix: The string shown after the opening square bracket, before the
@@ -303,7 +303,6 @@ class BaseResolver(ABC, Generic[X, Y]):
         *flags: str,
         as_string: bool = False,
         default: Hint[X] = None,
-
         required: bool = False,
         prefix: str | None = None,
         delimiter: str | None = None,

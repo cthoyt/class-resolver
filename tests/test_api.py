@@ -325,6 +325,10 @@ class TestResolver(unittest.TestCase):
         result_4: Result = runner.invoke(cli, ["--opt", "asynonym1"])
         self.assertEqual(A.__name__, result_4.output)
 
+        # Test normalization works correctly
+        # result_5: Result = runner.invoke(cli, ["--opt", "a_synonym_1"])
+        # self.assertEqual(A.__name__, result_5.output)
+
     def test_click_option_str(self) -> None:
         """Test the click option."""
 
