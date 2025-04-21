@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import partial
 from typing import Any, Callable, TypeVar
 
-from typing_extensions import ParamSpec
+from typing_extensions import ParamSpec, TypeAlias
 
 from .base import BaseResolver
 from .utils import Hint, OptionalKwargs
@@ -16,7 +16,7 @@ __all__ = [
 
 P = ParamSpec("P")
 T = TypeVar("T")
-X = Callable[P, T]
+X: TypeAlias = Callable[P, T]
 
 
 class FunctionResolver(BaseResolver[X, X]):
@@ -46,7 +46,7 @@ class FunctionResolver(BaseResolver[X, X]):
 
     def make(self, query: Hint[X], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> X:
         """Make a function with partial bindings to the given kwargs."""
-        func: X = self.lookup(query)
+        func = self.lookup(query)
         if pos_kwargs or kwargs:
             return partial(func, **(pos_kwargs or {}), **kwargs)  # type: ignore
         return func
