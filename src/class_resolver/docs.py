@@ -107,7 +107,7 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable[[F], F]:
+def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey[X, Y]) -> Callable[[F], F]:
     """Build a decorator to add information about resolved parameter pairs.
 
     The decorator is intended for methods with follow the ``param`` + ``param_kwargs``

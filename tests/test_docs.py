@@ -270,7 +270,7 @@ class TestDocumentResolver(unittest.TestCase):
 
     def test_duplicate_params(self) -> None:
         """Test when no keys are passed."""
-        key: ResolverKey = ResolverKey("a", "b")
+        key: ResolverKey[Any, Any] = ResolverKey("a", "b")
         with self.assertRaises(ValueError):
             update_docstring_with_resolver_keys(key, key)
 
