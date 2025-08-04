@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 import inspect
 import logging
 from collections.abc import Collection, Mapping, Sequence
@@ -75,7 +77,7 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
     #: The shared suffix fo all classes derived from the base class
     suffix: str
     #: The variable name to look up synonyms in classes that are registered with this resolver
-    synonyms_attribute: str | None
+    synonyms_attributes: list[str]
 
     def __init__(
         self,
@@ -104,7 +106,15 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
         :param location: The location used to document the resolver in sphinx
         """
         self.base = base
-        self.synonyms_attribute = synonym_attribute
+        if isinstance(synonym_attribute, str):
+            self.synonyms_attributes = [synonym_attribute]
+        elif isinstance(synonym_attribute, list):
+            self.synonyms_attributes = synonym_attribute
+        elif synonym_attribute is None:
+            self.synonyms_attributes = []
+        else:
+            raise TypeError
+
         if suffix is not None:
             if suffix == "":
                 suffix = None
@@ -122,11 +132,29 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
         """Get the name for an element."""
         return element.__name__
 
+    @property
+    def synonym_attribute(self) -> str | None:
+        warnings.warn("synonym_attribute is deprecated. Access the synonym_attributes list directly instead", DeprecationWarning)
+        lll = len(self.synonyms_attributes)
+        if lll == 0:
+            return None
+        elif lll == 1:
+            return self.synonyms_attributes[0]
+        else:
+            raise ValueError
+
     def extract_synonyms(self, element: type[X]) -> Collection[str]:
         """Get synonyms from an element."""
-        if not self.synonyms_attribute:
-            return []
-        return getattr(element, self.synonyms_attribute, None) or []
+        rv = []
+        for attribute in self.synonyms_attributes:
+            x = getattr(element, attribute, None)
+            if x is None:
+                pass
+            elif isinstance(x, str):
+                rv.append(x)
+            else:
+                rv.extend(x) # it's a list
+        return rv
 
     @classmethod
     def from_subclasses(

@@ -57,8 +57,8 @@ class RegistrationError(KeyError, Generic[X], ABC):
         """Coerce the registration error to a string."""
         return (
             f"Conflict on registration of {self.label} {self.key}:\n"
-            f"Existing: {self.existing}\n"
-            f"Proposed: {self.proposed}"
+            f"Existing: {self.existing} (bases: {self.existing.__mro__()})\n"
+            f"Proposed: {self.proposed} (bases: {self.proposed.__mro__()})"
         )
 
 
