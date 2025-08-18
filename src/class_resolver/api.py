@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import warnings
-
 import inspect
 import logging
+import warnings
 from collections.abc import Collection, Mapping, Sequence
 from typing import Any, Generic, TypeVar
 
@@ -135,7 +134,12 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
 
     @property
     def synonym_attribute(self) -> str | None:
-        warnings.warn("synonym_attribute is deprecated. Access the synonym_attributes list directly instead", DeprecationWarning)
+        """Get the synonnym attribute for the class used for synonym lookup."""
+        warnings.warn(
+            "synonym_attribute is deprecated. Access the synonym_attributes list directly instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         lll = len(self.synonyms_attributes)
         if lll == 0:
             return None
@@ -154,7 +158,7 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
             elif isinstance(x, str):
                 rv.append(x)
             else:
-                rv.extend(x) # it's a list
+                rv.extend(x)  # it's a list
         return rv
 
     @classmethod
