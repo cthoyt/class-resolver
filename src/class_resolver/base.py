@@ -57,8 +57,8 @@ class RegistrationError(KeyError, Generic[X], ABC):
         """Coerce the registration error to a string."""
         return (
             f"Conflict on registration of {self.label} {self.key}:\n"
-            f"Existing: {self.existing} (bases: {self.existing.__mro__()})\n"
-            f"Proposed: {self.proposed} (bases: {self.proposed.__mro__()})"
+            f"Existing: {self.existing} (type: {type(self.existing)})\n"
+            f"Proposed: {self.proposed} (type: {type(self.proposed)})"
         )
 
 
@@ -258,7 +258,7 @@ class BaseResolver(ABC, Generic[X, Y]):
 
     def _get_click_choice(
         self, prefix: str | None = None, delimiter: str | None = None, suffix: str | None = None
-    ) -> click.Choice:
+    ) -> click.Choice[str]:
         """Get a dynamically generated :class:`click.Choice` that shows values and synonyms.
 
         :param prefix: The string shown after the opening square bracket, before the
@@ -274,14 +274,14 @@ class BaseResolver(ABC, Generic[X, Y]):
         rev = self._get_reverse_synonyms()
         norm_func = self.normalize
 
-        class _Choice(click.Choice):
+        class _Choice(click.Choice[str]):
             """An extended choice that is aware of synonyms."""
 
             def convert(self, value: Any, param: click.Parameter | None, ctx: click.Context | None) -> Any:
                 """Normalize."""
                 return super().convert(norm_func(value), param=param, ctx=ctx)
 
-            def get_metavar(self, param: click.Parameter) -> str:
+            def get_metavar(self, param: click.Parameter, ctx: click.Context) -> str:
                 """Get the text that shows the choices, including synonyms."""
                 choices_lst = []
                 for key, synonyms in rev.items():
