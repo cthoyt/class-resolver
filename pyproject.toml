@@ -107,7 +107,7 @@ release = [
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
 [project.optional-dependencies]
 click = [
-    "click<8.2"
+    "click>=8.2"
 ]
 torch = [
     "torch"
