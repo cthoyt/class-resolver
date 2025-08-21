@@ -135,7 +135,7 @@ def upgrade_to_sequence(x: X | Sequence[X]) -> Sequence[X]:
     ('t', 'e', 's', 't')
     """
     if isinstance(x, str):
-        return (x,)  # type: ignore
+        return (x,)
     elif isinstance(x, collections.abc.Sequence):
         return x
     else:
