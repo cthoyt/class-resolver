@@ -258,7 +258,7 @@ class BaseResolver(ABC, Generic[X, Y]):
 
     def _get_click_choice(
         self, prefix: str | None = None, delimiter: str | None = None, suffix: str | None = None
-    ) -> click.Choice:
+    ) -> click.Choice[str]:
         """Get a dynamically generated :class:`click.Choice` that shows values and synonyms.
 
         :param prefix: The string shown after the opening square bracket, before the
@@ -274,7 +274,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         rev = self._get_reverse_synonyms()
         norm_func = self.normalize
 
-        class _Choice(click.Choice):
+        class _Choice(click.Choice[str]):
             """An extended choice that is aware of synonyms."""
 
             def convert(self, value: Any, param: click.Parameter | None, ctx: click.Context | None) -> Any:
