@@ -276,7 +276,7 @@ class BaseResolver(ABC, Generic[X, Y]):
                 """Normalize."""
                 return super().convert(norm_func(value), param=param, ctx=ctx)
 
-            def get_metavar(self, param: click.Parameter) -> str:
+            def get_metavar(self, param: click.Parameter, ctx: click.Context) -> str:
                 """Get the text that shows the choices, including synonyms."""
                 choices_lst = []
                 for key, synonyms in rev.items():
