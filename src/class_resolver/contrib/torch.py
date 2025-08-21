@@ -4,7 +4,8 @@ The ``class-resolver`` provides several class resolvers and function resolvers
 to make it possible to more easily parametrize models and training loops.
 """  # noqa: D205
 
-from typing import Callable
+from collections.abc import Callable
+from typing import TypeAlias
 
 import torch
 from torch import nn
@@ -12,7 +13,6 @@ from torch.nn import init
 from torch.nn.modules import activation
 from torch.optim import Adam, Optimizer
 from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau
-from typing_extensions import TypeAlias
 
 try:
     # when torch >= 2.0

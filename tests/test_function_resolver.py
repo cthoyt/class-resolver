@@ -2,7 +2,7 @@
 
 import operator
 import unittest
-from typing import Callable
+from collections.abc import Callable
 
 from class_resolver import FunctionResolver
 

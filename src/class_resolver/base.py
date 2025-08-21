@@ -3,17 +3,12 @@
 from __future__ import annotations
 
 import logging
-import sys
 from abc import ABC, abstractmethod
-from collections.abc import Collection, Iterable, Iterator, Mapping
-from typing import TYPE_CHECKING, Any, Callable, Generic, overload
+from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
+from importlib.metadata import entry_points
+from typing import TYPE_CHECKING, Any, Generic, overload
 
 from typing_extensions import Self
-
-if sys.version_info[:2] >= (3, 10):
-    from importlib.metadata import entry_points
-else:
-    from importlib_metadata import entry_points
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 

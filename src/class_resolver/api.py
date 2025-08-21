@@ -198,7 +198,7 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
         **kwargs: Any,
     ) -> X:
         """Instantiate a class with optional kwargs."""
-        if query is None or isinstance(query, (str, type)):
+        if query is None or isinstance(query, str | type):
             cls: type[X] = self.lookup(query)
             try:
                 return cls(**(pos_kwargs or {}), **kwargs)
@@ -288,7 +288,7 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
             raise ValueError("Mismatch in number number of queries and kwargs")
         return [
             self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs, **common_kwargs)
-            for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list)
+            for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list, strict=False)
         ]
 
     def make_table(
@@ -339,7 +339,7 @@ def get_cls(
         if default is None:
             raise ValueError(f"No default {base.__name__} set")
         return default
-    elif not isinstance(query, (str, type, base)):
+    elif not isinstance(query, str | type | base):
         raise TypeError(f"Invalid {base.__name__} type: {type(query)} - {query}")
     elif isinstance(query, str):
         key = normalize_string(query, suffix=suffix)

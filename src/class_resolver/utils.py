@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import collections.abc
 import logging
-from collections.abc import Iterable, Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union, overload
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar, overload
 
 if TYPE_CHECKING:
     import click  # pragma: no cover
@@ -37,19 +37,19 @@ X = TypeVar("X")
 Y = TypeVar("Y")
 
 #: A type annotation for either an instance of X or a class of X
-InstOrType = Union[X, type[X]]
+InstOrType: TypeAlias = X | type[X]
 #: A type annotation for either an instance of X or name a class X
-Lookup = Union[str, X]
+Lookup: TypeAlias = str | X
 
-LookupType = Lookup[type[X]]
-LookupOrType = Lookup[InstOrType[X]]
-Hint = Optional[Lookup[X]]
-HintType = Hint[type[X]]
-HintOrType = Hint[InstOrType[X]]
-OptionalKwargs = Optional[Mapping[str, Any]]
-OneOrSequence = Union[X, Sequence[X]]
-OneOrManyHintOrType = Optional[OneOrSequence[HintOrType[X]]]
-OneOrManyOptionalKwargs = Optional[OneOrSequence[OptionalKwargs]]
+LookupType: TypeAlias = Lookup[type[X]]
+LookupOrType: TypeAlias = Lookup[InstOrType[X]]
+Hint: TypeAlias = Lookup[X] | None
+HintType: TypeAlias = Hint[type[X]]
+HintOrType: TypeAlias = Hint[InstOrType[X]]
+OptionalKwargs: TypeAlias = Mapping[str, Any] | None
+OneOrSequence: TypeAlias = X | Sequence[X]
+OneOrManyHintOrType: TypeAlias = OneOrSequence[HintOrType[X]] | None
+OneOrManyOptionalKwargs: TypeAlias = OneOrSequence[OptionalKwargs] | None
 
 
 def is_private(class_name: str, module_name: str, main_is_private: bool = True) -> bool:
