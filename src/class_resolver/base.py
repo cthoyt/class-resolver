@@ -3,17 +3,12 @@
 from __future__ import annotations
 
 import logging
-import sys
 from abc import ABC, abstractmethod
-from collections.abc import Collection, Iterable, Iterator, Mapping
-from typing import TYPE_CHECKING, Any, Callable, Generic, overload
+from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
+from importlib.metadata import entry_points
+from typing import TYPE_CHECKING, Any, Generic, overload
 
 from typing_extensions import Self
-
-if sys.version_info[:2] >= (3, 10):
-    from importlib.metadata import entry_points
-else:
-    from importlib_metadata import entry_points
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
@@ -258,7 +253,7 @@ class BaseResolver(ABC, Generic[X, Y]):
 
     def _get_click_choice(
         self, prefix: str | None = None, delimiter: str | None = None, suffix: str | None = None
-    ) -> click.Choice:
+    ) -> click.Choice[str]:
         """Get a dynamically generated :class:`click.Choice` that shows values and synonyms.
 
         :param prefix: The string shown after the opening square bracket, before the
@@ -274,14 +269,14 @@ class BaseResolver(ABC, Generic[X, Y]):
         rev = self._get_reverse_synonyms()
         norm_func = self.normalize
 
-        class _Choice(click.Choice):
+        class _Choice(click.Choice[str]):
             """An extended choice that is aware of synonyms."""
 
             def convert(self, value: Any, param: click.Parameter | None, ctx: click.Context | None) -> Any:
                 """Normalize."""
                 return super().convert(norm_func(value), param=param, ctx=ctx)
 
-            def get_metavar(self, param: click.Parameter) -> str:
+            def get_metavar(self, param: click.Parameter, ctx: click.Context) -> str:
                 """Get the text that shows the choices, including synonyms."""
                 choices_lst = []
                 for key, synonyms in rev.items():

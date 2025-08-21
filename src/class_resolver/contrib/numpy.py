@@ -1,10 +1,10 @@
 """NumPy is a numerical package for Python."""
 
-from typing import Callable
+from collections.abc import Callable
+from typing import TypeAlias
 
 import numpy as np
 from numpy.typing import ArrayLike
-from typing_extensions import TypeAlias
 
 from ..func import FunctionResolver
 
