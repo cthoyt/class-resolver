@@ -3,7 +3,7 @@
 import importlib.util
 import unittest
 from collections.abc import Collection, Sequence
-from typing import Any, ClassVar, Optional, cast
+from typing import Any, ClassVar, cast
 
 import click
 from click.testing import CliRunner, Result
@@ -60,7 +60,7 @@ class D(Base):
 class E(Base):
     """E base class."""
 
-    def __init__(self, name: Optional[str] = None) -> None:
+    def __init__(self, name: str | None = None) -> None:
         """Initialize the class."""
         super().__init__(name or "default_name")
 
