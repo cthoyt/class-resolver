@@ -460,3 +460,18 @@ class TestResolver(unittest.TestCase):
         with self.assertRaises(TypeError) as e:
             resolver.make("a")
         self.assertEqual("surprise!", str(e.exception))
+
+    def test_register_synonym_duplicate(self) -> None:
+        """Test duplicate synonym on inferred name."""
+
+        class Doer:
+            """Test class."""
+
+        class NopeDoer(Doer):
+            """Test child class."""
+
+            synonyms: ClassVar[list[str]] = ["nope", "schruope"]
+
+        # the test is that we don't raise here
+        resolver = Resolver.from_subclasses(Doer)
+        self.assertEqual({"schruope"}, set(resolver.synonyms))

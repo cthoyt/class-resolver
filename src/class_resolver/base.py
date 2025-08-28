@@ -181,6 +181,8 @@ class BaseResolver(ABC, Generic[X, Y]):
             synonym_key = self.normalize(synonym)
             if not synonym_key:
                 raise ValueError(f"Tried to use empty synonym for {element}")
+            if synonym_key == key:
+                continue  # already registered above
             if synonym_key not in self.synonyms and synonym_key not in self.lookup_dict:
                 self.synonyms[synonym_key] = element
             elif synonym_key in self.lookup_dict and raise_on_conflict:
