@@ -9,6 +9,7 @@
 
     installation
     usage
+    contrib/index
 
 ********************
  Indices and Tables
