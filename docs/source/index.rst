@@ -1,5 +1,6 @@
-Class Resolver |release| Documentation
-======================================
+########################################
+ Class Resolver |release| Documentation
+########################################
 
 .. toctree::
     :maxdepth: 2
@@ -8,10 +9,10 @@ Class Resolver |release| Documentation
 
     installation
     usage
-    contrib/index
 
-Indices and Tables
-------------------
+********************
+ Indices and Tables
+********************
 
 - :ref:`genindex`
 - :ref:`modindex`

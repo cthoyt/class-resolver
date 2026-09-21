@@ -1,4 +1,5 @@
-Usage
-=====
+#######
+ Usage
+#######
 
-.. automodule:: class_resolver
+.. automodapi:: class_resolver.api

@@ -73,9 +73,11 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    # "sphinx_automodapi.automodapi",
-    # "sphinx_automodapi.smart_resolver",
+    "sphinx_automodapi.automodapi",
+    "sphinx_automodapi.smart_resolver",
+    # 'texext',
 ]
+
 
 
 # generate autosummary pages
@@ -238,13 +240,13 @@ texinfo_documents = [
 # Note: don't add trailing slashes, since sphinx adds "/objects.inv" to the end
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "pandas": ("https://pandas.pydata.org/docs", None),
+    "sklearn": ("https://scikit-learn.org/stable", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "torch": ("https://pytorch.org/docs/stable", None),
     "torch_geometric": ("https://pytorch-geometric.readthedocs.io/en/latest", None),
-    "numpy": ("https://numpy.org/doc/stable", None),
     "optuna": ("https://optuna.readthedocs.io/en/latest", None),
-    "sklearn": ("https://scikit-learn.org/stable", None),
-    "pandas": ("https://pandas.pydata.org/docs", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy", None),
 }
 
 autoclass_content = "both"

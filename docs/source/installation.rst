@@ -1,21 +1,23 @@
-Installation
-============
+##############
+ Installation
+##############
 
 The most recent release can be installed from `PyPI
-<https://pypi.org/project/class_resolver>`_ with uv:
+<https://pypi.org/project/class-resolver>`_ with uv:
 
 .. code-block:: console
 
-    $ uv pip install class_resolver
+    $ uv pip install class-resolver
 
 or with pip:
 
 .. code-block:: console
 
-    $ python3 -m pip install class_resolver
+    $ python3 -m pip install class-resolver
 
-Installing from git
--------------------
+*********************
+ Installing from git
+*********************
 
 The most recent code and data can be installed directly from GitHub with uv:
 
@@ -29,8 +31,9 @@ or with pip:
 
     $ python3 -m pip install git+https://github.com/cthoyt/class-resolver.git
 
-Installing for development
---------------------------
+****************************
+ Installing for development
+****************************
 
 To install in development mode with uv:
 
