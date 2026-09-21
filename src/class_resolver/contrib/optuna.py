@@ -19,9 +19,8 @@ sampler_resolver = ClassResolver.from_subclasses(
 )
 """A resolver for :class:`optuna.samplers.BaseSampler` subclasses.
 
-Building on the simple example from the Optuna website's homepage,
-you can parametrize :func:`optuna.create_study` with a sampler
-instantiated with :mod:`class_resolver`.
+Building on the simple example from the Optuna website's homepage, you can parametrize
+:func:`optuna.create_study` with a sampler instantiated with :mod:`class_resolver`.
 
 .. code-block:: python
 
@@ -30,9 +29,11 @@ instantiated with :mod:`class_resolver`.
     from class_resolver.contrib.optuna import sampler_resolver
     from optuna.sampler import BaseSampler
 
+
     def objective(trial):
-        x = trial.suggest_float('x', -10, 10)
+        x = trial.suggest_float("x", -10, 10)
         return (x - 2) ** 2
+
 
     def optimize_study(sampler: Hint[BaseSampler] = None):
         study = optuna.create_study(
@@ -40,6 +41,7 @@ instantiated with :mod:`class_resolver`.
         )
         study.optimize(objective, n_trials=100)
         return study
+
 
     study = optimize_study(sampler="TPE")
     study.best_params  # E.g. {'x': 2.002108042}
@@ -54,9 +56,8 @@ pruner_resolver = ClassResolver.from_subclasses(
 )
 """A resolver for :class:`optuna.pruners.BasePruner` subclasses.
 
-Building on the simple example from the Optuna website's homepage,
-you can parametrize :func:`optuna.create_study` with a pruner
-instantiated with :mod:`class_resolver`.
+Building on the simple example from the Optuna website's homepage, you can parametrize
+:func:`optuna.create_study` with a pruner instantiated with :mod:`class_resolver`.
 
 .. code-block:: python
 
@@ -65,9 +66,11 @@ instantiated with :mod:`class_resolver`.
     from class_resolver.contrib.optuna import pruner_resolver
     from optuna.pruner import BasePruner
 
+
     def objective(trial):
-        x = trial.suggest_float('x', -10, 10)
+        x = trial.suggest_float("x", -10, 10)
         return (x - 2) ** 2
+
 
     def optimize_study(pruner: Hint[BasePruner] = None):
         study = optuna.create_study(
@@ -75,6 +78,7 @@ instantiated with :mod:`class_resolver`.
         )
         study.optimize(objective, n_trials=100)
         return study
+
 
     study = optimize_study(pruner="median")
     study.best_params  # E.g. {'x': 2.002108042}

@@ -98,9 +98,9 @@ class ClassResolver(BaseResolver[type[X], X], Generic[X]):
         :param suffix: The optional shared suffix of all instances. If not none, will
             override ``base_as_suffix``.
         :param synonyms: The optional synonym dictionary
-        :param synonym_attribute:
-            The attribute or list of attributes to look in each class for synonyms.
-            Defaults to ``synonyms``. Explicitly set to None to turn off synonym lookup.
+        :param synonym_attribute: The attribute or list of attributes to look in each
+            class for synonyms. Defaults to ``synonyms``. Explicitly set to None to turn
+            off synonym lookup.
         :param base_as_suffix: Should the base class's name be used as the suffix if
             none is given? Defaults to true.
         :param location: The location used to document the resolver in sphinx

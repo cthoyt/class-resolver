@@ -1,8 +1,9 @@
+"""A contrib module for PyTorch.
+
+PyTorch is a tensor and autograd library widely used for machine learning. The
+``class-resolver`` provides several class resolvers and function resolvers to make it
+possible to more easily parametrize models and training loops.
 """
-PyTorch is a tensor and autograd library widely used for machine learning.
-The ``class-resolver`` provides several class resolvers and function resolvers
-to make it possible to more easily parametrize models and training loops.
-"""  # noqa: D205
 
 from collections.abc import Callable
 from typing import TypeAlias
@@ -50,13 +51,16 @@ optimizer_resolver = ClassResolver.from_subclasses(
 
     dataset = ...
 
+
     def train(
         model: nn.Module,
         optimizer: Hint[Optimizer] = "adam",
         optimizer_kwargs: OptionalKwargs = None,
     ):
         optimizer = optimizer_resolver.make(
-            optimizer, optimizer_kwargs, params=model.parameters(),
+            optimizer,
+            optimizer_kwargs,
+            params=model.parameters(),
         )
 
         for epoch in range(20):
@@ -96,18 +100,17 @@ activation_resolver: ClassResolver[nn.Module] = ClassResolver(
     from torch import nn
     from torch.nn import functional as F
 
+
     class TwoLayerPerceptron(nn.Module):
-        def __init__(
-            self,
-            dims: list[int]
-            activation: Hint[nn.Module] = None
-        )
+        def __init__(self, dims: list[int], activation: Hint[nn.Module] = None):
             layers = []
             for in_features, out_features in pairwise(dims):
-                layers.extend((
-                    nn.Linear(in_features, out_features),
-                    activation_resolver.make(activation),
-                ))
+                layers.extend(
+                    (
+                        nn.Linear(in_features, out_features),
+                        activation_resolver.make(activation),
+                    )
+                )
             self.layers = nn.Sequential(*layers)
 
         def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
@@ -129,9 +132,9 @@ margin_activation_resolver: ClassResolver[nn.Module] = ClassResolver(
 )
 """A resolver for a subset of :mod:`torch.nn.modules.activation` classes.
 
-This resolver fulfills the same idea as :data:`activation_resolver` but
-it is explicitly limited to :class:`torch.nn.ReLU` and :class:`torch.nn.Softplus`
-for certain scenarios where a margin-style activation is appropriate.
+This resolver fulfills the same idea as :data:`activation_resolver` but it is explicitly
+limited to :class:`torch.nn.ReLU` and :class:`torch.nn.Softplus` for certain scenarios
+where a margin-style activation is appropriate.
 """
 
 initializer_resolver = FunctionResolver(
@@ -148,6 +151,7 @@ initializer_resolver = FunctionResolver(
     from torch import nn
     from torch.nn import functional as F
 
+
     class TwoLayerPerceptron(nn.Module):
         def __init__(
             self,
@@ -155,7 +159,7 @@ initializer_resolver = FunctionResolver(
             hidden_features: int,
             out_features: int,
             initializer=nn.init.xavier_normal_,
-        )
+        ):
             self.layer_1 = nn.Linear(in_features, hidden_features)
             self.layer_2 = nn.Linear(hidden_features, out_features)
 
@@ -179,10 +183,10 @@ lr_scheduler_resolver = ClassResolver.from_subclasses(
 )
 """A resolver for learning rate schedulers.
 
-Borrowing from the PyTorch documentation's example on `how to adjust the learning
-rate <https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate>`_,
-the following example shows how a training loop can be first turned into a funciton
-then parametrized to accept a LRScheduler hint.
+Borrowing from the PyTorch documentation's example on `how to adjust the learning rate
+<https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate>`_, the
+following example shows how a training loop can be first turned into a funciton then
+parametrized to accept a LRScheduler hint.
 
 .. code-block:: python
 
@@ -194,13 +198,16 @@ then parametrized to accept a LRScheduler hint.
 
     dataset = ...
 
+
     def train(
         model: nn.Module,
         scheduler: Hint[LRScheduler] = "exponential",
         scheduler_kwargs: OptionalKwargs = None,
     ):
         optimizer = SGD(params=model.parameters(), lr=0.1)
-        scheduler = lr_scheduler_resolver.make(scheduler, scheduler_kwargs, optimizer=optimizer)
+        scheduler = lr_scheduler_resolver.make(
+            scheduler, scheduler_kwargs, optimizer=optimizer
+        )
 
         for epoch in range(20):
             for input, target in dataset:
@@ -259,8 +266,10 @@ following:
     arr = torch.tensor([1.0, 2.0, 3.0, 10.0], dtype=torch.float)
     assert 4.0 == func(arr).item()
 
+
     def first(x):
         return x[0]
+
 
     # Custom functions pass through
     func = aggregation_resolver.lookup(first)
