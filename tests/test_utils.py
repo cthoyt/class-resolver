@@ -68,7 +68,7 @@ class TestUtilities(unittest.TestCase):
 
     def test_normalize_with_defaults_2(self) -> None:
         """Tests for normalize with defaults."""
-        default_kwargs_tests: Sequence[None | dict[str, int]] = [None, {"b": 3}]
+        default_kwargs_tests: Sequence[dict[str, int] | None] = [None, {"b": 3}]
         # choice is not None -> return choice and kwargs
         choice_kwargs = {"a": 5}
         for default_kwargs in default_kwargs_tests:

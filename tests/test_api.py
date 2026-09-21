@@ -27,7 +27,7 @@ class Base:
         """Initialize the class."""
         self.name = name
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Check two instances are equal."""
         return type(self) is type(other) and self.name == other.name
 

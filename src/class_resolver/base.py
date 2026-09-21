@@ -6,9 +6,7 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
 from importlib.metadata import entry_points
-from typing import TYPE_CHECKING, Any, Generic, overload
-
-from typing_extensions import Self
+from typing import TYPE_CHECKING, Any, Generic, Self, overload
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
@@ -26,7 +24,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class RegistrationError(KeyError, Generic[X], ABC):
+class RegistrationError(KeyError, ABC, Generic[X]):
     """Raised when trying to add a new element to a resolver with a pre-existing lookup key."""
 
     def __init__(self, resolver: BaseResolver[X, Any], key: str, proposed: X, label: str) -> None:
