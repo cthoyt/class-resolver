@@ -1,11 +1,12 @@
-"""
-Scikit-learn is a generic machine learning package with implementations of
-algorithms for classification, regression, dimensionality reduction, clustering,
-as well as other generic tooling.
+"""A contrib module for scikit-learn.
+
+Scikit-learn is a generic machine learning package with implementations of algorithms
+for classification, regression, dimensionality reduction, clustering, as well as other
+generic tooling.
 
 The ``class-resolver`` provides several class resolvers for instantiating various
 implementations, such as those of linear models.
-"""  # noqa: D205
+"""
 
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
@@ -47,8 +48,8 @@ classifier_resolver: ClassResolver[BaseEstimator] = ClassResolver(
 )
 """A resolver for classifiers.
 
-The default value is :class:`sklearn.linear_model.LogisticRegression`.
-This resolver can be used like in the following:
+The default value is :class:`sklearn.linear_model.LogisticRegression`. This resolver can
+be used like in the following:
 
 .. code-block:: python
 
@@ -59,7 +60,9 @@ This resolver can be used like in the following:
 
     # Prepare a dataset
     x, y = datasets.load_iris(return_X_y=True)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=0.33, random_state=42
+    )
 
     # Lookup with a string
     classifier = classifier_resolver.make("LogisticRegression")
@@ -71,5 +74,7 @@ This resolver can be used like in the following:
     classifier.fit(x_train, y_train)
     assert 0.7 < classifier.score(x_test, y_test)
 
-.. seealso:: https://scikit-learn.org/stable/modules/classes.html#linear-classifiers
+.. seealso::
+
+    https://scikit-learn.org/stable/modules/classes.html#linear-classifiers
 """

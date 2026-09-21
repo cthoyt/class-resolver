@@ -6,11 +6,12 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
 from importlib.metadata import entry_points
-from typing import TYPE_CHECKING, Any, Generic, Self, overload
+from typing import TYPE_CHECKING, Any, Generic, Self, TypeVar, Union, overload
 
 from .utils import Hint, OptionalKwargs, X, Y, make_callback, normalize_string
 
 if TYPE_CHECKING:
+    import click
     import click.decorators
     import optuna
 
@@ -22,6 +23,8 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+FC = TypeVar("FC", bound=Union[Callable[..., Any], "click.Command"])
 
 
 class RegistrationError(KeyError, ABC, Generic[X]):
@@ -307,7 +310,7 @@ class BaseResolver(ABC, Generic[X, Y]):
         delimiter: str | None = None,
         suffix: str | None = None,
         **kwargs: Any,
-    ) -> Callable[[click.decorators.FC], click.decorators.FC]:
+    ) -> Callable[[FC], FC]:
         """Get a click option for this resolver.
 
         :param flags: Positional arguments that are passed to :func:`click.option`
