@@ -26,7 +26,9 @@ class FunctionResolver(BaseResolver[Callable[P, T], Callable[P, T]], Generic[P, 
         """Get the name for an element."""
         return element.__name__
 
-    def lookup(self, query: Hint[Callable[P, T]], default: Callable[P, T] | None = None) -> Callable[P, T]:
+    def lookup(
+        self, query: Hint[Callable[P, T]], default: Callable[P, T] | None = None
+    ) -> Callable[P, T]:
         """Lookup a function."""
         if query is None:
             return self._default(default)
@@ -44,7 +46,9 @@ class FunctionResolver(BaseResolver[Callable[P, T], Callable[P, T]], Generic[P, 
         else:
             raise TypeError(f"Invalid function: {type(query)} - {query}")
 
-    def make(self, query: Hint[Callable[P, T]], pos_kwargs: OptionalKwargs = None, **kwargs: Any) -> Callable[P, T]:
+    def make(
+        self, query: Hint[Callable[P, T]], pos_kwargs: OptionalKwargs = None, **kwargs: Any
+    ) -> Callable[P, T]:
         """Make a function with partial bindings to the given kwargs."""
         func = self.lookup(query)
         if pos_kwargs or kwargs:

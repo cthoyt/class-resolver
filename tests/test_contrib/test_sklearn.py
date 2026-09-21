@@ -5,7 +5,8 @@ import unittest
 
 
 @unittest.skipUnless(
-    importlib.util.find_spec("sklearn"), "Can not test sklearn contrib without ``pip install scikit-learn``."
+    importlib.util.find_spec("sklearn"),
+    "Can not test sklearn contrib without ``pip install scikit-learn``.",
 )
 class TestSklearn(unittest.TestCase):
     """Test for the scikit-learn contribution module."""

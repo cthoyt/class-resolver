@@ -79,7 +79,6 @@ extensions = [
 ]
 
 
-
 # generate autosummary pages
 autosummary_generate = True
 

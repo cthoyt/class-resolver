@@ -279,8 +279,12 @@ MLP(dims=[10, 200, 40], activation="ReLU")  # uses stylized
 MLP(dims=[10, 200, 40], activation=nn.ReLU)  # uses class
 MLP(dims=[10, 200, 40], activation=nn.ReLU())  # uses instance
 
-MLP(dims=[10, 200, 40], activation="hardtanh", activation_kwargs={"min_val": 0.0, "max_value": 6.0})  # uses kwargs
-MLP(dims=[10, 200, 40], activation=nn.HardTanh, activation_kwargs={"min_val": 0.0, "max_value": 6.0})  # uses kwargs
+MLP(
+    dims=[10, 200, 40], activation="hardtanh", activation_kwargs={"min_val": 0.0, "max_value": 6.0}
+)  # uses kwargs
+MLP(
+    dims=[10, 200, 40], activation=nn.HardTanh, activation_kwargs={"min_val": 0.0, "max_value": 6.0}
+)  # uses kwargs
 MLP(dims=[10, 200, 40], activation=nn.HardTanh(0.0, 6.0))  # uses instance
 ```
 

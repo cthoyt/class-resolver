@@ -1,4 +1,4 @@
-"""The :mod:`class_resolver` package helps you look up related classes and functions to parametrize your code.
+"""An implementation of the registry pattern.
 
 Getting Started
 ===============

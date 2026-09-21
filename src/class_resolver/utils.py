@@ -214,8 +214,9 @@ def normalize_with_default(
         raise ValueError("If choice is None, a default has to be provided.")
     if kwargs is not None:
         logger.warning(
-            f"No choice was provided, but kwargs={kwargs} is not None. Will use the default choice={default} "
-            f"with its default_kwargs={default_kwargs}. If you want the explicitly provided kwargs to be used,"
-            f" explicitly provide choice={default} instead of None."
+            f"No choice was provided, but kwargs={kwargs} is not None. Will use the default "
+            f"choice={default} with its default_kwargs={default_kwargs}. If you want the "
+            f"explicitly provided kwargs to be used, explicitly provide choice={default} instead "
+            f"of None."
         )
     return default, default_kwargs
