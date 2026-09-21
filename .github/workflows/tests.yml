@@ -25,12 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "3.13", "3.10" ]
+        python-version: [ "3.14", "3.11" ]
         tox-command: [ "lint", "pyroma", "mypy" ]
     steps:
-      - uses: actions/checkout@v4
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v3"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
@@ -45,14 +47,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # We only test documentation on the latest version
-        # sphinx 8.0 / sphinx-rtd-theme 3.0 discontinued Python 3.9 support
-        # a year early, which prompted re-thinking about this.
-        python-version: [ "3.13" ]
+        python-version: [ "3.14" ]
     steps:
-      - uses: actions/checkout@v4
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v3"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
@@ -76,11 +77,13 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ "3.13", "3.10" ]
+        python-version: [ "3.14", "3.11" ]
     steps:
-      - uses: actions/checkout@v4
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v3"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
@@ -91,7 +94,7 @@ jobs:
         run:
           uvx -p ${{ matrix.python-version }} --with tox-uv tox -e doctests
       - name: Upload coverage report to codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         if: success()
         with:
           file: coverage.xml
