@@ -1,4 +1,4 @@
-"""NumPy is a numerical package for Python."""
+"""A contrib module for NumPy, a numerical package for Python."""
 
 from collections.abc import Callable
 from typing import TypeAlias
@@ -46,8 +46,10 @@ following:
     arr = [1, 2, 3, 10]
     assert 4.0 == func(arr).item()
 
+
     def first(x):
         return x[0]
+
 
     # Custom functions pass through
     func = aggregation_resolver.lookup(first)
