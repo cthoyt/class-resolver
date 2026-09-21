@@ -85,4 +85,4 @@ Building on the simple example from the Optuna website's homepage, you can param
 """
 
 # TODO figure out why this isn't auto-registered
-pruner_resolver.register(MedianPruner, raise_on_conflict=True)
+pruner_resolver.register(MedianPruner, raise_on_conflict=False)
