@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.12.6,<1.0"]
+requires = ["uv_build>=0.12.17,<1.0"]
 build-backend = "uv_build"
 
 [project]
@@ -62,16 +62,15 @@ tests = [
 docs = [
     "sphinx>=8",
     "sphinx-rtd-theme>=3.0",
-    "sphinx_automodapi",
+    "sphinx-automodapi",
 ]
 lint = [
     "ruff",
 ]
 typing = [
     { include-group = "tests" },
-    "mypy",
+    "mypy>=2.3.1",
     "pydantic",
-    "types-click",
     "types-tabulate",
 ]
 docs-lint = [
@@ -95,8 +94,8 @@ bump = [
     "bump-my-version",
 ]
 build = [
-    "uv>=0.9.6",
-    "uv-build>=0.9.6",
+    "uv>=0.12.17",
+    "uv-build>=0.12.17",
 ]
 release = [
     { include-group = "build" },
@@ -107,7 +106,7 @@ release = [
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
 [project.optional-dependencies]
 click = [
-    "click>=8.2"
+    "click>=8.5"
 ]
 torch = [
     "torch"
@@ -145,6 +144,8 @@ sub = "operator:sub"
 mul = "operator:mul"
 expected_failure = "operator:nope_this_is_not_real"
 
+[tool.uv.extra-build-dependencies]
+torch-sparse = ["torch"]
 
 [tool.cruft]
 skip = [
