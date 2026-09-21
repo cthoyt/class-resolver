@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 import logging
 import warnings
-from collections.abc import Collection, Mapping, Sequence
+from collections.abc import Callable, Collection, Mapping, Sequence
 from typing import Any, Generic, TypeVar
 
 from .base import BaseResolver
@@ -169,6 +169,7 @@ class ClassResolver(BaseResolver[type[X], X], Generic[X]):
         skip: Collection[type[X]] | None = None,
         exclude_private: bool = True,
         exclude_external: bool = True,
+        exclude_predicate: Callable[[type[X]], bool] | None = None,
         **kwargs: Any,
     ) -> ClassResolver[X]:
         """Make a resolver from the subclasses of a given class.
@@ -181,6 +182,8 @@ class ClassResolver(BaseResolver[type[X], X], Generic[X]):
             when having shadow duplicate classes implemented in C
         :param exclude_external: If true, will exclude any class that does not originate
             from the same package as the base class.
+        :param exclude_func: If given, will exclude any class that causes the function
+            to return true
         :param kwargs: remaining keyword arguments to pass to :func:`Resolver.__init__`
 
         :returns: A resolver instance
@@ -189,7 +192,12 @@ class ClassResolver(BaseResolver[type[X], X], Generic[X]):
         return cls(
             {
                 subcls
-                for subcls in get_subclasses(base, exclude_private=exclude_private, exclude_external=exclude_external)
+                for subcls in get_subclasses(
+                    base,
+                    exclude_private=exclude_private,
+                    exclude_external=exclude_external,
+                    exclude_predicate=exclude_predicate,
+                )
                 if subcls not in skip
             },
             base=base,

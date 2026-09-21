@@ -71,9 +71,11 @@ def is_private(class_name: str, module_name: str, main_is_private: bool = True) 
 
 def get_subclasses(
     cls: type[X],
+    *,
     exclude_private: bool = True,
     exclude_external: bool = True,
     main_is_private: bool = True,
+    exclude_predicate: Callable[[type[X]], bool] | None = None,
 ) -> Iterable[type[X]]:
     """Get all subclasses.
 
@@ -84,11 +86,19 @@ def get_subclasses(
     :param exclude_external: If true, will exclude any class that does not originate
         from the same package as the base class.
     :param main_is_private: If true, __main__ is considered a private module.
+    :param exclude_predicate: If given, will exclude any class that causes the function
+        to return true
 
     :yields: Descendant classes of the ancestor class
     """
     for subclass in cls.__subclasses__():
-        yield from get_subclasses(subclass)
+        yield from get_subclasses(
+            subclass,
+            exclude_private=exclude_private,
+            exclude_external=exclude_external,
+            main_is_private=main_is_private,
+            exclude_predicate=exclude_predicate,
+        )
         if exclude_private and is_private(
             class_name=subclass.__name__,
             module_name=subclass.__module__,
@@ -96,6 +106,8 @@ def get_subclasses(
         ):
             continue
         if exclude_external and not same_module(cls, subclass):
+            continue
+        if exclude_predicate is not None and exclude_predicate(subclass):
             continue
         yield subclass
 
