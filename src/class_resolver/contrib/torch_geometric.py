@@ -6,6 +6,7 @@ class resolvers and function resolvers to make it possible to more easily parame
 models and training loops.
 """
 
+from torch_geometric.nn import GlobalAttention
 from torch_geometric.nn.aggr import Aggregation, MeanAggregation
 from torch_geometric.nn.conv import MessagePassing, SimpleConv
 
@@ -33,6 +34,9 @@ aggregation_resolver = ClassResolver.from_subclasses(
     base=Aggregation,
     default=MeanAggregation,
     location="class_resolver.contrib.torch_geometric.aggregation_resolver",
+    skip={
+        GlobalAttention,  # deprecated
+    },
 )
 """A resolver for aggregation layers.
 

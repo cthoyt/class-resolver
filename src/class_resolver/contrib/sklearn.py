@@ -13,7 +13,6 @@ from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import (
     LogisticRegression,
     LogisticRegressionCV,
-    PassiveAggressiveClassifier,
     Perceptron,
     RidgeClassifier,
     RidgeClassifierCV,
@@ -31,7 +30,7 @@ classifier_resolver: ClassResolver[BaseEstimator] = ClassResolver(
     [
         LogisticRegression,
         LogisticRegressionCV,
-        PassiveAggressiveClassifier,
+        # PassiveAggressiveClassifier, # deprecated
         Perceptron,
         RidgeClassifier,
         RidgeClassifierCV,

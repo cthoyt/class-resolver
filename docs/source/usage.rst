@@ -1,5 +1,4 @@
 Usage
 =====
 
-.. automodapi:: class_resolver
-    :inherited-members:
+.. automodule:: class_resolver
