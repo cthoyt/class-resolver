@@ -83,6 +83,3 @@ Building on the simple example from the Optuna website's homepage, you can param
     study = optimize_study(pruner="median")
     study.best_params  # E.g. {'x': 2.002108042}
 """
-
-# TODO figure out why this isn't auto-registered
-pruner_resolver.register(MedianPruner)
