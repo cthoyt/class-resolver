@@ -196,7 +196,7 @@ class ClassResolver(BaseResolver[type[X], X], Generic[X]):
                     base,
                     exclude_private=exclude_private,
                     exclude_external=exclude_external,
-                    exclude_func=exclude_predicate,
+                    exclude_predicate=exclude_predicate,
                 )
                 if subcls not in skip
             },
