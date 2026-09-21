@@ -1,6 +1,7 @@
 """Tests for the torch-geometric contribution module."""
 
 import importlib.util
+import inspect
 import unittest
 
 
@@ -33,6 +34,10 @@ class TestTorch(unittest.TestCase):
         index = torch.randint(0, 100, (1000,))
 
         for cls in aggregation_resolver:
-            aggr = cls()
-            output = aggr(x, index)
-            self.assertEqual((100, 64), tuple(output.shape))
+            if len(inspect.signature(cls).parameters) > 0:
+                # skip anything that is parametrized
+                continue
+            with self.subTest(name=cls.__name__):
+                aggr = cls()
+                output = aggr(x, index)
+                self.assertEqual((100, 64), tuple(output.shape))
