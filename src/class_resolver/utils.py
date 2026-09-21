@@ -71,9 +71,7 @@ def is_private(class_name: str, module_name: str, main_is_private: bool = True) 
         return True
     if not main_is_private and module_name.startswith("__main__"):
         return False
-    if any(part.startswith("_") for part in module_name.split(".")):
-        return True
-    return False
+    return bool(any(part.startswith("_") for part in module_name.split(".")))
 
 
 def get_subclasses(

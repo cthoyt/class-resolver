@@ -26,7 +26,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class RegistrationError(KeyError, Generic[X], ABC):
+class RegistrationError(KeyError, ABC, Generic[X]):
     """Raised when trying to add a new element to a resolver with a pre-existing lookup key."""
 
     def __init__(self, resolver: BaseResolver[X, Any], key: str, proposed: X, label: str) -> None:

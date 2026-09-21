@@ -68,7 +68,7 @@ MISSING_ARGS = [
 ]
 
 
-class ClassResolver(Generic[X], BaseResolver[type[X], X]):
+class ClassResolver(BaseResolver[type[X], X], Generic[X]):
     """Resolve from a list of classes."""
 
     #: The base class
@@ -240,7 +240,7 @@ class ClassResolver(Generic[X], BaseResolver[type[X], X]):
                     raise KeywordArgumentError(cls, e.args[0]) from None
                 if any(text in e.args[0] for text in MISSING_ARGS):
                     raise UnexpectedKeywordError(cls) from None
-                raise e
+                raise
 
         # An instance was passed, and it will go through without modification.
         return query

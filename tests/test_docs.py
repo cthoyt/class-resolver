@@ -75,7 +75,7 @@ Apply an activation then aggregation.
 
 
 @TEST_RESOLVER_1
-def f1(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: OptionalKwargs) -> Tensor:
+def f1(activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -85,7 +85,7 @@ def f1(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: 
 
 
 @TEST_RESOLVER_1
-def f2(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: OptionalKwargs) -> Tensor:
+def f2(activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -100,7 +100,7 @@ def f2(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: 
 )
 def f3(
     tensor: Tensor,
-    activation: None | str | type[nn.Module] | nn.Module,
+    activation: str | type[nn.Module] | nn.Module | None,
     activation_kwargs: dict[str, Any] | None,
     aggregation: TorchAggregationFunc,
     aggregation_kwargs: dict[str, Any] | None,
@@ -150,11 +150,11 @@ Apply an activation then aggregation.
 )
 def f4(
     tensor: Tensor,
-    activation_1: None | str | type[nn.Module] | nn.Module,
+    activation_1: str | type[nn.Module] | nn.Module | None,
     activation_1_kwargs: dict[str, Any] | None,
-    aggregation: None | str | TorchAggregationFunc,
+    aggregation: str | TorchAggregationFunc | None,
     aggregation_kwargs: dict[str, Any] | None,
-    activation_2: None | str | type[nn.Module] | nn.Module,
+    activation_2: str | type[nn.Module] | nn.Module | None,
     activation_2_kwargs: dict[str, Any] | None,
 ) -> Tensor:
     """Apply an activation then aggregation.
@@ -201,7 +201,7 @@ Apply an activation then aggregation.
 
 
 @TEST_RESOLVER_2
-def f5(activation: None | str | type[nn.Module] | nn.Module, activation_kwargs: OptionalKwargs) -> Tensor:
+def f5(activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -216,7 +216,6 @@ class DecoratorTests(unittest.TestCase):
     @staticmethod
     def f(model: Any, model_kwargs: OptionalKwargs) -> None:
         """Do something, and also use model."""
-        pass
 
     # docstr-coverage:excused `testing missing docstr on purpose`
     @staticmethod

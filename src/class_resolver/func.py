@@ -19,7 +19,7 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-class FunctionResolver(Generic[P, T], BaseResolver[Callable[P, T], Callable[P, T]]):
+class FunctionResolver(BaseResolver[Callable[P, T], Callable[P, T]], Generic[P, T]):
     """A resolver for functions."""
 
     def extract_name(self, element: Callable[P, T]) -> str:

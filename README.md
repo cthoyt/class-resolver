@@ -39,30 +39,35 @@ Lookup and instantiate classes with style.
 from class_resolver import ClassResolver
 from dataclasses import dataclass
 
-class Base: pass
+
+class Base:
+    pass
+
 
 @dataclass
 class A(Base):
-   name: str
+    name: str
+
 
 @dataclass
 class B(Base):
-   name: str
+    name: str
+
 
 # Index
 resolver = ClassResolver([A, B], base=Base)
 
 # Lookup
-assert A == resolver.lookup('A')
+assert A == resolver.lookup("A")
 
 # Instantiate with a dictionary
-assert A(name='hi') == resolver.make('A', {'name': 'hi'})
+assert A(name="hi") == resolver.make("A", {"name": "hi"})
 
 # Instantiate with kwargs
-assert A(name='hi') == resolver.make('A', name='hi')
+assert A(name="hi") == resolver.make("A", name="hi")
 
 # A pre-instantiated class will simply be passed through
-assert A(name='hi') == resolver.make(A(name='hi'))
+assert A(name="hi") == resolver.make(A(name="hi"))
 ```
 
 ## 🤖 Writing Extensible Machine Learning Models with `class-resolver`
@@ -75,15 +80,18 @@ from itertools import chain
 from more_itertools import pairwise
 from torch import nn
 
+
 class MLP(nn.Sequential):
     def __init__(self, dims: list[int]):
-        super().__init__(chain.from_iterable(
-            (
-                nn.Linear(in_features, out_features),
-                nn.ReLU(),
+        super().__init__(
+            chain.from_iterable(
+                (
+                    nn.Linear(in_features, out_features),
+                    nn.ReLU(),
+                )
+                for in_features, out_features in pairwise(dims)
             )
-            for in_features, out_features in pairwise(dims)
-        ))
+        )
 ```
 
 This MLP uses a hard-coded rectified linear unit as the non-linear activation
@@ -97,6 +105,7 @@ from itertools import chain
 from more_itertools import pairwise
 from torch import nn
 
+
 class MLP(nn.Sequential):
     def __init__(self, dims: list[int], activation: str = "relu"):
         if activation == "relu":
@@ -107,13 +116,15 @@ class MLP(nn.Sequential):
             activation = nn.Hardtanh()
         else:
             raise KeyError(f"Unsupported activation: {activation}")
-        super().__init__(chain.from_iterable(
-            (
-                nn.Linear(in_features, out_features),
-                activation,
+        super().__init__(
+            chain.from_iterable(
+                (
+                    nn.Linear(in_features, out_features),
+                    activation,
+                )
+                for in_features, out_features in pairwise(dims)
             )
-            for in_features, out_features in pairwise(dims)
-        ))
+        )
 ```
 
 The first issue with this implementation is it relies on a hard-coded set of
@@ -127,21 +138,24 @@ from more_itertools import pairwise
 from torch import nn
 
 activation_lookup: dict[str, nn.Module] = {
-   "relu": nn.ReLU(),
-   "tanh": nn.Tanh(),
-   "hardtanh": nn.Hardtanh(),
+    "relu": nn.ReLU(),
+    "tanh": nn.Tanh(),
+    "hardtanh": nn.Hardtanh(),
 }
+
 
 class MLP(nn.Sequential):
     def __init__(self, dims: list[int], activation: str = "relu"):
         activation = activation_lookup[activation]
-        super().__init__(chain.from_iterable(
-            (
-                nn.Linear(in_features, out_features),
-                activation,
+        super().__init__(
+            chain.from_iterable(
+                (
+                    nn.Linear(in_features, out_features),
+                    activation,
+                )
+                for in_features, out_features in pairwise(dims)
             )
-            for in_features, out_features in pairwise(dims)
-        ))
+        )
 ```
 
 This approach is rigid because it requires pre-instantiation of the activations.
@@ -156,10 +170,11 @@ from more_itertools import pairwise
 from torch import nn
 
 activation_lookup: dict[str, type[nn.Module]] = {
-   "relu": nn.ReLU,
-   "tanh": nn.Tanh,
-   "hardtanh": nn.Hardtanh,
+    "relu": nn.ReLU,
+    "tanh": nn.Tanh,
+    "hardtanh": nn.Hardtanh,
 }
+
 
 class MLP(nn.Sequential):
     def __init__(
@@ -170,13 +185,15 @@ class MLP(nn.Sequential):
     ):
         activation_cls = activation_lookup[activation]
         activation = activation_cls(**(activation_kwargs or {}))
-        super().__init__(chain.from_iterable(
-            (
-                nn.Linear(in_features, out_features),
-                activation,
+        super().__init__(
+            chain.from_iterable(
+                (
+                    nn.Linear(in_features, out_features),
+                    activation,
+                )
+                for in_features, out_features in pairwise(dims)
             )
-            for in_features, out_features in pairwise(dims)
-        ))
+        )
 ```
 
 This is pretty good, but it still has a few issues:
@@ -204,6 +221,7 @@ activation_resolver = ClassResolver(
     default=nn.ReLU,
 )
 
+
 class MLP(nn.Sequential):
     def __init__(
         self,
@@ -211,13 +229,15 @@ class MLP(nn.Sequential):
         activation: Hint[nn.Module] = None,  # Hint = Union[None, str, nn.Module, type[nn.Module]]
         activation_kwargs: None | dict[str, any] = None,
     ):
-        super().__init__(chain.from_iterable(
-            (
-                nn.Linear(in_features, out_features),
-                activation_resolver.make(activation, activation_kwargs),
+        super().__init__(
+            chain.from_iterable(
+                (
+                    nn.Linear(in_features, out_features),
+                    activation_resolver.make(activation, activation_kwargs),
+                )
+                for in_features, out_features in pairwise(dims)
             )
-            for in_features, out_features in pairwise(dims)
-        ))
+        )
 ```
 
 Because this is such a common pattern, we've made it available through contrib
@@ -231,6 +251,7 @@ from class_resolver.contrib.torch import activation_resolver
 from more_itertools import pairwise
 from torch import nn
 
+
 class MLP(nn.Sequential):
     def __init__(
         self,
@@ -238,13 +259,15 @@ class MLP(nn.Sequential):
         activation: Hint[nn.Module] = None,
         activation_kwargs: None | dict[str, any] = None,
     ):
-        super().__init__(chain.from_iterable(
-            (
-                nn.Linear(in_features, out_features),
-                activation_resolver.make(activation, activation_kwargs),
+        super().__init__(
+            chain.from_iterable(
+                (
+                    nn.Linear(in_features, out_features),
+                    activation_resolver.make(activation, activation_kwargs),
+                )
+                for in_features, out_features in pairwise(dims)
             )
-            for in_features, out_features in pairwise(dims)
-        ))
+        )
 ```
 
 Now, you can instantiate the MLP with any of the following:
