@@ -291,7 +291,6 @@ MLP(dims=[10, 200, 40], activation=nn.HardTanh(0.0, 6.0))  # uses instance
 In practice, it makes sense to stick to using the strings in combination with
 hyper-parameter optimization libraries like [Optuna](https://optuna.org/).
 
-
 ## 🚀 Installation
 
 The most recent release can be installed from
