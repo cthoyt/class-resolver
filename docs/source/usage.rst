@@ -4,5 +4,4 @@
 
 .. automodapi:: class_resolver.api
     :no-inheritance-diagram:
-    :no-inherited-members:
-    :include: ClassResolver
+    :include: ClassResolver,Resolver,get_cls,UnexpectedKeywordError,KeywordArgumentError
