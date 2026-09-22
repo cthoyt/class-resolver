@@ -2,5 +2,5 @@
  Usage
 #######
 
-.. automodule:: class_resolver.api
-    :members:
+.. automodapi:: class_resolver
+    :no-inheritance-diagram:
