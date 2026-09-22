@@ -8,8 +8,17 @@ from typing import Any, cast
 import torch
 from torch import Tensor, nn
 
-from class_resolver import FunctionResolver, OptionalKwargs, ResolverKey, update_docstring_with_resolver_keys
-from class_resolver.contrib.torch import TorchAggregationFunc, activation_resolver, aggregation_resolver
+from class_resolver import (
+    FunctionResolver,
+    OptionalKwargs,
+    ResolverKey,
+    update_docstring_with_resolver_keys,
+)
+from class_resolver.contrib.torch import (
+    TorchAggregationFunc,
+    activation_resolver,
+    aggregation_resolver,
+)
 from class_resolver.docs import _clean_docstring
 
 TARGET = """This method does some stuff
@@ -75,7 +84,9 @@ Apply an activation then aggregation.
 
 
 @TEST_RESOLVER_1
-def f1(activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs) -> Tensor:
+def f1(
+    activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs
+) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -85,7 +96,9 @@ def f1(activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: 
 
 
 @TEST_RESOLVER_1
-def f2(activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs) -> Tensor:
+def f2(
+    activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs
+) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -201,7 +214,9 @@ Apply an activation then aggregation.
 
 
 @TEST_RESOLVER_2
-def f5(activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs) -> Tensor:
+def f5(
+    activation: str | type[nn.Module] | nn.Module | None, activation_kwargs: OptionalKwargs
+) -> Tensor:
     """Apply an activation then aggregation.
 
     :param activation: An activation function (stateful)
@@ -241,10 +256,14 @@ class DecoratorTests(unittest.TestCase):
         """Test errors when decorating."""
         # missing docstring
         with self.assertRaises(ValueError):
-            update_docstring_with_resolver_keys(ResolverKey("model", "model_resolver"))(self.f_no_doc)
+            update_docstring_with_resolver_keys(ResolverKey("model", "model_resolver"))(
+                self.f_no_doc
+            )
         # non-existing parameter name
         with self.assertRaises(ValueError):
-            update_docstring_with_resolver_keys(ResolverKey("interaction", "model_resolver"))(self.f)
+            update_docstring_with_resolver_keys(ResolverKey("interaction", "model_resolver"))(
+                self.f
+            )
 
 
 class TestDocumentResolver(unittest.TestCase):

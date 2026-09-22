@@ -45,7 +45,10 @@ class KeywordArgumentError(TypeError):
         self.name = s.rstrip("'").rsplit("'", 1)[1]
 
     def __str__(self) -> str:
-        return f"{self.cls.__name__}: __init__() missing 1 required keyword-only argument: '{self.name}'"
+        return (
+            f"{self.cls.__name__}: __init__() missing 1 "
+            f"required keyword-only argument: '{self.name}'"
+        )
 
 
 class UnexpectedKeywordError(TypeError):
@@ -329,7 +332,9 @@ class ClassResolver(BaseResolver[type[X], X], Generic[X]):
             raise ValueError("Mismatch in number number of queries and kwargs")
         return [
             self.make(query=_result_tracker, pos_kwargs=_result_tracker_kwargs, **common_kwargs)
-            for _result_tracker, _result_tracker_kwargs in zip(_query_list, _kwargs_list, strict=False)
+            for _result_tracker, _result_tracker_kwargs in zip(
+                _query_list, _kwargs_list, strict=False
+            )
         ]
 
     def make_table(
@@ -357,7 +362,10 @@ class ClassResolver(BaseResolver[type[X], X], Generic[X]):
 
         # TODO: synonyms?
         rows = [
-            (key_fmt.format(key=norm_key), cls_fmt.format(cls=f"{cls.__module__}.{cls.__qualname__}"))
+            (
+                key_fmt.format(key=norm_key),
+                cls_fmt.format(cls=f"{cls.__module__}.{cls.__qualname__}"),
+            )
             for norm_key, cls in self.lookup_dict.items()
         ]
         return tabulate.tabulate(rows, headers=header, tablefmt=table_fmt, **kwargs)
@@ -391,7 +399,8 @@ def get_cls(
         else:
             valid_choices = sorted(set(lookup_dict.keys()).union(lookup_dict_synonyms or []))
             raise KeyError(
-                f"Invalid {base.__name__} name: {query} (normalized to: {key}). Valid choices are: {valid_choices}"
+                f"Invalid {base.__name__} name: {query} (normalized to: "
+                f"{key}). Valid choices are: {valid_choices}"
             )
     elif isinstance(query, base):
         return query.__class__

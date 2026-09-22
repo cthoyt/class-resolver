@@ -1,4 +1,8 @@
-Usage
-=====
+#######
+ Usage
+#######
 
-.. automodule:: class_resolver
+.. automodapi:: class_resolver.api
+    :no-inheritance-diagram:
+    :no-inherited-members:
+    :include: ClassResolver

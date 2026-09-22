@@ -1,9 +1,9 @@
 [build-system]
-requires = ["uv_build>=0.12.17,<1.0"]
+requires = ["uv_build>=0.11.2,<1.0"]
 build-backend = "uv_build"
 
 [project]
-name = "class_resolver"
+name = "class-resolver"
 version = "0.8.1-dev"
 description = "Lookup and instantiate classes with style."
 readme = "README.md"
@@ -43,9 +43,7 @@ keywords = [
 # License Information.
 # See PEP-639 at https://peps.python.org/pep-0639/#add-license-files-key
 license = "MIT"
-license-files = [
-    "LICENSE",
-]
+license-files = ["LICENSE"]
 
 requires-python = ">=3.11"
 dependencies = [
@@ -60,17 +58,18 @@ tests = [
     "docdata",
 ]
 docs = [
-    "sphinx>=9",
+    "sphinx<9",
     "sphinx-rtd-theme>=3.0",
-    "sphinx-automodapi",
+    "sphinx_automodapi",
 ]
 lint = [
     "ruff",
 ]
 typing = [
     { include-group = "tests" },
-    "mypy>=2.3.1",
+    "mypy",
     "pydantic",
+    "types-click",
     "types-tabulate",
 ]
 docs-lint = [
@@ -86,21 +85,9 @@ doctests = [
     "pygments",
 ]
 pyroma = [
+    "uv-build",
     "pyroma",
     "pygments",
-]
-# follow https://github.com/astral-sh/uv/issues/6298 for switching to a uv-based version bump workflow
-bump = [
-    "bump-my-version",
-]
-build = [
-    "uv>=0.12.17",
-    "uv-build>=0.12.17",
-]
-release = [
-    { include-group = "build" },
-    "uv",
-    "keyring",
 ]
 
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
@@ -138,6 +125,8 @@ Repository = "https://github.com/cthoyt/class-resolver.git"
 Documentation = "https://class_resolver.readthedocs.io"
 Funding = "https://github.com/sponsors/cthoyt"
 
+[project.scripts]
+
 [project.entry-points.class_resolver_demo]
 add = "operator:add"
 sub = "operator:sub"
@@ -155,8 +144,8 @@ skip = [
 
 # MyPy, see https://mypy.readthedocs.io/en/stable/config_file.html
 [tool.mypy]
-plugins = [
-]
+plugins = []
+ignore_missing_imports = true
 
 # Doc8, see https://doc8.readthedocs.io/en/stable/readme.html#ini-file-usage
 [tool.doc8]
@@ -179,7 +168,6 @@ omit = [
     "docs/*",
     "src/class_resolver/version.py",
     "src/class_resolver/__main__.py",
-    "src/class_resolver/cli.py",
 ]
 
 [tool.coverage.paths]
@@ -200,7 +188,7 @@ exclude_lines = [
 ]
 
 [tool.ruff]
-line-length = 120
+line-length = 100
 extend-include = ["*.ipynb"]
 
 [tool.ruff.lint]
@@ -225,7 +213,6 @@ extend-select = [
 ]
 ignore = [
     "D105", # Missing docstring in magic method
-    "E203", # Black conflicts with the following
 ]
 
 # See https://docs.astral.sh/ruff/settings/#per-file-ignores
@@ -289,8 +276,3 @@ replace = "release = \"{new_version}\""
 filename = "src/class_resolver/version.py"
 search = "VERSION = \"{current_version}\""
 replace = "VERSION = \"{new_version}\""
-
-[[tool.bumpversion.files]]
-filename = "CITATION.cff"
-search = "version: {current_version}"
-replace = "version: {new_version}"

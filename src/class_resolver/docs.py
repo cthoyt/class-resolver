@@ -107,7 +107,9 @@ def _clean_docstring(s: str) -> str:
     return f"{first.strip()}\n\n{rest_j}"
 
 
-def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def update_docstring_with_resolver_keys(
+    *resolver_keys: ResolverKey,
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Build a decorator to add information about resolved parameter pairs.
 
     The decorator is intended for methods with follow the ``param`` + ``param_kwargs``
@@ -237,7 +239,9 @@ def update_docstring_with_resolver_keys(*resolver_keys: ResolverKey) -> Callable
                 parameter_pair_str = f"pairs {', '.join(pair_strs)} are"
             else:
                 parameter_pair_str = f"pair {pair_strs[0]} is"
-            parameter_pair_strs.append(f"The parameter {parameter_pair_str} used for :data:`{resolver_qualname}`")
+            parameter_pair_strs.append(
+                f"The parameter {parameter_pair_str} used for :data:`{resolver_qualname}`"
+            )
 
         if len(parameter_pair_strs) == 1:
             note_str = f"""\

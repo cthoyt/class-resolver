@@ -115,7 +115,9 @@ class TestResolver(unittest.TestCase):
             self.resolver.lookup(3)  # type:ignore
         with self.assertRaises(TypeError) as e:
             self.resolver.lookup(AAltBase)  # type:ignore
-        self.assertEqual(f"Not subclass of {self.resolver.base.__name__}: {AAltBase}", str(e.exception))
+        self.assertEqual(
+            f"Not subclass of {self.resolver.base.__name__}: {AAltBase}", str(e.exception)
+        )
         self.assertEqual(self.resolver.lookup(A(name="max")), A)
 
     def test_docdata(self) -> None:
@@ -243,7 +245,9 @@ class TestResolver(unittest.TestCase):
         def objective(trial: optuna.Trial) -> float:
             """Calculate the classification accuracy for the iris dataset."""
             x, y = datasets.load_iris(return_X_y=True)
-            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+            x_train, x_test, y_train, y_test = train_test_split(
+                x, y, test_size=0.33, random_state=42
+            )
             clf_cls = resolver.optuna_lookup(trial, "model")
             clf = clf_cls()
             clf.fit(x_train, y_train)
@@ -405,7 +409,9 @@ class TestResolver(unittest.TestCase):
         self.assertEqual([A(name="name"), B(name="name"), C(name="name")], instances)
 
         # Multiple class, multiple kwargs
-        instances = self.resolver.make_many(["a", "b", "c"], [{"name": "name1"}, {"name": "name2"}, {"name": "name3"}])
+        instances = self.resolver.make_many(
+            ["a", "b", "c"], [{"name": "name1"}, {"name": "name2"}, {"name": "name3"}]
+        )
         self.assertEqual([A(name="name1"), B(name="name2"), C(name="name3")], instances)
 
         # One class, No kwargs
