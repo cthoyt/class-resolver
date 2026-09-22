@@ -2,7 +2,5 @@
  Usage
 #######
 
-.. automodapi:: class_resolver.api
+.. automodapi:: class_resolver
     :no-inheritance-diagram:
-    :no-inherited-members:
-    :include: ClassResolver
