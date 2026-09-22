@@ -259,3 +259,5 @@ todo_emit_warnings = True
 
 # Output SVG inheritance diagrams
 graphviz_output_format = "svg"
+
+automodsumm_properties_are_attributes = False

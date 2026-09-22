@@ -58,7 +58,7 @@ tests = [
     "docdata",
 ]
 docs = [
-    "sphinx>=9",
+    "sphinx<9",
     "sphinx-rtd-theme>=3.0",
     "sphinx_automodapi",
 ]
