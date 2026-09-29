@@ -277,6 +277,18 @@ class TestResolver(unittest.TestCase):
 
         self._test_cli(cli)
 
+    def test_click_option_help(self) -> None:
+        """Test that the help text of a click option shows the choices, including synonyms."""
+
+        @click.command()
+        @self.resolver.get_option("--opt", default="a")
+        def cli(opt: Base) -> None:
+            """Run the test CLI."""
+
+        result = CliRunner().invoke(cli, ["--help"])
+        self.assertEqual(0, result.exit_code, msg=repr(result.exception))
+        self.assertIn("a (synonyms: ", result.output)
+
     def _test_cli(self, cli: click.Command) -> None:
         runner = CliRunner()
 
